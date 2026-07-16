@@ -36,7 +36,8 @@
         <h2>First Aid Mini Game 01</h2>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required>
         <input type="password" id="pincode" placeholder="PIN (4-7 digits)" minlength="4" maxlength="7" required>
-        <input type="text" id="fullname" placeholder="Full Name (First time only)">
+        <!-- ซ่อนช่อง Full Name ไว้ก่อน จะแสดงเมื่อสมัครใหม่เท่านั้น -->
+        <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่เท่านั้น)" style="display: none;">
         <button onclick="handleLogin()" id="btnLogin">Login / Register</button>
         <p id="login-msg" style="color: #ff5555; font-size: 14px;"></p>
     </div>
@@ -80,7 +81,7 @@
     // 2. ตัวแปรสถานะเกม
     // ----------------------------------------------------------------
     let currentUser = null;
-    let gameState = 'LOGIN'; // LOGIN, MENU, PLAYING, SHOP, GAMEOVER
+    let gameState = 'LOGIN'; 
     let currentPhase = 1;
     let phaseTimer = 30;
     let lastTime = 0;
@@ -88,6 +89,7 @@
     let score = 0;
     let diamonds = 0;
     let rerollCost = 1;
+    let isRegistering = false; // ตัวแปรเช็คว่ากำลังอยู่ในโหมดสมัครสมาชิกใหม่หรือไม่
 
     // Canvas Setup
     const canvas = document.getElementById('gameCanvas');
@@ -110,7 +112,8 @@
     async function handleLogin() {
         const userStr = document.getElementById('username').value.trim();
         const pinStr = document.getElementById('pincode').value.trim();
-        const fnameStr = document.getElementById('fullname').value.trim();
+        const fullnameInput = document.getElementById('fullname');
+        const fnameStr = fullnameInput.value.trim();
         const msgEl = document.getElementById('login-msg');
         const btn = document.getElementById('btnLogin');
 
@@ -128,15 +131,21 @@
         btn.disabled = true;
 
         try {
-            // 1. ค้นหาผู้เล่นในฐานข้อมูล
+            // 1. ค้นหาผู้เล่นในฐานข้อมูล (ใช้ maybeSingle() เพื่อป้องกัน error ตอนไม่พบข้อมูล)
             const { data: existingPlayer, error: fetchErr } = await supabase
                 .from('players')
                 .select('*')
                 .eq('username', userStr)
-                .single();
+                .maybeSingle(); 
+
+            if (fetchErr) throw fetchErr;
 
             if (existingPlayer) {
-                // ผู้เล่นเก่า เช็ค PIN
+                // --- กรณี: ผู้เล่นเก่า ---
+                fullnameInput.style.display = 'none'; // ซ่อนเผื่อแสดงอยู่
+                isRegistering = false;
+
+                // เช็ค PIN
                 if (existingPlayer.pin_code !== pinStr) {
                     msgEl.innerText = "PIN ไม่ถูกต้อง กรุณาลองใหม่";
                     btn.innerText = "Login / Register";
@@ -145,14 +154,26 @@
                 }
                 currentUser = existingPlayer;
             } else {
-                // ผู้เล่นใหม่ ต้องใส่ชื่อจริง
+                // --- กรณี: ผู้เล่นใหม่ (ไม่พบในระบบ) ---
+                if (!isRegistering) {
+                    // ปรับหน้าต่างเข้าโหมดรับชื่อนามสกุลครั้งแรก
+                    isRegistering = true;
+                    fullnameInput.style.display = 'block'; 
+                    msgEl.innerText = "ไม่พบชื่อนี้ในระบบ กรุณากรอกชื่อ-นามสกุล และกดปุ่มอีกครั้งเพื่อสมัครสมาชิก";
+                    btn.innerText = "ยืนยันการสมัคร";
+                    btn.disabled = false;
+                    return;
+                }
+
+                // ถ้าอยู่ในโหมดสมัครและกดปุ่มซ้ำ จะตรวจว่ากรอกชื่อเต็มหรือยัง
                 if (!fnameStr) {
-                    msgEl.innerText = "คุณเป็นผู้เล่นใหม่ กรุณากรอก Full Name เพื่อระบุตัวตนด้วยครับ";
-                    btn.innerText = "Login / Register";
+                    msgEl.innerText = "กรุณากรอก Full Name ให้ครบถ้วนด้วยครับ";
+                    btn.innerText = "ยืนยันการสมัคร";
                     btn.disabled = false;
                     return;
                 }
                 
+                // บันทึกผู้เล่นใหม่
                 const { data: newPlayer, error: insertErr } = await supabase
                     .from('players')
                     .insert([{ 
@@ -168,11 +189,18 @@
                 if (insertErr) throw insertErr;
                 currentUser = newPlayer;
 
-                // สร้าง record ใน Leaderboard ให้เบื้องต้น
+                // สร้าง record ใน Leaderboard ให้เริ่มต้นที่ 0
                 await supabase.from('leaderboards').insert([{ username: userStr, max_score: 0, max_phase: 1 }]);
+                
+                // คืนค่าฟอร์มกลับเหมือนเดิมหลังสมัครผ่าน
+                fullnameInput.style.display = 'none';
+                fullnameInput.value = '';
+                isRegistering = false;
             }
 
+            // --- เมื่อ Login สำเร็จ (ทั้งเก่าและใหม่) ---
             msgEl.innerText = "";
+            btn.innerText = "Login / Register";
             diamonds = currentUser.diamonds;
             updateTopBar();
             await loadLeaderboard();
@@ -182,9 +210,9 @@
         } catch (err) {
             console.error(err);
             msgEl.innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล";
+            btn.innerText = "Login / Register";
         }
 
-        btn.innerText = "Login / Register";
         btn.disabled = false;
     }
 
@@ -221,17 +249,15 @@
         if (!currentUser) return;
         
         try {
-            // ดึงคะแนนเดิมมาเช็ค
             const { data: currentRecord } = await supabase
                 .from('leaderboards')
                 .select('max_score')
                 .eq('username', currentUser.username)
-                .single();
+                .maybeSingle();
 
             const oldScore = currentRecord ? currentRecord.max_score : 0;
 
             if (score > oldScore) {
-                // อัปเดตคะแนนใหม่ (Upsert)
                 await supabase
                     .from('leaderboards')
                     .upsert({ 
@@ -245,7 +271,6 @@
                 alert(`Game Over!\nScore: ${score} | Phase: ${currentPhase}\n(ยังไม่ผ่านสถิติสูงสุดเดิมของคุณที่ ${oldScore} คะแนน)`);
             }
 
-            // บันทึกเพชรและอัปเดตพลังงานที่เหลือ
             await supabase
                 .from('players')
                 .update({ 
@@ -267,7 +292,7 @@
     }
 
     // ----------------------------------------------------------------
-    // 4. คลาสและออบเจ็กต์ในเกม (เหมือนเดิม)
+    // 4. คลาสและออบเจ็กต์ในเกม
     // ----------------------------------------------------------------
     class Player {
         constructor() {
@@ -406,8 +431,14 @@
 
     function logout() {
         currentUser = null;
+        // รีเซ็ตค่าหน้าล็อกอินทั้งหมดให้กลับสู่สถานะเริ่มต้น
         document.getElementById('username').value = '';
         document.getElementById('pincode').value = '';
+        document.getElementById('fullname').value = '';
+        document.getElementById('fullname').style.display = 'none';
+        isRegistering = false;
+        document.getElementById('login-msg').innerText = '';
+        document.getElementById('btnLogin').innerText = 'Login / Register';
         switchScreen('loginScreen');
     }
 
@@ -420,7 +451,6 @@
         currentUser.daily_energy -= 1;
         updateTopBar();
         
-        // บันทึกพลังงานลง DB ทันทีตอนกดเริ่มเกม
         await supabase.from('players')
             .update({ daily_energy: currentUser.daily_energy })
             .eq('username', currentUser.username);
@@ -498,11 +528,10 @@
 
     async function gameOver() {
         gameState = 'GAMEOVER';
-        // เคลียร์หน้าจอแล้วเรียกฟังก์ชันเซฟคะแนน
         await saveScoreToDB();
         
         updateTopBar();
-        await loadLeaderboard(); // โหลดกระดานคะแนนใหม่
+        await loadLeaderboard(); 
         switchScreen('menuScreen');
     }
 
