@@ -75,7 +75,9 @@
     // ----------------------------------------------------------------
     const SUPABASE_URL = 'https://budgugzxmgmptxycfyeb.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1ZGd1Z3p4bWdtcHR4eWNmeWViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxODgyNDMsImV4cCI6MjA5OTc2NDI0M30.85-Yr-DDFQa0eioI_rydxhljP96pg24t3GVnj7PrP0E';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // แก้ไข: เปลี่ยนชื่อตัวแปรจาก supabase เป็น supabaseClient
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // ----------------------------------------------------------------
     // 2. ตัวแปรสถานะเกม
@@ -131,8 +133,8 @@
         btn.disabled = true;
 
         try {
-            // 1. ค้นหาผู้เล่นในฐานข้อมูล
-            const { data: existingPlayer, error: fetchErr } = await supabase
+            // 1. ค้นหาผู้เล่นในฐานข้อมูล (เปลี่ยนเป็น supabaseClient)
+            const { data: existingPlayer, error: fetchErr } = await supabaseClient
                 .from('players')
                 .select('*')
                 .eq('username', userStr)
@@ -170,7 +172,8 @@
                     return;
                 }
                 
-                const { data: newPlayer, error: insertErr } = await supabase
+                // สมัครผู้เล่นใหม่ (เปลี่ยนเป็น supabaseClient)
+                const { data: newPlayer, error: insertErr } = await supabaseClient
                     .from('players')
                     .insert([{ 
                         username: userStr, 
@@ -185,8 +188,8 @@
                 if (insertErr) throw insertErr;
                 currentUser = newPlayer;
 
-                // สร้าง record ใน Leaderboard
-                await supabase.from('leaderboards').insert([{ username: userStr, max_score: 0, max_phase: 1 }]);
+                // สร้าง record ใน Leaderboard (เปลี่ยนเป็น supabaseClient)
+                await supabaseClient.from('leaderboards').insert([{ username: userStr, max_score: 0, max_phase: 1 }]);
                 
                 fullnameInput.style.display = 'none';
                 fullnameInput.value = '';
@@ -216,7 +219,8 @@
         lbList.innerHTML = "กำลังโหลดข้อมูล...";
         
         try {
-            const { data: lbData, error } = await supabase
+            // โหลด Leaderboard (เปลี่ยนเป็น supabaseClient)
+            const { data: lbData, error } = await supabaseClient
                 .from('leaderboards')
                 .select('username, max_score, max_phase')
                 .order('max_score', { ascending: false })
@@ -244,7 +248,8 @@
         if (!currentUser) return;
         
         try {
-            const { data: currentRecord } = await supabase
+            // เช็คสถิติเดิม (เปลี่ยนเป็น supabaseClient)
+            const { data: currentRecord } = await supabaseClient
                 .from('leaderboards')
                 .select('max_score')
                 .eq('username', currentUser.username)
@@ -253,7 +258,8 @@
             const oldScore = currentRecord ? currentRecord.max_score : 0;
 
             if (score > oldScore) {
-                await supabase
+                // บันทึกสถิติใหม่ (เปลี่ยนเป็น supabaseClient)
+                await supabaseClient
                     .from('leaderboards')
                     .upsert({ 
                         username: currentUser.username, 
@@ -266,7 +272,8 @@
                 alert(`Game Over!\nScore: ${score} | Phase: ${currentPhase}\n(ยังไม่ผ่านสถิติสูงสุดเดิมของคุณที่ ${oldScore} คะแนน)`);
             }
 
-            await supabase
+            // อัปเดตข้อมูลผู้เล่น (เปลี่ยนเป็น supabaseClient)
+            await supabaseClient
                 .from('players')
                 .update({ 
                     diamonds: currentUser.diamonds,
@@ -449,7 +456,8 @@
         currentUser.daily_energy -= 1;
         updateTopBar();
         
-        await supabase.from('players')
+        // อัปเดตพลังงาน (เปลี่ยนเป็น supabaseClient)
+        await supabaseClient.from('players')
             .update({ daily_energy: currentUser.daily_energy })
             .eq('username', currentUser.username);
         
