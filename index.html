@@ -33,7 +33,7 @@
 
     <!-- หน้าต่าง Login -->
     <div id="loginScreen" class="screen active">
-        <h2>First Aid Mini Game 01</h2>
+        <h2>First Aid Survivor</h2>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required>
         <input type="password" id="pincode" placeholder="PIN (4-7 digits)" minlength="4" maxlength="7" required>
         <!-- ซ่อนช่อง Full Name ไว้ก่อน จะแสดงเมื่อสมัครใหม่เท่านั้น -->
@@ -71,7 +71,7 @@
 
 <script>
     // ----------------------------------------------------------------
-    // 1. ตั้งค่า Supabase ด้วยคีย์จริงของคุณ
+    // 1. ตั้งค่า Supabase ด้วยคีย์จริงของคุณ (ประกาศแค่รอบเดียวเท่านั้น)
     // ----------------------------------------------------------------
     const SUPABASE_URL = 'https://budgugzxmgmptxycfyeb.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1ZGd1Z3p4bWdtcHR4eWNmeWViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxODgyNDMsImV4cCI6MjA5OTc2NDI0M30.85-Yr-DDFQa0eioI_rydxhljP96pg24t3GVnj7PrP0E';
@@ -131,7 +131,7 @@
         btn.disabled = true;
 
         try {
-            // 1. ค้นหาผู้เล่นในฐานข้อมูล (ใช้ maybeSingle() เพื่อป้องกัน error ตอนไม่พบข้อมูล)
+            // 1. ค้นหาผู้เล่นในฐานข้อมูล
             const { data: existingPlayer, error: fetchErr } = await supabase
                 .from('players')
                 .select('*')
@@ -142,10 +142,9 @@
 
             if (existingPlayer) {
                 // --- กรณี: ผู้เล่นเก่า ---
-                fullnameInput.style.display = 'none'; // ซ่อนเผื่อแสดงอยู่
+                fullnameInput.style.display = 'none'; 
                 isRegistering = false;
 
-                // เช็ค PIN
                 if (existingPlayer.pin_code !== pinStr) {
                     msgEl.innerText = "PIN ไม่ถูกต้อง กรุณาลองใหม่";
                     btn.innerText = "Login / Register";
@@ -156,7 +155,6 @@
             } else {
                 // --- กรณี: ผู้เล่นใหม่ (ไม่พบในระบบ) ---
                 if (!isRegistering) {
-                    // ปรับหน้าต่างเข้าโหมดรับชื่อนามสกุลครั้งแรก
                     isRegistering = true;
                     fullnameInput.style.display = 'block'; 
                     msgEl.innerText = "ไม่พบชื่อนี้ในระบบ กรุณากรอกชื่อ-นามสกุล และกดปุ่มอีกครั้งเพื่อสมัครสมาชิก";
@@ -165,7 +163,6 @@
                     return;
                 }
 
-                // ถ้าอยู่ในโหมดสมัครและกดปุ่มซ้ำ จะตรวจว่ากรอกชื่อเต็มหรือยัง
                 if (!fnameStr) {
                     msgEl.innerText = "กรุณากรอก Full Name ให้ครบถ้วนด้วยครับ";
                     btn.innerText = "ยืนยันการสมัคร";
@@ -173,7 +170,6 @@
                     return;
                 }
                 
-                // บันทึกผู้เล่นใหม่
                 const { data: newPlayer, error: insertErr } = await supabase
                     .from('players')
                     .insert([{ 
@@ -189,16 +185,15 @@
                 if (insertErr) throw insertErr;
                 currentUser = newPlayer;
 
-                // สร้าง record ใน Leaderboard ให้เริ่มต้นที่ 0
+                // สร้าง record ใน Leaderboard
                 await supabase.from('leaderboards').insert([{ username: userStr, max_score: 0, max_phase: 1 }]);
                 
-                // คืนค่าฟอร์มกลับเหมือนเดิมหลังสมัครผ่าน
                 fullnameInput.style.display = 'none';
                 fullnameInput.value = '';
                 isRegistering = false;
             }
 
-            // --- เมื่อ Login สำเร็จ (ทั้งเก่าและใหม่) ---
+            // --- เมื่อ Login สำเร็จ ---
             msgEl.innerText = "";
             btn.innerText = "Login / Register";
             diamonds = currentUser.diamonds;
@@ -289,6 +284,10 @@
         document.getElementById('tb-name').innerText = `Player: ${currentUser.username}`;
         document.getElementById('tb-energy').innerText = `Energy: ${currentUser.daily_energy}/5`;
         document.getElementById('menu-diamonds').innerText = currentUser.diamonds;
+    }
+
+    function showUpgrade() {
+        alert("ระบบอัปเกรดจะเพิ่มเข้ามาในอนาคตครับ!");
     }
 
     // ----------------------------------------------------------------
@@ -431,7 +430,6 @@
 
     function logout() {
         currentUser = null;
-        // รีเซ็ตค่าหน้าล็อกอินทั้งหมดให้กลับสู่สถานะเริ่มต้น
         document.getElementById('username').value = '';
         document.getElementById('pincode').value = '';
         document.getElementById('fullname').value = '';
