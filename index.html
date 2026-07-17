@@ -184,7 +184,7 @@
             <strong>🦠 อาการป่วยปัจจุบัน (มีผลในเฟสถัดไป):</strong> <span id="shop-status-text" style="color:#aaa;">ไม่มีอาการผิดปกติ</span>
         </div>
 
-        <!-- เอาตัวอักษรโปรโมชั่นออกไป ซ่อนไว้เป็นกิมมิคแทน -->
+        <!-- ไอเทมลดราคา -->
         <h4 style="margin:5px 0 10px 0; color:#4CAF50;">📦 ไอเทมสุ่มลดราคาพิเศษ 70%</h4>
         <div class="shop-card-container" id="shopCards"></div>
         <button onclick="rerollShop()" id="btnReroll" style="margin-bottom: 10px;">สุ่มกระดานใหม่ (ใช้ <span id="shop-reroll-cost">1</span> เหรียญ)</button>
@@ -329,16 +329,23 @@
         showBuffsUI = !showBuffsUI;
     }
 
+    // 🛠️ แก้ไขบั๊ก toLowerCase โดยการเช็คค่า e.key ว่ามีหรือไม่
     window.addEventListener('keydown', e => {
-        keys[e.key.toLowerCase()] = true;
+        if (!e.key) return; 
+        let k = e.key.toLowerCase();
+        keys[k] = true;
         if (currentUser && currentUser.is_admin && gameState === 'PLAYING') {
-            if (e.key.toLowerCase() === 'g') adminGodMode = !adminGodMode;
-            if (e.key.toLowerCase() === 'c') coins += 1000;
-            if (e.key.toLowerCase() === 'v') currentUser.diamonds += 100;
+            if (k === 'g') adminGodMode = !adminGodMode;
+            if (k === 'c') coins += 1000;
+            if (k === 'v') currentUser.diamonds += 100;
         }
     });
     
-    window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+    window.addEventListener('keyup', e => {
+        if (!e.key) return;
+        keys[e.key.toLowerCase()] = false;
+    });
+
     document.getElementById('loginScreen').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
     setInterval(updateEnergyTimer, 1000);
 
@@ -413,7 +420,11 @@
             
             updateEnergyTimer(); msgEl.innerText = ""; updateTopBar(); await loadLeaderboard(); 
             switchScreen('menuScreen'); gameState = 'MENU';
-        } catch (err) { msgEl.innerText = "เชื่อมต่อล้มเหลว"; }
+        } catch (err) { 
+            console.error(err); 
+            // โชว์สาเหตุที่แท้จริงออกมาบนหน้าจอเลย
+            msgEl.innerText = "ล้มเหลว: " + (err.message || err.details || "กรุณาเช็ค Console (F12)"); 
+        }
         
         btn.disabled = false; btn.innerText = "Login / Register";
     }
@@ -765,9 +776,7 @@
                                 let extra = Math.floor(Math.random() * 5) + 1; 
                                 for(let j=0; j<extra; j++) drops.push(new ItemDrop(e.x + (Math.random()*20-10), e.y + (Math.random()*20-10), 'coin'));
                             }
-                            // 5% เพชรตก
                             if(Math.random() < 0.05) drops.push(new ItemDrop(e.x + 10, e.y + 10, 'diamond')); 
-                            // 5% แม่เหล็กตก (สุ่มแม่เหล็ก V1.11)
                             if(Math.random() < 0.05) drops.push(new ItemDrop(e.x - 10, e.y - 10, 'magnet')); 
                         }
                     }
@@ -809,7 +818,7 @@
                 this.active = false;
                 if (this.type === 'coin') coins++;
                 if (this.type === 'diamond') { currentUser.diamonds++; document.getElementById('shop-diamonds').innerText = currentUser.diamonds; }
-                if (this.type === 'magnet') { player.magnetActiveTime = player.magnetMaxTime; } // เก็บได้แม่เหล็ก
+                if (this.type === 'magnet') { player.magnetActiveTime = player.magnetMaxTime; }
             }
         }
         draw(ctx) {
@@ -835,7 +844,6 @@
         if (screenId) document.getElementById(screenId).classList.add('active');
         document.getElementById('topBar').style.display = (currentUser && screenId !== 'loginScreen') ? 'flex' : 'none';
         
-        // จัดการโชว์ซ่อนปุ่ม Buff
         if (gameState === 'PLAYING' && screenId === null) {
             document.getElementById('btnToggleBuff').style.display = 'block';
         } else {
@@ -874,13 +882,11 @@
         let hpStr = `${Math.ceil(player.hp)}/${player.maxHp}`;
         let defStr = `${player.def} (หลบหลีก ${dodgePerc}%)`;
         
-        // อัปเดตในหน้าร้านค้า
         document.getElementById('shop-hp-stat').innerText = hpStr;
         document.getElementById('shop-atk-stat').innerText = player.atk;
         document.getElementById('shop-def-stat').innerText = defStr;
         document.getElementById('shop-spd-stat').innerText = player.spd;
         
-        // อัปเดตใน Modal แคตตาล็อกด้วย
         document.getElementById('modal-hp-stat').innerText = hpStr;
         document.getElementById('modal-atk-stat').innerText = player.atk;
         document.getElementById('modal-def-stat').innerText = defStr;
@@ -917,11 +923,10 @@
             alert(`ได้รับโบนัสเหรียญจบด่าน: +${cardBonus + sysBonus}`);
         }
 
-        // Auto Save Diamonds เพื่อความชัวร์เมื่อจบเฟส
         try { supabaseClient.from('players').update({ diamonds: currentUser.diamonds }).eq('username', currentUser.username).then(); } catch(e){}
 
         rerollCost = currentPhase; discountedBoughtCount = 0;
-        player.activeCpmDebuff = 0; // เคลียร์ดีบัฟเดินช้าก่อนเข้า Shop เพื่อให้แสดงผลปกติ
+        player.activeCpmDebuff = 0; 
         player.applyPhaseModifiers();
 
         updateShopUI(); rollShopCards(); 
@@ -1025,7 +1030,6 @@
         if (itemId === 'dressing_set') { player.hp = Math.min(player.maxHp, player.hp + 5); }
         if (itemId === 'betadine_sol' || itemId === 'betadine_scrub') { let addHp = [0, 2, 3, 5][player.inv[itemId]] || 0; player.bonusMaxHp += addHp; }
         
-        // CPM รอลงผลในเฟสถัดไป
         if (itemId === 'cpm') { player.cpmDebuffToApply++; }
 
         player.checkCombos(); 
@@ -1034,7 +1038,6 @@
             currentDiscountItems[index].bought = true;
             discountedBoughtCount++;
             if (discountedBoughtCount >= 3) {
-                // กิมมิค ซื้อ 3 ชิ้น ฟรี Reroll (ไม่บวกค่า Reroll)
                 alert("🎉 Secret Gimmick! เหมาครบ 3 ชิ้น สุ่มกระดานฟรี 1 ครั้ง!");
                 rollShopCards();
             } else {
@@ -1052,11 +1055,9 @@
         currentPhase++; phaseTimer = 30; bossSpawnedThisPhase = false;
         enemies = []; bullets = []; enemyBullets = []; drops = [];
         
-        // รีเซ็ตยา 1 เฟส
         player.inv.air_x = 0;
         player.inv.flying_rabit = 0;
         
-        // ส่งผลลดความเร็วเดิน CPM ในเฟสนี้ (แล้วพอจบจะถูกเคลียร์)
         player.activeCpmDebuff = player.cpmDebuffToApply;
         player.cpmDebuffToApply = 0;
 
@@ -1156,11 +1157,11 @@
     }
 
     function drawStatusUI(ctx) {
-        if (!showBuffsUI) return; // ถ้ากดซ่อนไว้ไม่ต้องวาด
+        if (!showBuffsUI) return; 
         
         let boxWidth = 280; 
         let startX = canvas.width - boxWidth;
-        let startY = 80; // หลบปุ่มตา
+        let startY = 80; 
         let lines = [];
         
         if (currentUser && currentUser.is_admin && adminGodMode) {
@@ -1201,10 +1202,9 @@
     function draw() {
         ctx.fillStyle = '#111'; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // วาดตัวเลข 5 วินาทีสุดท้ายกะพริบจางๆ
         if (phaseTimer <= 5 && phaseTimer > 0) {
             ctx.save();
-            ctx.globalAlpha = (phaseTimer % 1) * 0.5 + 0.1; // กะพริบจางๆ
+            ctx.globalAlpha = (phaseTimer % 1) * 0.5 + 0.1; 
             ctx.fillStyle = 'white';
             ctx.font = 'bold 300px Arial';
             ctx.textAlign = 'center';
@@ -1230,7 +1230,7 @@
 
         let boss = enemies.find(e => e.isBoss);
         if (boss) {
-            let barWidth = 600; // บอสขยายหลอดให้กว้างตามจอ
+            let barWidth = 600; 
             let barX = (canvas.width - barWidth) / 2;
             let barY = 55;
             
