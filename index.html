@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V1.4</title>
+    <title>First Aid Survivor V1.5</title>
     <!-- นำเข้า Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -33,6 +33,10 @@
         .lb-entry { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #555; }
         .lb-entry:nth-child(odd) { background-color: #3a3a3a; }
         .status-box { background: rgba(68, 34, 34, 0.8); padding: 8px; border-radius: 5px; font-size: 12px; text-align: left; width: 90%; border: 1px solid #ff5555; margin-bottom: 10px;}
+
+        /* สไตล์หน้าอัปเกรด */
+        .upg-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding: 10px 0; }
+        .upg-row:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
@@ -49,9 +53,10 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active" style="justify-content: center;">
-        <h2>First Aid Survivor (V1.4)</h2>
+        <h2>First Aid Survivor (V1.5)</h2>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required>
-        <input type="password" id="pincode" placeholder="PIN (4-7 digits)" minlength="4" maxlength="7" required>
+        <!-- นำขีดจำกัดความยาว PIN ออกแล้ว -->
+        <input type="password" id="pincode" placeholder="PIN" required>
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none;">
         <button onclick="handleLogin()" id="btnLogin">Login / Register</button>
         <p id="login-msg" style="color: #ff5555; font-size: 14px;"></p>
@@ -59,10 +64,41 @@
 
     <!-- Main Menu -->
     <div id="menuScreen" class="screen" style="justify-content: center;">
-        <h2 style="font-size: 36px; margin-bottom: 30px;">Main Menu</h2>
+        <h2 style="font-size: 36px; margin-bottom: 20px;">Main Menu</h2>
         <button onclick="startGame()" style="font-size: 22px; padding: 15px 50px; margin-bottom: 15px; background-color: #2196F3;">Game Start</button>
         <button onclick="switchScreen('howToPlayScreen')" style="width: 250px; margin-bottom: 10px;">วิธีการเล่น</button>
         <button onclick="switchScreen('leaderboardScreen')" style="width: 250px; margin-bottom: 10px;">Leader Board</button>
+        <button onclick="showUpgrade()" style="width: 250px; background-color: #9c27b0;">Upgrades (เพชร: <span id="menu-diamonds">0</span>)</button>
+    </div>
+
+    <!-- Upgrade Screen -->
+    <div id="upgradeScreen" class="screen" style="justify-content: center;">
+        <h2>Permanent Upgrades</h2>
+        <p style="font-size: 18px;">เพชรที่มี: <span id="upg-diamonds" style="color: cyan; font-weight: bold;">0</span> 💎</p>
+        <div style="background: #2a2a2a; padding: 20px; border-radius: 8px; text-align: left; width: 450px; display: flex; flex-direction: column; border: 1px solid #444;">
+            
+            <div class="upg-row">
+                <span>❤️ <strong>Max HP</strong> (+<span id="upg-lvl-hp">0</span>/20)</span>
+                <button id="btn-upg-hp" onclick="buyUpgrade('hp')">อัปเกรด (💎 <span id="cost-hp">2</span>)</button>
+            </div>
+            
+            <div class="upg-row">
+                <span>⚔️ <strong>Attack</strong> (+<span id="upg-lvl-atk">0</span>/10)</span>
+                <button id="btn-upg-atk" onclick="buyUpgrade('atk')">อัปเกรด (💎 <span id="cost-atk">4</span>)</button>
+            </div>
+            
+            <div class="upg-row">
+                <span>🛡️ <strong>Immunity</strong> (+<span id="upg-lvl-def">0</span>/50)</span>
+                <button id="btn-upg-def" onclick="buyUpgrade('def')">อัปเกรด (💎 <span id="cost-def">2</span>)</button>
+            </div>
+            
+            <div class="upg-row">
+                <span>👟 <strong>Speed</strong> (+<span id="upg-lvl-spd">0</span>/3)</span>
+                <button id="btn-upg-spd" onclick="buyUpgrade('spd')">อัปเกรด (💎 <span id="cost-spd">30</span>)</button>
+            </div>
+
+        </div>
+        <button onclick="switchScreen('menuScreen')" style="margin-top: 20px; background-color: #777;">กลับสู่เมนูหลัก</button>
     </div>
 
     <!-- How to Play -->
@@ -181,8 +217,6 @@
 
     function updateEnergyTimer() {
         if (!currentUser) return;
-        
-        // ถ้าเป็น Admin ไม่ต้องแสดงเวลานับถอยหลัง
         if (currentUser.is_admin) {
             document.getElementById('tb-energy-timer').innerText = ``;
             return;
@@ -212,7 +246,8 @@
         const fnameStr = document.getElementById('fullname').value.trim();
         const msgEl = document.getElementById('login-msg'); const btn = document.getElementById('btnLogin');
         
-        if (!/^[A-Za-z0-9]+$/.test(userStr) || pinStr.length < 4 || pinStr.length > 7) { msgEl.innerText = "ข้อมูลไม่ถูกต้อง (User อังกฤษล้วน, PIN 4-7 หลัก)"; return; }
+        // เอาการล็อกเงื่อนไขความยาว PIN ออกแล้ว
+        if (!/^[A-Za-z0-9]+$/.test(userStr) || pinStr.length < 1) { msgEl.innerText = "กรุณากรอก Username(อังกฤษล้วน) และ PIN"; return; }
         btn.innerText = "กำลังตรวจสอบ..."; btn.disabled = true;
 
         try {
@@ -221,7 +256,7 @@
             
             if (existing) {
                 document.getElementById('fullname').style.display = 'none';
-                if (existing.pin_code !== pinStr) { msgEl.innerText = "PIN ไม่ถูกต้อง"; btn.innerText = "Login"; btn.disabled = false; return; }
+                if (existing.pin_code !== pinStr) { msgEl.innerText = "PIN ไม่ถูกต้อง"; btn.innerText = "Login / Register"; btn.disabled = false; return; }
                 currentUser = existing;
             } else {
                 if (document.getElementById('fullname').style.display === 'none') {
@@ -230,8 +265,10 @@
                 }
                 if (!fnameStr) { msgEl.innerText = "กรุณากรอก Full Name"; btn.innerText = "ยืนยัน"; btn.disabled = false; return; }
                 
-                // insert ข้อมูลใหม่ ระบบฐานข้อมูลจะตั้งค่า is_admin เป็น false ให้อัตโนมัติ
-                const { data: newP, error: insErr } = await supabaseClient.from('players').insert([{ username: userStr, pin_code: pinStr, full_name: fnameStr, diamonds: 0, daily_energy: 5, last_played_at: new Date().toISOString() }]).select().single();
+                const { data: newP, error: insErr } = await supabaseClient.from('players').insert([{ 
+                    username: userStr, pin_code: pinStr, full_name: fnameStr, diamonds: 0, daily_energy: 5, last_played_at: new Date().toISOString(),
+                    upgraded_hp: 0, upgraded_atk: 0, upgraded_def: 0, upgraded_spd: 0
+                }]).select().single();
                 if (insErr) throw insErr; currentUser = newP;
                 
                 await supabaseClient.from('leaderboards').insert([{ username: userStr, max_score: 0, max_phase: 1 }]);
@@ -255,12 +292,9 @@
 
     async function saveScoreToDB() {
         if (!currentUser) return;
-        
         try {
-            // เซฟเพชรและพลังงานที่เหลือ (Admin ก็ต้องเซฟเพชรด้วย)
             await supabaseClient.from('players').update({ diamonds: currentUser.diamonds, daily_energy: currentUser.daily_energy }).eq('username', currentUser.username);
 
-            // ถ้าเป็น Admin (Tester) จะไม่บันทึกคะแนนลง Leaderboard เพื่อไม่ให้รก
             if (currentUser.is_admin) {
                 alert(`[Tester Mode] Game Over!\nScore: ${score} | Phase: ${currentPhase}\n(ระบบ Admin จะไม่บันทึกคะแนนลง Leaderboard)`);
                 return;
@@ -278,28 +312,109 @@
     }
 
     function updateTopBar() {
-        // เพิ่มสัญลักษณ์ (Admin) หลังชื่อถ้าใช่
         let adminTag = currentUser.is_admin ? ' <span style="color:#ffcc00; font-size:12px;">(Admin)</span>' : '';
         document.getElementById('tb-name').innerHTML = `Player: ${currentUser.username}${adminTag}`;
-        
-        // ถ้าเป็น Admin ให้แสดงพลังงานเป็น ∞
         let energyDisplay = currentUser.is_admin ? '∞' : currentUser.daily_energy;
         document.getElementById('tb-energy').innerText = `Energy: ${energyDisplay}/5`;
+        document.getElementById('menu-diamonds').innerText = currentUser.diamonds;
     }
 
     // ----------------------------------------------------------------
-    // ⚔️ GAME MECHANICS V1.4
+    // 💎 UPGRADE SYSTEM V1.5
     // ----------------------------------------------------------------
+    function getUpgradeCost(stat, lvl) {
+        if (stat === 'hp') return lvl < 10 ? 2 : 4;
+        if (stat === 'atk') return 4;
+        if (stat === 'def') return lvl < 20 ? 2 : (lvl < 40 ? 4 : 6);
+        if (stat === 'spd') return 30;
+        return Infinity;
+    }
 
+    function updateUpgradeUI() {
+        document.getElementById('upg-diamonds').innerText = currentUser.diamonds;
+        
+        let hpLvl = currentUser.upgraded_hp || 0;
+        document.getElementById('upg-lvl-hp').innerText = hpLvl;
+        let btnHp = document.getElementById('btn-upg-hp');
+        if (hpLvl >= 20) { btnHp.innerText = 'MAX'; btnHp.disabled = true; }
+        else { let cost = getUpgradeCost('hp', hpLvl); btnHp.innerHTML = `อัปเกรด (💎 <span style="color:cyan;">${cost}</span>)`; btnHp.disabled = (currentUser.diamonds < cost); }
+        
+        let atkLvl = currentUser.upgraded_atk || 0;
+        document.getElementById('upg-lvl-atk').innerText = atkLvl;
+        let btnAtk = document.getElementById('btn-upg-atk');
+        if (atkLvl >= 10) { btnAtk.innerText = 'MAX'; btnAtk.disabled = true; }
+        else { let cost = getUpgradeCost('atk', atkLvl); btnAtk.innerHTML = `อัปเกรด (💎 <span style="color:cyan;">${cost}</span>)`; btnAtk.disabled = (currentUser.diamonds < cost); }
+
+        let defLvl = currentUser.upgraded_def || 0;
+        document.getElementById('upg-lvl-def').innerText = defLvl;
+        let btnDef = document.getElementById('btn-upg-def');
+        if (defLvl >= 50) { btnDef.innerText = 'MAX'; btnDef.disabled = true; }
+        else { let cost = getUpgradeCost('def', defLvl); btnDef.innerHTML = `อัปเกรด (💎 <span style="color:cyan;">${cost}</span>)`; btnDef.disabled = (currentUser.diamonds < cost); }
+
+        let spdLvl = currentUser.upgraded_spd || 0;
+        document.getElementById('upg-lvl-spd').innerText = spdLvl;
+        let btnSpd = document.getElementById('btn-upg-spd');
+        if (spdLvl >= 3) { btnSpd.innerText = 'MAX'; btnSpd.disabled = true; }
+        else { let cost = getUpgradeCost('spd', spdLvl); btnSpd.innerHTML = `อัปเกรด (💎 <span style="color:cyan;">${cost}</span>)`; btnSpd.disabled = (currentUser.diamonds < cost); }
+    }
+
+    function showUpgrade() {
+        updateUpgradeUI();
+        switchScreen('upgradeScreen');
+    }
+
+    async function buyUpgrade(stat) {
+        let currentLvl = currentUser[`upgraded_${stat}`] || 0;
+        let maxLvl = { hp: 20, atk: 10, def: 50, spd: 3 }[stat];
+        if (currentLvl >= maxLvl) return;
+
+        let cost = getUpgradeCost(stat, currentLvl);
+        if (currentUser.diamonds < cost) { alert("เพชรไม่พอ!"); return; }
+
+        currentUser.diamonds -= cost;
+        currentUser[`upgraded_${stat}`] = currentLvl + 1;
+        
+        updateUpgradeUI();
+        updateTopBar();
+
+        try {
+            await supabaseClient.from('players')
+                .update({ 
+                    diamonds: currentUser.diamonds,
+                    [`upgraded_${stat}`]: currentUser[`upgraded_${stat}`]
+                })
+                .eq('username', currentUser.username);
+        } catch (err) { console.error("Save upgrade failed"); }
+    }
+
+    // ----------------------------------------------------------------
+    // ⚔️ GAME MECHANICS
+    // ----------------------------------------------------------------
     class Player {
         constructor() {
             this.x = 400; this.y = 300; this.size = 15;
-            this.baseMaxHp = 10; this.bonusMaxHp = 0; 
-            this.baseAtk = 1; this.baseDef = 0; this.baseSpd = 3; 
-            this.baseFireRate = 1.0; this.baseBullets = 1;
             
-            this.hp = 10; this.maxHp = 10; this.atk = 1; this.def = 0; this.spd = 3; 
-            this.fireRate = 1.0; this.bulletCount = 1;
+            // นำค่าที่อัปเกรดถาวรมาบวกกับสเตตัสเริ่มต้น
+            let upgHp = currentUser.upgraded_hp || 0;
+            let upgAtk = currentUser.upgraded_atk || 0;
+            let upgDef = currentUser.upgraded_def || 0;
+            let upgSpd = currentUser.upgraded_spd || 0;
+
+            this.baseMaxHp = 10 + upgHp; 
+            this.bonusMaxHp = 0; 
+            this.baseAtk = 1 + upgAtk; 
+            this.baseDef = 0 + upgDef; 
+            this.baseSpd = 3 + upgSpd; 
+            this.baseFireRate = 1.0; 
+            this.baseBullets = 1;
+            
+            this.hp = this.baseMaxHp; 
+            this.maxHp = this.baseMaxHp; 
+            this.atk = this.baseAtk; 
+            this.def = this.baseDef; 
+            this.spd = this.baseSpd; 
+            this.fireRate = 1.0; 
+            this.bulletCount = 1;
             
             this.fireTimer = 0; this.magnetRange = 0;
             this.statuses = { headache: 0, allergy: 0, stomach: 0, rash: 0, swelling: 0, mouth_ulcer: 0, red_eye: 0, sore_throat: 0, fresh_wound: 0, scald: 0 }; 
@@ -539,9 +654,8 @@
     }
 
     // ----------------------------------------------------------------
-    // 🛒 SHOP SYSTEM V1.4
+    // 🛒 SHOP SYSTEM
     // ----------------------------------------------------------------
-
     function switchScreen(screenId) {
         document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
         if (screenId) document.getElementById(screenId).classList.add('active');
@@ -551,13 +665,9 @@
     function logout() { location.reload(); }
 
     async function startGame() {
-        // เช็คเงื่อนไข Admin ถ้าไม่ใช่นำไปเช็คพลังงาน
         if (!currentUser.is_admin && currentUser.daily_energy <= 0) { alert("พลังงานหมด!"); return; }
+        if (!currentUser.is_admin) currentUser.daily_energy -= 1; 
         
-        // ถ้าไม่ใช่ Admin ให้ลดพลังงาน
-        if (!currentUser.is_admin) {
-            currentUser.daily_energy -= 1; 
-        }
         currentUser.last_played_at = new Date().toISOString(); 
         updateTopBar();
         
@@ -571,7 +681,7 @@
         currentPhase = 1; phaseTimer = 30; score = 0; coins = 0; 
         
         switchScreen(null); gameState = 'PLAYING'; 
-        lastTime = performance.now(); // รีเซ็ตเวลาเพื่อป้องกันบั๊กภาพค้างหรือมอนเกิดรัวๆตอนเริ่มใหม่
+        lastTime = performance.now(); 
         requestAnimationFrame(gameLoop);
     }
 
@@ -698,20 +808,13 @@
         player.applyPhaseModifiers();
         
         gameState = 'PLAYING'; switchScreen(null);
-        
-        // แก้ไขบั๊กจอค้าง: สั่งเริ่ม Game Loop ใหม่ทุกครั้งที่จบร้านค้า
         lastTime = performance.now();
         requestAnimationFrame(gameLoop);
     }
 
     // ----------------------------------------------------------------
-    // 🔄 GAME LOOP V1.4
+    // 🔄 GAME LOOP
     // ----------------------------------------------------------------
-
-    async function gameOver() {
-        gameState = 'GAMEOVER'; await saveScoreToDB();
-        updateTopBar(); await loadLeaderboard(); switchScreen('menuScreen');
-    }
 
     function gameLoop(timestamp) {
         if (gameState !== 'PLAYING') return;
