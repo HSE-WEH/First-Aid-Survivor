@@ -10,24 +10,34 @@
         body { margin: 0; padding: 0; background-color: #222; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         #game-container { position: relative; width: 800px; height: 600px; background-color: #000; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
         canvas { display: block; }
-        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.85); z-index: 10; }
+        
+        /* เพิ่ม padding-top เพื่อไม่ให้เนื้อหาโดน Top bar บัง */
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.85); z-index: 10; padding-top: 40px; box-sizing: border-box;}
         .active { display: flex; }
         input, button { margin: 5px; padding: 10px; font-size: 16px; border-radius: 5px; border: none; }
-        button { background-color: #4CAF50; color: white; cursor: pointer; }
+        button { background-color: #4CAF50; color: white; cursor: pointer; transition: 0.2s; }
         button:hover { background-color: #45a049; }
-        .top-bar { position: absolute; top: 0; left: 0; width: 100%; height: 40px; background: rgba(0,0,0,0.7); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-sizing: border-box; z-index: 5; display: none; }
+        
+        /* แก้ไข z-index เป็น 20 เพื่อให้อยู่บนสุดเสมอ */
+        .top-bar { position: absolute; top: 0; left: 0; width: 100%; height: 40px; background: rgba(0,0,0,0.9); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-sizing: border-box; z-index: 20; display: none; border-bottom: 1px solid #444; }
+        
         .shop-card-container { display: flex; gap: 10px; margin-top: 20px; }
         .shop-card { background: #333; padding: 15px; border: 2px solid #555; border-radius: 8px; text-align: center; cursor: pointer; width: 150px; }
         .shop-card:hover { border-color: #4CAF50; }
-        .lb-entry { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #555; }
+        .lb-entry { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #555; }
+        .lb-entry:nth-child(odd) { background-color: #3a3a3a; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
+    <!-- แถบเมนูด้านบน (ปรับ z-index ให้อยู่เหนือหน้าต่างเกม) -->
     <div id="topBar" class="top-bar">
         <span id="tb-name">Player: ---</span>
-        <span id="tb-energy">Energy: -/5</span>
+        <span>
+            <span id="tb-energy">Energy: -/5</span>
+            <span id="tb-energy-timer" style="font-size: 12px; color: #ffeb3b; margin-left: 5px;"></span>
+        </span>
         <button onclick="logout()" style="padding: 5px 10px; font-size: 12px; background-color: #f44336;">Logout</button>
     </div>
 
@@ -42,24 +52,43 @@
         <p id="login-msg" style="color: #ff5555; font-size: 14px;"></p>
     </div>
 
-    <!-- หน้าต่าง Main Menu -->
+    <!-- หน้าต่าง Main Menu (ปรับเมนูให้ตรงตามความต้องการ) -->
     <div id="menuScreen" class="screen">
-        <h2>Main Menu</h2>
-        <button onclick="startGame()" style="font-size: 20px; padding: 15px 30px; margin-bottom: 20px;">Start Game</button>
-        <button onclick="showUpgrade()">Permanent Upgrades (เพชร: <span id="menu-diamonds">0</span>)</button>
-        <h3>Leaderboard (Top 10)</h3>
-        <div id="leaderboardList" style="text-align: left; background: #333; padding: 15px; border-radius: 5px; width: 350px; height: 200px; overflow-y: auto;">
+        <h2 style="font-size: 32px; margin-bottom: 30px;">Main Menu</h2>
+        <button onclick="startGame()" style="font-size: 20px; padding: 15px 40px; margin-bottom: 15px; background-color: #2196F3;">Game Start</button>
+        <button onclick="switchScreen('howToPlayScreen')" style="width: 200px; margin-bottom: 10px;">วิธีการเล่น</button>
+        <button onclick="switchScreen('leaderboardScreen')" style="width: 200px; margin-bottom: 10px;">Leader Board</button>
+        <button onclick="showUpgrade()" style="width: 200px; background-color: #9c27b0;">Upgrades (เพชร: <span id="menu-diamonds">0</span>)</button>
+    </div>
+
+    <!-- หน้าต่าง วิธีการเล่น -->
+    <div id="howToPlayScreen" class="screen">
+        <h2>วิธีการเล่น</h2>
+        <div style="background: #333; padding: 20px; border-radius: 8px; text-align: left; max-width: 400px; margin-bottom: 20px; line-height: 1.6;">
+            <ul>
+                <li>ใช้ปุ่ม <strong>W, A, S, D</strong> เพื่อบังคับตัวละคร</li>
+                <li>ตัวละครจะทำการยิงอัตโนมัติใส่ศัตรูที่ใกล้ที่สุด</li>
+                <li>หลบหลีกศัตรูและเอาชีวิตรอดให้ครบ 30 วินาทีในแต่ละ Phase</li>
+                <li>เก็บเหรียญเพื่อซื้อยาอัปเกรดความสามารถในร้านค้า</li>
+            </ul>
+        </div>
+        <button onclick="switchScreen('menuScreen')" style="background-color: #777;">กลับสู่เมนูหลัก</button>
+    </div>
+
+    <!-- หน้าต่าง Leaderboard แยกออกมาจาก Main Menu -->
+    <div id="leaderboardScreen" class="screen">
+        <h2>Leader Board (Top 10)</h2>
+        <div id="leaderboardList" style="text-align: left; background: #333; padding: 15px; border-radius: 5px; width: 400px; height: 300px; overflow-y: auto; margin-bottom: 20px;">
             Loading...
         </div>
+        <button onclick="switchScreen('menuScreen')" style="background-color: #777;">กลับสู่เมนูหลัก</button>
     </div>
 
     <!-- หน้าต่าง ร้านค้ายา (Shop Phase) -->
     <div id="shopScreen" class="screen">
         <h2>Shop Phase <span id="shop-phase-num"></span></h2>
         <p>Coins: <span id="shop-coins">0</span> | Re-roll Cost: <span id="shop-reroll-cost">1</span></p>
-        <div class="shop-card-container" id="shopCards">
-            <!-- Cards will be injected here -->
-        </div>
+        <div class="shop-card-container" id="shopCards"></div>
         <br>
         <button onclick="rerollShop()">Re-roll</button>
         <button onclick="nextPhase()" style="background-color: #2196F3;">Next Phase</button>
@@ -70,18 +99,10 @@
 </div>
 
 <script>
-    // ----------------------------------------------------------------
-    // 1. ตั้งค่า Supabase ด้วยคีย์จริงของคุณ (ประกาศแค่รอบเดียวเท่านั้น)
-    // ----------------------------------------------------------------
     const SUPABASE_URL = 'https://budgugzxmgmptxycfyeb.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1ZGd1Z3p4bWdtcHR4eWNmeWViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxODgyNDMsImV4cCI6MjA5OTc2NDI0M30.85-Yr-DDFQa0eioI_rydxhljP96pg24t3GVnj7PrP0E';
-    
-    // แก้ไข: เปลี่ยนชื่อตัวแปรจาก supabase เป็น supabaseClient
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ----------------------------------------------------------------
-    // 2. ตัวแปรสถานะเกม
-    // ----------------------------------------------------------------
     let currentUser = null;
     let gameState = 'LOGIN'; 
     let currentPhase = 1;
@@ -91,15 +112,24 @@
     let score = 0;
     let diamonds = 0;
     let rerollCost = 1;
-    let isRegistering = false; // ตัวแปรเช็คว่ากำลังอยู่ในโหมดสมัครสมาชิกใหม่หรือไม่
+    let isRegistering = false; 
 
-    // Canvas Setup
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const keys = {};
 
     window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
     window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+    // 1. เพิ่มระบบกด Enter เพื่อ Login
+    document.getElementById('loginScreen').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            handleLogin();
+        }
+    });
+
+    // เริ่มต้นระบบนับถอยหลังพลังงาน
+    setInterval(updateEnergyTimer, 1000);
 
     const shopItems = [
         { name: "Tylenol", cost: 10, desc: "รักษาปวดศีรษะ +กระสุน +Atk", type: "heal_headache" },
@@ -108,9 +138,59 @@
         { name: "Saline", cost: 10, desc: "Heal HP 2", type: "heal_hp_basic" }
     ];
 
-    // ----------------------------------------------------------------
-    // 3. ฟังก์ชันฐานข้อมูล Supabase (Login & Leaderboard)
-    // ----------------------------------------------------------------
+    // คำนวณเวลาปัจจุบันของประเทศไทย (GMT+7)
+    function getThaiDate() {
+        let now = new Date();
+        let utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+        return new Date(utc + (3600000 * 7));
+    }
+
+    // อัปเดตตัวจับเวลาและรีเซ็ตพลังงานอัตโนมัติ
+    function updateEnergyTimer() {
+        if (!currentUser) return;
+
+        let thaiNow = getThaiDate();
+        let midnight = new Date(thaiNow);
+        midnight.setHours(24, 0, 0, 0); // ตั้งเป็นเวลาเที่ยงคืน
+
+        // ตรวจสอบว่าข้ามวันหรือยัง
+        if (currentUser.last_played_at) {
+            let lp = new Date(currentUser.last_played_at);
+            let lpUtc = lp.getTime() + (lp.getTimezoneOffset() * 60000);
+            let lpThai = new Date(lpUtc + (3600000 * 7));
+            
+            if (lpThai.getDate() !== thaiNow.getDate() || lpThai.getMonth() !== thaiNow.getMonth() || lpThai.getFullYear() !== thaiNow.getFullYear()) {
+                // รีเซ็ตพลังงานเมื่อข้ามวัน
+                currentUser.daily_energy = 5;
+                currentUser.last_played_at = new Date().toISOString();
+                updateTopBar();
+                
+                // บันทึกการรีเซ็ตลงฐานข้อมูลแบบ Background
+                supabaseClient.from('players').update({ 
+                    daily_energy: 5, 
+                    last_played_at: currentUser.last_played_at 
+                }).eq('username', currentUser.username).then();
+            }
+        }
+
+        // แสดงเวลานับถอยหลังถ้าพลังงานไม่เต็ม
+        if (currentUser.daily_energy < 5) {
+            let diff = midnight - thaiNow; // มิลลิวินาที
+            let h = Math.floor(diff / (1000 * 60 * 60));
+            let m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            let s = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            // ใส่ 0 นำหน้าถ้าน้อยกว่า 10
+            h = h < 10 ? '0' + h : h;
+            m = m < 10 ? '0' + m : m;
+            s = s < 10 ? '0' + s : s;
+            
+            document.getElementById('tb-energy-timer').innerText = `(รีเซ็ตใน ${h}:${m}:${s})`;
+        } else {
+            document.getElementById('tb-energy-timer').innerText = ``;
+        }
+    }
+
     async function handleLogin() {
         const userStr = document.getElementById('username').value.trim();
         const pinStr = document.getElementById('pincode').value.trim();
@@ -119,7 +199,6 @@
         const msgEl = document.getElementById('login-msg');
         const btn = document.getElementById('btnLogin');
 
-        // ตรวจสอบภาษาอังกฤษเท่านั้น
         if (!/^[A-Za-z0-9]+$/.test(userStr)) {
             msgEl.innerText = "Username ต้องเป็นภาษาอังกฤษและตัวเลขเท่านั้น";
             return;
@@ -133,7 +212,6 @@
         btn.disabled = true;
 
         try {
-            // 1. ค้นหาผู้เล่นในฐานข้อมูล (เปลี่ยนเป็น supabaseClient)
             const { data: existingPlayer, error: fetchErr } = await supabaseClient
                 .from('players')
                 .select('*')
@@ -143,7 +221,6 @@
             if (fetchErr) throw fetchErr;
 
             if (existingPlayer) {
-                // --- กรณี: ผู้เล่นเก่า ---
                 fullnameInput.style.display = 'none'; 
                 isRegistering = false;
 
@@ -155,11 +232,10 @@
                 }
                 currentUser = existingPlayer;
             } else {
-                // --- กรณี: ผู้เล่นใหม่ (ไม่พบในระบบ) ---
                 if (!isRegistering) {
                     isRegistering = true;
                     fullnameInput.style.display = 'block'; 
-                    msgEl.innerText = "ไม่พบชื่อนี้ในระบบ กรุณากรอกชื่อ-นามสกุล และกดปุ่มอีกครั้งเพื่อสมัครสมาชิก";
+                    msgEl.innerText = "ไม่พบชื่อนี้ในระบบ กรุณากรอกชื่อ-นามสกุล และกด Enter เพื่อสมัครสมาชิก";
                     btn.innerText = "ยืนยันการสมัคร";
                     btn.disabled = false;
                     return;
@@ -172,7 +248,6 @@
                     return;
                 }
                 
-                // สมัครผู้เล่นใหม่ (เปลี่ยนเป็น supabaseClient)
                 const { data: newPlayer, error: insertErr } = await supabaseClient
                     .from('players')
                     .insert([{ 
@@ -180,7 +255,8 @@
                         pin_code: pinStr, 
                         full_name: fnameStr,
                         diamonds: 0,
-                        daily_energy: 5
+                        daily_energy: 5,
+                        last_played_at: new Date().toISOString()
                     }])
                     .select()
                     .single();
@@ -188,7 +264,6 @@
                 if (insertErr) throw insertErr;
                 currentUser = newPlayer;
 
-                // สร้าง record ใน Leaderboard (เปลี่ยนเป็น supabaseClient)
                 await supabaseClient.from('leaderboards').insert([{ username: userStr, max_score: 0, max_phase: 1 }]);
                 
                 fullnameInput.style.display = 'none';
@@ -196,7 +271,9 @@
                 isRegistering = false;
             }
 
-            // --- เมื่อ Login สำเร็จ ---
+            // ตรวจสอบวันและรีเซ็ตพลังงานเบื้องต้นก่อนเข้าเกม
+            updateEnergyTimer();
+
             msgEl.innerText = "";
             btn.innerText = "Login / Register";
             diamonds = currentUser.diamonds;
@@ -219,7 +296,6 @@
         lbList.innerHTML = "กำลังโหลดข้อมูล...";
         
         try {
-            // โหลด Leaderboard (เปลี่ยนเป็น supabaseClient)
             const { data: lbData, error } = await supabaseClient
                 .from('leaderboards')
                 .select('username, max_score, max_phase')
@@ -232,7 +308,7 @@
                 lbList.innerHTML = lbData.map((p, index) => 
                     `<div class="lb-entry">
                         <span><strong>#${index + 1}</strong> ${p.username}</span>
-                        <span>Score: ${p.max_score} (Phase ${p.max_phase})</span>
+                        <span><strong style="color:#ffeb3b;">${p.max_score}</strong> Pts (Phase ${p.max_phase})</span>
                     </div>`
                 ).join('');
             } else {
@@ -248,7 +324,6 @@
         if (!currentUser) return;
         
         try {
-            // เช็คสถิติเดิม (เปลี่ยนเป็น supabaseClient)
             const { data: currentRecord } = await supabaseClient
                 .from('leaderboards')
                 .select('max_score')
@@ -258,7 +333,6 @@
             const oldScore = currentRecord ? currentRecord.max_score : 0;
 
             if (score > oldScore) {
-                // บันทึกสถิติใหม่ (เปลี่ยนเป็น supabaseClient)
                 await supabaseClient
                     .from('leaderboards')
                     .upsert({ 
@@ -272,7 +346,6 @@
                 alert(`Game Over!\nScore: ${score} | Phase: ${currentPhase}\n(ยังไม่ผ่านสถิติสูงสุดเดิมของคุณที่ ${oldScore} คะแนน)`);
             }
 
-            // อัปเดตข้อมูลผู้เล่น (เปลี่ยนเป็น supabaseClient)
             await supabaseClient
                 .from('players')
                 .update({ 
@@ -297,9 +370,6 @@
         alert("ระบบอัปเกรดจะเพิ่มเข้ามาในอนาคตครับ!");
     }
 
-    // ----------------------------------------------------------------
-    // 4. คลาสและออบเจ็กต์ในเกม
-    // ----------------------------------------------------------------
     class Player {
         constructor() {
             this.x = 400; this.y = 300; this.size = 15;
@@ -426,9 +496,6 @@
     let bullets = [];
     let enemySpawnTimer = 0;
 
-    // ----------------------------------------------------------------
-    // 5. ระบบ UI & Flow
-    // ----------------------------------------------------------------
     function switchScreen(screenId) {
         document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
         if (screenId) document.getElementById(screenId).classList.add('active');
@@ -454,11 +521,14 @@
         }
         
         currentUser.daily_energy -= 1;
+        currentUser.last_played_at = new Date().toISOString(); // อัปเดตเวลาล่าสุดที่เล่นด้วย
         updateTopBar();
         
-        // อัปเดตพลังงาน (เปลี่ยนเป็น supabaseClient)
         await supabaseClient.from('players')
-            .update({ daily_energy: currentUser.daily_energy })
+            .update({ 
+                daily_energy: currentUser.daily_energy,
+                last_played_at: currentUser.last_played_at
+            })
             .eq('username', currentUser.username);
         
         player = new Player();
@@ -541,9 +611,6 @@
         switchScreen('menuScreen');
     }
 
-    // ----------------------------------------------------------------
-    // 6. Game Loop อัปเดตและวาดภาพ
-    // ----------------------------------------------------------------
     function gameLoop(timestamp) {
         if (gameState !== 'PLAYING') return;
         
