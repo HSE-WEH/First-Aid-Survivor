@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V1.6</title>
-    <!-- นำเข้า Supabase SDK -->
+    <title>First Aid Survivor V1.7</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; background-color: #222; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
@@ -19,7 +18,6 @@
         
         .top-bar { position: absolute; top: 0; left: 0; width: 100%; height: 40px; background: rgba(0,0,0,0.95); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-sizing: border-box; z-index: 20; display: none; border-bottom: 2px solid #444; }
         
-        /* ร้านค้า */
         .shop-header { width: 90%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .shop-card-container { display: flex; gap: 10px; margin-bottom: 15px; }
         .shop-card { background: #2a2a2a; padding: 10px; border: 2px solid #ffcc00; border-radius: 8px; text-align: center; cursor: pointer; width: 160px; position: relative; transition: transform 0.1s;}
@@ -35,7 +33,6 @@
         .upg-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding: 10px 0; }
         .upg-row:last-child { border-bottom: none; }
 
-        /* Tabs สำหรับ How To Play */
         .tab-btn { background-color: #444; margin: 0 2px; padding: 8px 12px; font-size: 14px; }
         .tab-btn.active-tab { background-color: #2196F3; }
         .htp-content { display: none; background: #333; padding: 20px; border-radius: 8px; text-align: left; width: 550px; height: 350px; overflow-y: auto; line-height: 1.6; margin-bottom: 15px; }
@@ -56,7 +53,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active" style="justify-content: center;">
-        <h2>First Aid Survivor (V1.6)</h2>
+        <h2>First Aid Survivor (V1.7)</h2>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required>
         <input type="password" id="pincode" placeholder="PIN" required>
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none;">
@@ -68,7 +65,7 @@
     <div id="menuScreen" class="screen" style="justify-content: center;">
         <h2 style="font-size: 36px; margin-bottom: 20px;">Main Menu</h2>
         <button onclick="startGame()" style="font-size: 22px; padding: 15px 50px; margin-bottom: 15px; background-color: #2196F3;">Game Start</button>
-        <button onclick="switchScreen('howToPlayScreen'); showHtpTab('basic');" style="width: 250px; margin-bottom: 10px;">ข้อมูลเกม (วิธีเล่น / มอนสเตอร์ / ไอเทม)</button>
+        <button onclick="switchScreen('howToPlayScreen'); showHtpTab('basic');" style="width: 250px; margin-bottom: 10px;">ข้อมูลเกม (วิธีเล่น / มอนสเตอร์)</button>
         <button onclick="switchScreen('leaderboardScreen')" style="width: 250px; margin-bottom: 10px;">Leader Board</button>
         <button onclick="showUpgrade()" style="width: 250px; background-color: #9c27b0;">Upgrades (เพชร: <span id="menu-diamonds">0</span>)</button>
     </div>
@@ -99,38 +96,32 @@
             <ul>
                 <li><strong>เชื้อโรค (สีแดง):</strong> วิ่งชน (ทำให้ปวดศีรษะ, อาการแพ้)</li>
                 <li><strong>ปวดท้อง (สีแดง):</strong> โจมตีไกล (ทำให้ปวดท้อง, น้ำร้อนลวก)</li>
-                <li><strong>แมลง (สีแดง เล็กไว):</strong> วิ่งชนด้วยความเร็วสูง (ทำให้ผื่นแพ้, ผื่นบวม, แผลสด) - มาในเฟส 4+</li>
+                <li><strong>แมลง (สีแดง เล็กไว):</strong> วิ่งชน (ทำให้ผื่นแพ้, ผื่นบวม, แผลสด) - มาในเฟส 4+</li>
                 <li><strong>ปาก/ดวงตา (สีแดง ใหญ่):</strong> ลูกผสมยิงและชน (ทำให้แผลในปาก, ตาแดง, เจ็บคอ) - มาในเฟส 4+</li>
             </ul>
             <h3 style="color:#ffcc00; margin-top:0;">👹 บอสประจำเฟส (3, 5, 7, 9, 10+)</h3>
-            <p>บอสจะตัวใหญ่มาก เลือดเยอะ และมีการยิงสาดกระจายเป็นกรวยหรือวงกลมแบบทวีคูณตามเฟส! ถ้าโดนบอสโจมตีจะสุ่มติดได้ทุกสถานะ 20%</p>
+            <p>บอสจะตัวใหญ่มาก เลือดเยอะ และมีการยิงสาดกระจาย ถ้าโดนบอสโจมตีจะสุ่มติดได้ทุกสถานะ 20%</p>
         </div>
 
         <div id="tab-shop" class="htp-content">
             <h3 style="color:#4CAF50; margin-top:0;">💊 ยาในร้านค้า และคุณสมบัติ</h3>
-            <p>มียาให้เลือกซื้อทุกครั้งที่จบเฟส แต่ละชนิดรักษาอาการป่วยได้ 1 Stack ถ้ารักษาตรงจุด และเมื่อซื้อซ้ำจะได้ บัฟ (Buff) ติดตัวตามนี้:</p>
+            <p>มียาให้เลือกซื้อทุกครั้งที่จบเฟส แต่ละชนิดรักษาอาการป่วยได้ 1 Stack ถ้ารักษาตรงจุด และเมื่อซื้อซ้ำจะได้ บัฟ ติดตัวตามนี้:</p>
             <ul style="font-size:14px;">
-                <li><strong>Tylenol:</strong> รักษาปวดหัว | ซื้อซ้ำเพิ่มจำนวนกระสุนและพลังโจมตี (Max 5)</li>
+                <li><strong>Tylenol:</strong> รักษาปวดหัว | +กระสุนและดาเมจ</li>
                 <li><strong>CPM / Telfast:</strong> รักษาภูมิแพ้ | เพิ่มเกราะ (แต่ CPM ลดความเร็ววิ่ง)</li>
-                <li><strong>Carbon / Air-X / Flying Rabit:</strong> รักษาปวดท้อง | เพิ่มความเร็ว, เปลี่ยนยิง 4 แฉก, ทำกระสุนทะลุ</li>
-                <li><strong>Gumgig / Apache:</strong> รักษาเจ็บคอ | ยิงไวขึ้นรัวๆ</li>
+                <li><strong>Carbon / Air-X / Flying Rabit:</strong> รักษาปวดท้อง | +ความเร็ว, โจมตี 4 แฉก (1 เฟส), ทะลุศัตรู (1 เฟส)</li>
+                <li><strong>Gumgig / Apache:</strong> รักษาเจ็บคอ | ยิงไวขึ้น</li>
                 <li><strong>Betadine:</strong> รักษาแผลสด | เพิ่ม Max HP</li>
                 <li><strong>Cardamine / Systral:</strong> รักษาผื่นแพ้ | ได้โบนัสเหรียญทันทีเมื่อเข้าร้านค้า</li>
                 <li><strong>Oral Paste:</strong> รักษาแผลในปาก | เม็ดกระสุนขยายใหญ่ขึ้น</li>
                 <li><strong>Eye Lotion:</strong> รักษาตาแดง | โอกาสโจมตีเบิ้ล 2 ครั้งติด</li>
-                <li><strong>อุปกรณ์ทำแผล (Saline, Alcohol, Plaster, Gauze, Dressing):</strong> ฟื้นฟู HP และถ้าสะสมครบเซ็ตจะได้โบนัส Max HP สูงสุดถึง +20!</li>
+                <li><strong>อุปกรณ์ทำแผล:</strong> ฟื้นฟู HP สะสมคอมโบได้ Max HP</li>
             </ul>
         </div>
 
         <div id="tab-upg" class="htp-content">
             <h3 style="color:#9c27b0; margin-top:0;">💎 การอัปเกรดตัวละคร</h3>
-            <p>เพชรสีฟ้าที่ดรอปจากมอนสเตอร์ (โอกาสดรอป 5%) จะถูกบันทึกติดไอดีคุณไว้ใช้ตลอดไป! คุณสามารถใช้เพชรเพื่ออัปเกรดตัวละครได้ที่ปุ่ม <strong>Upgrades</strong> ในเมนูหลัก</p>
-            <ul>
-                <li><strong>Max HP:</strong> เพิ่มเลือดสูงสุด</li>
-                <li><strong>Attack:</strong> เพิ่มพลังโจมตีเริ่มต้น</li>
-                <li><strong>Immunity:</strong> เพิ่มโอกาสการหลบหลีก (Dodge) สูงสุดคือหลบได้ 70%</li>
-                <li><strong>Speed:</strong> เพิ่มความเร็วการเดินตั้งแต่เริ่มเกม</li>
-            </ul>
+            <p>เพชรสีฟ้าที่ดรอปจากมอนสเตอร์ (โอกาส 5%) จะถูกบันทึกติดไอดีคุณไว้ใช้ตลอดไป! คุณสามารถใช้เพชรเพื่ออัปเกรดสเตตัสเริ่มต้นได้ที่หน้า Upgrades</p>
         </div>
 
         <button onclick="switchScreen('menuScreen')" style="background-color: #777;">กลับสู่เมนูหลัก</button>
@@ -141,27 +132,10 @@
         <h2>Permanent Upgrades</h2>
         <p style="font-size: 18px;">เพชรที่มี: <span id="upg-diamonds" style="color: cyan; font-weight: bold;">0</span> 💎</p>
         <div style="background: #2a2a2a; padding: 20px; border-radius: 8px; text-align: left; width: 450px; display: flex; flex-direction: column; border: 1px solid #444;">
-            
-            <div class="upg-row">
-                <span>❤️ <strong>Max HP</strong> (+<span id="upg-lvl-hp">0</span>/20)</span>
-                <button id="btn-upg-hp" onclick="buyUpgrade('hp')">อัปเกรด (💎 <span id="cost-hp">2</span>)</button>
-            </div>
-            
-            <div class="upg-row">
-                <span>⚔️ <strong>Attack</strong> (+<span id="upg-lvl-atk">0</span>/10)</span>
-                <button id="btn-upg-atk" onclick="buyUpgrade('atk')">อัปเกรด (💎 <span id="cost-atk">4</span>)</button>
-            </div>
-            
-            <div class="upg-row">
-                <span>🛡️ <strong>Immunity</strong> (+<span id="upg-lvl-def">0</span>/50)</span>
-                <button id="btn-upg-def" onclick="buyUpgrade('def')">อัปเกรด (💎 <span id="cost-def">2</span>)</button>
-            </div>
-            
-            <div class="upg-row">
-                <span>👟 <strong>Speed</strong> (+<span id="upg-lvl-spd">0</span>/3)</span>
-                <button id="btn-upg-spd" onclick="buyUpgrade('spd')">อัปเกรด (💎 <span id="cost-spd">30</span>)</button>
-            </div>
-
+            <div class="upg-row"><span>❤️ <strong>Max HP</strong> (+<span id="upg-lvl-hp">0</span>/20)</span><button id="btn-upg-hp" onclick="buyUpgrade('hp')">อัปเกรด</button></div>
+            <div class="upg-row"><span>⚔️ <strong>Attack</strong> (+<span id="upg-lvl-atk">0</span>/10)</span><button id="btn-upg-atk" onclick="buyUpgrade('atk')">อัปเกรด</button></div>
+            <div class="upg-row"><span>🛡️ <strong>Immunity</strong> (+<span id="upg-lvl-def">0</span>/50)</span><button id="btn-upg-def" onclick="buyUpgrade('def')">อัปเกรด</button></div>
+            <div class="upg-row"><span>👟 <strong>Speed</strong> (+<span id="upg-lvl-spd">0</span>/3)</span><button id="btn-upg-spd" onclick="buyUpgrade('spd')">อัปเกรด</button></div>
         </div>
         <button onclick="switchScreen('menuScreen')" style="margin-top: 20px; background-color: #777;">กลับสู่เมนูหลัก</button>
     </div>
@@ -216,6 +190,7 @@
     let rerollCost = 1;
     let discountedBoughtCount = 0; 
     let currentDiscountItems = []; 
+    let adminGodMode = false; // ตัวแปรสำหรับคุมอมตะของ Admin
 
     let player;
     let enemies = [];
@@ -225,14 +200,14 @@
     let enemySpawnTimer = 0;
     let bossSpawnedThisPhase = false;
 
-    // ฐานข้อมูลไอเทม (ปรับราคาขึ้น 1.5 เท่าตามคำขอ V1.6)
+    // ฐานข้อมูลไอเทม (ปรับราคา Saline, Alcohol, Plaster, Gauze เป็น 7 / Dressing เป็น 14)
     const ITEMS_DB = [
         { id: 'tylenol', name: "Tylenol", cost: 15, cures: 'headache', maxStack: 5, desc: "แก้ปวดหัว | +กระสุน/Atk" },
         { id: 'cpm', name: "CPM", cost: 15, cures: 'allergy', maxStack: 3, desc: "แก้ภูมิแพ้ | +Def แต่ลด Spd" },
         { id: 'telfast', name: "Telfast", cost: 15, cures: 'allergy', maxStack: 3, desc: "แก้ภูมิแพ้ | +Def" },
         { id: 'carbon', name: "Carbon", cost: 15, cures: 'stomach', maxStack: 2, desc: "แก้ปวดท้อง | +Spd" },
-        { id: 'air_x', name: "Air-X", cost: 30, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | โจมตี 4 แฉก" },
-        { id: 'flying_rabit', name: "Flying Rabit", cost: 30, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | กระสุนทะลุศัตรู" },
+        { id: 'air_x', name: "Air-X", cost: 30, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | โจมตี 4 แฉก (1 เฟส)" },
+        { id: 'flying_rabit', name: "Flying Rabit", cost: 30, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | กระสุนทะลุ (1 เฟส)" },
         { id: 'gumgig', name: "Gumgig pean", cost: 15, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ยิงไวขึ้น" },
         { id: 'apache', name: "Apache", cost: 15, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ยิงไวขึ้น" },
         { id: 'betadine_sol', name: "Betadine solution", cost: 18, cures: 'fresh_wound', maxStack: 3, desc: "แก้แผลสด | +Max HP" },
@@ -243,11 +218,11 @@
         { id: 'silver_cream', name: "Silver cream", cost: 45, cures: 'scald', maxStack: 3, desc: "แก้น้ำร้อนลวก | ศัตรูตกเหรียญ" },
         { id: 'oral_paste', name: "Oral paste", cost: 30, cures: 'mouth_ulcer', maxStack: 3, desc: "แก้แผลในปาก | กระสุนยักษ์" },
         { id: 'eye_lotion', name: "Eye lotion", cost: 30, cures: 'red_eye', maxStack: 3, desc: "แก้ตาแดง | โอกาสโจมตีเบิ้ล" },
-        { id: 'saline', name: "Saline", cost: 15, cures: 'hp', maxStack: 99, desc: "Heal 2 | Combo: Alcohol +MaxHP" },
-        { id: 'alcohol', name: "Alcohol", cost: 15, cures: 'hp', maxStack: 99, desc: "Heal 2 | Combo: Betadine +MaxHP" },
-        { id: 'plaster', name: "Plaster", cost: 15, cures: 'hp', maxStack: 99, desc: "Heal 2 | Combo: Saline +MaxHP" },
-        { id: 'gauze', name: "Gauze", cost: 15, cures: 'hp', maxStack: 99, desc: "Heal 2 | Combo: Plaster +MaxHP" },
-        { id: 'dressing_set', name: "Dressing set", cost: 23, cures: 'hp', maxStack: 99, desc: "Heal 5 | Combo: Full Set +20 MaxHP" }
+        { id: 'saline', name: "Saline", cost: 7, cures: 'hp', maxStack: 99, desc: "Heal 2 | Combo: Alcohol +MaxHP" },
+        { id: 'alcohol', name: "Alcohol", cost: 7, cures: 'hp', maxStack: 99, desc: "Heal 2 | Combo: Betadine +MaxHP" },
+        { id: 'plaster', name: "Plaster", cost: 7, cures: 'hp', maxStack: 99, desc: "Heal 2 | Combo: Saline +MaxHP" },
+        { id: 'gauze', name: "Gauze", cost: 7, cures: 'hp', maxStack: 99, desc: "Heal 2 | Combo: Plaster +MaxHP" },
+        { id: 'dressing_set', name: "Dressing set", cost: 14, cures: 'hp', maxStack: 99, desc: "Heal 5 | Combo: Full Set +20 MaxHP" }
     ];
 
     const STATUS_NAMES = { headache: "ปวดศีรษะ", allergy: "อาการแพ้", stomach: "ปวดท้อง", rash: "ผื่นแพ้", swelling: "ผื่นบวม", mouth_ulcer: "แผลในปาก", red_eye: "ตาแดง", sore_throat: "เจ็บคอ", fresh_wound: "แผลสด", scald: "น้ำร้อนลวก" };
@@ -256,13 +231,27 @@
     const ctx = canvas.getContext('2d');
     const keys = {};
 
-    window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+    window.addEventListener('keydown', e => {
+        keys[e.key.toLowerCase()] = true;
+        
+        // ระบบคีย์ลัด Admin
+        if (currentUser && currentUser.is_admin && gameState === 'PLAYING') {
+            if (e.key.toLowerCase() === 'g') {
+                adminGodMode = !adminGodMode;
+            }
+            if (e.key.toLowerCase() === 'c') {
+                coins += 1000;
+            }
+            if (e.key.toLowerCase() === 'v') {
+                currentUser.diamonds += 100;
+            }
+        }
+    });
+    
     window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
-
     document.getElementById('loginScreen').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
     setInterval(updateEnergyTimer, 1000);
 
-    // ควบคุม Tab How to Play
     function showHtpTab(tabId) {
         document.querySelectorAll('.htp-content').forEach(el => el.classList.remove('active-content'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active-tab'));
@@ -351,7 +340,6 @@
             await supabaseClient.from('players').update({ diamonds: currentUser.diamonds, daily_energy: currentUser.daily_energy }).eq('username', currentUser.username);
 
             if (currentUser.is_admin) {
-                // Admin ไม่เซฟคะแนน
                 return;
             }
 
@@ -372,9 +360,6 @@
         document.getElementById('menu-diamonds').innerText = currentUser.diamonds;
     }
 
-    // ----------------------------------------------------------------
-    // 💎 UPGRADE SYSTEM V1.6
-    // ----------------------------------------------------------------
     function getUpgradeCost(stat, lvl) {
         if (stat === 'hp') return lvl < 10 ? 2 : 4;
         if (stat === 'atk') return 4;
@@ -447,7 +432,7 @@
             this.def = this.baseDef; this.spd = this.baseSpd; this.fireRate = 1.0; this.bulletCount = 1;
             
             this.fireTimer = 0; this.magnetRange = 0;
-            this.isDead = false; // ตัวแปรป้องกันบั๊กตายซ้ำซ้อน
+            this.isDead = false; 
             this.statuses = { headache: 0, allergy: 0, stomach: 0, rash: 0, swelling: 0, mouth_ulcer: 0, red_eye: 0, sore_throat: 0, fresh_wound: 0, scald: 0 }; 
             this.activeStatuses = { ...this.statuses };
             
@@ -502,6 +487,14 @@
         }
         draw(ctx) {
             if (this.isDead) return;
+            
+            // วาดวงกลมรัศมีดูดเหรียญจางๆ
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size + 10 + this.magnetRange, 0, Math.PI * 2);
+            ctx.stroke();
+
             ctx.fillStyle = '#00ff00'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
             ctx.fillStyle = 'red'; ctx.fillRect(this.x - 15, this.y - 20, 30, 5);
             ctx.fillStyle = 'green'; ctx.fillRect(this.x - 15, this.y - 20, 30 * (this.hp / this.maxHp), 5);
@@ -535,6 +528,8 @@
         }
         takeDamage(amt, statusList) {
             if (this.isDead) return;
+            if (currentUser.is_admin && adminGodMode) return; // อมตะ Admin
+
             let dodgeChance = (this.def / 100) * 0.7; 
             if (Math.random() < dodgeChance) return; 
             
@@ -545,7 +540,6 @@
                 let randomStatus = statusList[Math.floor(Math.random() * statusList.length)];
                 if (this.statuses[randomStatus] < 3) this.statuses[randomStatus]++;
             }
-            // แก้บั๊กตายเกมค้าง
             if (this.hp <= 0) {
                 this.hp = 0;
                 this.isDead = true;
@@ -561,7 +555,7 @@
             this.shootTimer = 0; this.bossPattern = 0; 
             if (type === 1) { this.hp = 1; this.atk = 1; this.spd = 2; this.size = 12; this.statusList = ['headache', 'allergy']; this.isRanged = false; } 
             else if (type === 2) { this.hp = 1; this.atk = 1; this.spd = 2; this.size = 12; this.statusList = ['stomach', 'scald']; this.isRanged = true; this.shootTimer = 2.0; } 
-            else if (type === 3) { this.hp = 1; this.atk = 2; this.spd = 5; this.size = 10; this.statusList = ['rash', 'swelling', 'fresh_wound']; this.isRanged = false; } 
+            else if (type === 3) { this.hp = 1; this.atk = 2; this.spd = 3; this.size = 10; this.statusList = ['rash', 'swelling', 'fresh_wound']; this.isRanged = false; } 
             else if (type === 4) { this.hp = 5; this.atk = 5; this.rangedAtk = 3; this.spd = 2; this.size = 15; this.statusList = ['mouth_ulcer', 'red_eye', 'sore_throat']; this.isRanged = true; this.shootTimer = 2.5; } 
             else if (type === 5) {
                 this.size = 35; this.isRanged = true; this.shootTimer = 2.0;
@@ -572,7 +566,7 @@
                 else if (phase === 9) { this.hp = 250; this.atk = 10; this.spd = 2; }
                 else if (phase >= 10) { let loop = phase - 10; this.hp = 400 + (loop * 100); this.atk = 10 + (loop * 2); this.spd = Math.min(4, 2 + (loop * 1)); }
             }
-            this.maxHp = this.hp; // เซฟค่า HP สูงสุดไว้โชว์หลอดเลือด
+            this.maxHp = this.hp; 
         }
         update(dt) {
             if (player.isDead) return;
@@ -603,7 +597,6 @@
         }
         draw(ctx) {
             ctx.fillStyle = this.isBoss ? '#ff5555' : 'red'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
-            // ย้ายหลอดเลือดบอสไปวาดรวมที่จอหลักแทน (ดึงการวาดหลอดเลือดมินิของบอสออก)
         }
         fireCone(baseAngle, atk, count) {
             let spread = Math.PI / 4; let startAngle = baseAngle - (spread / 2); let step = count > 1 ? spread / (count - 1) : 0;
@@ -714,7 +707,7 @@
         
         player = new Player(); player.applyPhaseModifiers(); 
         enemies = []; bullets = []; enemyBullets = []; drops = [];
-        currentPhase = 1; phaseTimer = 30; score = 0; coins = 0; 
+        currentPhase = 1; phaseTimer = 30; score = 0; coins = 0; adminGodMode = false;
         
         switchScreen(null); gameState = 'PLAYING'; 
         lastTime = performance.now(); 
@@ -799,16 +792,29 @@
 
     function buyItem(itemId, price, isDiscounted, index) { 
         let itemDef = ITEMS_DB.find(i => i.id === itemId);
+        let hasAilment = (itemDef.cures !== 'hp' && player.statuses[itemDef.cures] > 0);
+
         if (coins < price) { alert("เหรียญไม่พอ!"); return; }
-        if (player.inv[itemId] >= itemDef.maxStack) { alert("ไอเทมนี้ถึงระดับสูงสุดแล้ว"); return; }
+        
+        // ถ้าบัฟเต็มแล้ว และ ไม่ได้มีอาการป่วยให้รักษา จะไม่ให้ซื้อ
+        if (player.inv[itemId] >= itemDef.maxStack && !hasAilment && itemDef.cures !== 'hp') { 
+            alert("ไอเทมนี้ให้บัฟระดับสูงสุดแล้ว และไม่มีอาการป่วยให้รักษา!"); 
+            return; 
+        }
 
         coins -= price; 
-        player.inv[itemId]++;
         
-        if (itemDef.cures !== 'hp' && player.statuses[itemDef.cures] > 0) {
+        // เพิ่มบัฟถ้ายังไม่ตัน หรือเป็นกลุ่มยารักษา HP
+        if (player.inv[itemId] < itemDef.maxStack || itemDef.cures === 'hp') {
+            player.inv[itemId]++;
+        }
+        
+        // รักษาโรค
+        if (hasAilment) {
             player.statuses[itemDef.cures]--;
         }
 
+        // คอมโบ HP
         if (itemId === 'saline') { player.hp = Math.min(player.maxHp, player.hp + 2); if (player.inv.alcohol > 0) player.bonusMaxHp += 2; }
         if (itemId === 'alcohol') { player.hp = Math.min(player.maxHp, player.hp + 2); if (player.inv.betadine_sol > 0 || player.inv.betadine_scrub > 0) player.bonusMaxHp += 2; }
         if (itemId === 'plaster') { player.hp = Math.min(player.maxHp, player.hp + 2); if (player.inv.saline > 0) player.bonusMaxHp += 2; }
@@ -841,6 +847,11 @@
     function nextPhase() {
         currentPhase++; phaseTimer = 30; bossSpawnedThisPhase = false;
         enemies = []; bullets = []; enemyBullets = []; drops = [];
+        
+        // รีเซ็ตบัฟ 1 เฟส
+        player.inv.air_x = 0;
+        player.inv.flying_rabit = 0;
+
         player.applyPhaseModifiers();
         
         gameState = 'PLAYING'; switchScreen(null);
@@ -852,20 +863,17 @@
     // 🔄 GAME LOOP
     // ----------------------------------------------------------------
 
-    // 🛠️ แก้บั๊กเกมค้างตอนตาย
     function gameOver() {
         gameState = 'GAMEOVER';
         
-        // วาดหน้าต่าง GAME OVER บน Canvas ก่อนโหลดเซฟ
         ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = 'white';
         ctx.font = '60px Arial';
         ctx.textAlign = 'center';
         ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
-        ctx.textAlign = 'left'; // Reset
+        ctx.textAlign = 'left'; 
 
-        // หน่วงเวลา 100ms เพื่อให้ภาพเปลี่ยนก่อน แล้วค่อยยิง Alert/Save
         setTimeout(async () => {
             await saveScoreToDB();
             updateTopBar(); 
@@ -934,17 +942,18 @@
         drops.forEach(d => d.update(dt)); drops = drops.filter(d => d.active);
     }
 
-    // 🛠️ แถบโชว์สถานะและบัฟ มุมขวาบน
     function drawStatusUI(ctx) {
         let startX = canvas.width - 180;
         let startY = 30;
         let lines = [];
         
-        // สถานะผิดปกติ
+        if (currentUser && currentUser.is_admin && adminGodMode) {
+            lines.push({ text: "🌟 GOD MODE [ON]", color: '#00ffff' });
+        }
+
         for (let key in player.activeStatuses) {
             if (player.activeStatuses[key] > 0) lines.push({ text: `${STATUS_NAMES[key]} (Lv.${player.activeStatuses[key]})`, color: '#ff5555' });
         }
-        // บัฟ/ยา ที่มี
         for (let key in player.inv) {
             if (player.inv[key] > 0) {
                 let item = ITEMS_DB.find(i => i.id === key);
@@ -979,7 +988,6 @@
         enemyBullets.forEach(b => b.draw(ctx));
         enemies.forEach(e => e.draw(ctx));
 
-        // UI ข้อมูลทั่วไป
         ctx.fillStyle = 'white'; ctx.font = 'bold 20px Arial';
         ctx.fillText(`Phase: ${currentPhase}`, 10, 30);
         ctx.fillText(`Time: ${Math.ceil(phaseTimer)}`, 10, 60);
@@ -987,10 +995,8 @@
         ctx.fillStyle = 'yellow'; ctx.fillText(`Coins: ${coins}`, 10, 120);
         ctx.fillStyle = 'cyan'; ctx.fillText(`Diamonds: ${currentUser.diamonds}`, 10, 150);
 
-        // 🛠️ วาดแถบ Status ด้านขวา
         drawStatusUI(ctx);
 
-        // 🛠️ วาดหลอดเลือดบอสแบบยาว ด้านบนสุด
         let boss = enemies.find(e => e.isBoss);
         if (boss) {
             let barWidth = 500;
@@ -1006,7 +1012,7 @@
             ctx.font = 'bold 16px Arial';
             ctx.textAlign = 'center';
             ctx.fillText(`BOSS HP: ${Math.ceil(boss.hp)} / ${boss.maxHp}`, canvas.width / 2, barY + 18);
-            ctx.textAlign = 'left'; // Reset
+            ctx.textAlign = 'left'; 
         }
     }
 </script>
