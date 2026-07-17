@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V1.7</title>
+    <title>First Aid Survivor V1.8</title>
+    <!-- นำเข้า Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; background-color: #222; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
@@ -18,12 +19,14 @@
         
         .top-bar { position: absolute; top: 0; left: 0; width: 100%; height: 40px; background: rgba(0,0,0,0.95); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-sizing: border-box; z-index: 20; display: none; border-bottom: 2px solid #444; }
         
-        .shop-header { width: 90%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .shop-card-container { display: flex; gap: 10px; margin-bottom: 15px; }
+        /* สไตล์ร้านค้า */
+        .shop-header { width: 90%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .shop-card-container { display: flex; gap: 10px; margin-bottom: 10px; }
         .shop-card { background: #2a2a2a; padding: 10px; border: 2px solid #ffcc00; border-radius: 8px; text-align: center; cursor: pointer; width: 160px; position: relative; transition: transform 0.1s;}
         .shop-card:hover { transform: scale(1.05); background: #333; }
         .shop-card.sold { border-color: #555; background: #222; opacity: 0.5; pointer-events: none; }
-        .full-shop-container { width: 95%; background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #444; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 250px; overflow-y: auto; margin-bottom: 10px;}
+        
+        .full-shop-container { width: 95%; background: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px solid #444; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 260px; overflow-y: auto; margin-bottom: 10px;}
         .full-shop-item { background: #333; padding: 8px; border-radius: 5px; font-size: 12px; cursor: pointer; border: 1px solid #555; display: flex; flex-direction: column; justify-content: space-between; align-items: center; text-align: center;}
         .full-shop-item:hover { border-color: #4CAF50; background: #444; }
         
@@ -53,7 +56,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active" style="justify-content: center;">
-        <h2>First Aid Survivor (V1.7)</h2>
+        <h2>First Aid Survivor (V1.8)</h2>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required>
         <input type="password" id="pincode" placeholder="PIN" required>
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none;">
@@ -109,7 +112,7 @@
             <ul style="font-size:14px;">
                 <li><strong>Tylenol:</strong> รักษาปวดหัว | +กระสุนและดาเมจ</li>
                 <li><strong>CPM / Telfast:</strong> รักษาภูมิแพ้ | เพิ่มเกราะ (แต่ CPM ลดความเร็ววิ่ง)</li>
-                <li><strong>Carbon / Air-X / Flying Rabit:</strong> รักษาปวดท้อง | +ความเร็ว, โจมตี 4 แฉก (1 เฟส), ทะลุศัตรู (1 เฟส)</li>
+                <li><strong>Carbon / Air-X / Flying Rabit:</strong> รักษาปวดท้อง | +ความเร็ว, โจมตี 5 แฉก (1 เฟส), ทะลุศัตรู (1 เฟส)</li>
                 <li><strong>Gumgig / Apache:</strong> รักษาเจ็บคอ | ยิงไวขึ้น</li>
                 <li><strong>Betadine:</strong> รักษาแผลสด | เพิ่ม Max HP</li>
                 <li><strong>Cardamine / Systral:</strong> รักษาผื่นแพ้ | ได้โบนัสเหรียญทันทีเมื่อเข้าร้านค้า</li>
@@ -157,13 +160,21 @@
             </div>
         </div>
         
+        <!-- แถบโชว์สเตตัสตัวละครในร้าน -->
+        <div style="background: rgba(0,0,0,0.6); border-radius: 5px; padding: 8px; margin-bottom: 10px; width: 90%; text-align: center; font-size: 14px; border: 1px solid #4CAF50;">
+            <span style="color:#0f0;">❤️ HP: <strong id="shop-hp-stat">0/0</strong></span> &nbsp;|&nbsp; 
+            <span style="color:#ff5555;">⚔️ ATK: <strong id="shop-atk-stat">0</strong></span> &nbsp;|&nbsp; 
+            <span style="color:#aaa;">🛡️ DEF: <strong id="shop-def-stat">0</strong></span> &nbsp;|&nbsp; 
+            <span style="color:#55ccff;">👟 SPD: <strong id="shop-spd-stat">0</strong></span>
+        </div>
+
         <div class="status-box" id="shop-status-list">
             <strong>🦠 อาการป่วยปัจจุบัน:</strong> <span id="shop-status-text" style="color:#aaa;">ไม่มีอาการผิดปกติ</span>
         </div>
 
         <h4 style="margin:5px 0; color:#ffcc00;">🔥 โปรโมชั่นลด 70% (ซื้อครบ 3 ชิ้น ลดค่า Reroll ฟรี!)</h4>
         <div class="shop-card-container" id="shopCards"></div>
-        <button onclick="rerollShop()" id="btnReroll" style="margin-bottom: 15px;">สุ่มใหม่ (ใช้ <span id="shop-reroll-cost">1</span> เหรียญ)</button>
+        <button onclick="rerollShop()" id="btnReroll" style="margin-bottom: 10px;">สุ่มใหม่ (ใช้ <span id="shop-reroll-cost">1</span> เหรียญ)</button>
 
         <h4 style="margin:5px 0;">🛒 แคตตาล็อกยาราคาเต็ม</h4>
         <div class="full-shop-container" id="fullShopCards"></div>
@@ -190,7 +201,7 @@
     let rerollCost = 1;
     let discountedBoughtCount = 0; 
     let currentDiscountItems = []; 
-    let adminGodMode = false; // ตัวแปรสำหรับคุมอมตะของ Admin
+    let adminGodMode = false; 
 
     let player;
     let enemies = [];
@@ -200,29 +211,28 @@
     let enemySpawnTimer = 0;
     let bossSpawnedThisPhase = false;
 
-    // ฐานข้อมูลไอเทม (ปรับราคา Saline, Alcohol, Plaster, Gauze เป็น 7 / Dressing เป็น 14)
     const ITEMS_DB = [
         { id: 'tylenol', name: "Tylenol", cost: 15, cures: 'headache', maxStack: 5, desc: "แก้ปวดหัว | +กระสุน/Atk" },
         { id: 'cpm', name: "CPM", cost: 15, cures: 'allergy', maxStack: 3, desc: "แก้ภูมิแพ้ | +Def แต่ลด Spd" },
         { id: 'telfast', name: "Telfast", cost: 15, cures: 'allergy', maxStack: 3, desc: "แก้ภูมิแพ้ | +Def" },
         { id: 'carbon', name: "Carbon", cost: 15, cures: 'stomach', maxStack: 2, desc: "แก้ปวดท้อง | +Spd" },
-        { id: 'air_x', name: "Air-X", cost: 30, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | โจมตี 4 แฉก (1 เฟส)" },
+        { id: 'air_x', name: "Air-X", cost: 30, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | โจมตี 5 แฉก (1 เฟส)" },
         { id: 'flying_rabit', name: "Flying Rabit", cost: 30, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | กระสุนทะลุ (1 เฟส)" },
         { id: 'gumgig', name: "Gumgig pean", cost: 15, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ยิงไวขึ้น" },
         { id: 'apache', name: "Apache", cost: 15, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ยิงไวขึ้น" },
         { id: 'betadine_sol', name: "Betadine solution", cost: 18, cures: 'fresh_wound', maxStack: 3, desc: "แก้แผลสด | +Max HP" },
         { id: 'betadine_scrub', name: "Betadine scrub", cost: 18, cures: 'fresh_wound', maxStack: 3, desc: "แก้แผลสด | +Max HP" },
         { id: 'cardamine', name: "Cardamine", cost: 30, cures: 'rash', maxStack: 3, desc: "แก้ผื่นแพ้ | โบนัสเหรียญ" },
-        { id: 'golden_cup', name: "Golden Cup Blam", cost: 30, cures: 'swelling', maxStack: 3, desc: "แก้ผื่นบวม | +ระยะดูดเหรียญ" },
+        { id: 'golden_cup', name: "Golden Cup Blam", cost: 30, cures: 'swelling', maxStack: 3, desc: "แก้ผื่นบวม | +ระยะดูด" },
         { id: 'systral', name: "Systral cream", cost: 23, cures: 'rash', maxStack: 3, desc: "แก้ผื่นแพ้ | โบนัสเหรียญ" },
         { id: 'silver_cream', name: "Silver cream", cost: 45, cures: 'scald', maxStack: 3, desc: "แก้น้ำร้อนลวก | ศัตรูตกเหรียญ" },
         { id: 'oral_paste', name: "Oral paste", cost: 30, cures: 'mouth_ulcer', maxStack: 3, desc: "แก้แผลในปาก | กระสุนยักษ์" },
-        { id: 'eye_lotion', name: "Eye lotion", cost: 30, cures: 'red_eye', maxStack: 3, desc: "แก้ตาแดง | โอกาสโจมตีเบิ้ล" },
+        { id: 'eye_lotion', name: "Eye lotion", cost: 30, cures: 'red_eye', maxStack: 3, desc: "แก้ตาแดง | โอกาสตีเบิ้ล" },
         { id: 'saline', name: "Saline", cost: 7, cures: 'hp', maxStack: 99, desc: "Heal 2 | Combo: Alcohol +MaxHP" },
         { id: 'alcohol', name: "Alcohol", cost: 7, cures: 'hp', maxStack: 99, desc: "Heal 2 | Combo: Betadine +MaxHP" },
         { id: 'plaster', name: "Plaster", cost: 7, cures: 'hp', maxStack: 99, desc: "Heal 2 | Combo: Saline +MaxHP" },
         { id: 'gauze', name: "Gauze", cost: 7, cures: 'hp', maxStack: 99, desc: "Heal 2 | Combo: Plaster +MaxHP" },
-        { id: 'dressing_set', name: "Dressing set", cost: 14, cures: 'hp', maxStack: 99, desc: "Heal 5 | Combo: Full Set +20 MaxHP" }
+        { id: 'dressing_set', name: "Dressing set", cost: 14, cures: 'hp', maxStack: 99, desc: "Heal 5 | Combo: Full Set +20 HP" }
     ];
 
     const STATUS_NAMES = { headache: "ปวดศีรษะ", allergy: "อาการแพ้", stomach: "ปวดท้อง", rash: "ผื่นแพ้", swelling: "ผื่นบวม", mouth_ulcer: "แผลในปาก", red_eye: "ตาแดง", sore_throat: "เจ็บคอ", fresh_wound: "แผลสด", scald: "น้ำร้อนลวก" };
@@ -233,24 +243,21 @@
 
     window.addEventListener('keydown', e => {
         keys[e.key.toLowerCase()] = true;
-        
-        // ระบบคีย์ลัด Admin
         if (currentUser && currentUser.is_admin && gameState === 'PLAYING') {
-            if (e.key.toLowerCase() === 'g') {
-                adminGodMode = !adminGodMode;
-            }
-            if (e.key.toLowerCase() === 'c') {
-                coins += 1000;
-            }
-            if (e.key.toLowerCase() === 'v') {
-                currentUser.diamonds += 100;
-            }
+            if (e.key.toLowerCase() === 'g') adminGodMode = !adminGodMode;
+            if (e.key.toLowerCase() === 'c') coins += 1000;
+            if (e.key.toLowerCase() === 'v') currentUser.diamonds += 100;
         }
     });
     
     window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
     document.getElementById('loginScreen').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
     setInterval(updateEnergyTimer, 1000);
+
+    // รีเซ็ตปุ่มทั้งหมด
+    function resetKeys() {
+        for (let k in keys) keys[k] = false;
+    }
 
     function showHtpTab(tabId) {
         document.querySelectorAll('.htp-content').forEach(el => el.classList.remove('active-content'));
@@ -339,9 +346,7 @@
         try {
             await supabaseClient.from('players').update({ diamonds: currentUser.diamonds, daily_energy: currentUser.daily_energy }).eq('username', currentUser.username);
 
-            if (currentUser.is_admin) {
-                return;
-            }
+            if (currentUser.is_admin) return;
 
             const { data: cur } = await supabaseClient.from('leaderboards').select('max_score').eq('username', currentUser.username).maybeSingle();
             let oldScore = cur ? cur.max_score : 0;
@@ -397,8 +402,7 @@
     }
 
     function showUpgrade() {
-        updateUpgradeUI();
-        switchScreen('upgradeScreen');
+        updateUpgradeUI(); switchScreen('upgradeScreen');
     }
 
     async function buyUpgrade(stat) {
@@ -488,20 +492,29 @@
         draw(ctx) {
             if (this.isDead) return;
             
-            // วาดวงกลมรัศมีดูดเหรียญจางๆ
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            // วาดวงกลมรัศมีดูดเหรียญ
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size + 10 + this.magnetRange, 0, Math.PI * 2);
+            ctx.arc(this.x, this.y, this.size + 15 + this.magnetRange, 0, Math.PI * 2);
             ctx.stroke();
 
             ctx.fillStyle = '#00ff00'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
             ctx.fillStyle = 'red'; ctx.fillRect(this.x - 15, this.y - 20, 30, 5);
             ctx.fillStyle = 'green'; ctx.fillRect(this.x - 15, this.y - 20, 30 * (this.hp / this.maxHp), 5);
+
+            // โชว์เลข HP ลอยตัว
+            ctx.fillStyle = 'white';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${Math.ceil(this.hp)}/${this.maxHp}`, this.x, this.y - 25);
+            ctx.textAlign = 'left';
         }
         shootNearest() {
             let nearest = null; let minDist = Infinity;
             for (let e of enemies) {
+                // ข้ามตัวที่กำลังเกิด (spawn delay)
+                if (e.spawnDelay > 0) continue;
                 let dist = Math.hypot(e.x - this.x, e.y - this.y);
                 if (dist < minDist) { minDist = dist; nearest = e; }
             }
@@ -511,7 +524,8 @@
                 let isPierce = (this.inv.flying_rabit > 0);
 
                 if (this.inv.air_x > 0) {
-                    let angles = [-0.2, -0.06, 0.06, 0.2];
+                    // เปลี่ยนเป็น 5 แฉก (นัดกลางจะวิ่งตรงเป้าหมายพอดี)
+                    let angles = [-0.2, -0.1, 0, 0.1, 0.2];
                     angles.forEach(offset => {
                         for(let i=0; i < this.bulletCount; i++) {
                             let spread = (this.bulletCount > 1) ? ((i - (this.bulletCount-1)/2) * 0.1) : 0;
@@ -528,7 +542,7 @@
         }
         takeDamage(amt, statusList) {
             if (this.isDead) return;
-            if (currentUser.is_admin && adminGodMode) return; // อมตะ Admin
+            if (currentUser.is_admin && adminGodMode) return; 
 
             let dodgeChance = (this.def / 100) * 0.7; 
             if (Math.random() < dodgeChance) return; 
@@ -553,6 +567,8 @@
             this.type = type; this.phase = phase; this.isBoss = (type === 5);
             this.x = 0; this.y = 0; 
             this.shootTimer = 0; this.bossPattern = 0; 
+            this.spawnDelay = 0.3; // ยืนงง 0.3 วิ
+            
             if (type === 1) { this.hp = 1; this.atk = 1; this.spd = 2; this.size = 12; this.statusList = ['headache', 'allergy']; this.isRanged = false; } 
             else if (type === 2) { this.hp = 1; this.atk = 1; this.spd = 2; this.size = 12; this.statusList = ['stomach', 'scald']; this.isRanged = true; this.shootTimer = 2.0; } 
             else if (type === 3) { this.hp = 1; this.atk = 2; this.spd = 3; this.size = 10; this.statusList = ['rash', 'swelling', 'fresh_wound']; this.isRanged = false; } 
@@ -570,6 +586,12 @@
         }
         update(dt) {
             if (player.isDead) return;
+            
+            if (this.spawnDelay > 0) {
+                this.spawnDelay -= dt;
+                return; // ยังไม่ขยับ
+            }
+
             let angle = Math.atan2(player.y - this.y, player.x - this.x);
             this.x += Math.cos(angle) * this.spd * 60 * dt; this.y += Math.sin(angle) * this.spd * 60 * dt;
             let dist = Math.hypot(player.x - this.x, player.y - this.y);
@@ -596,7 +618,10 @@
             }
         }
         draw(ctx) {
+            // ถ้ายืนงงอยู่ จะกระพริบจางๆ
+            ctx.globalAlpha = this.spawnDelay > 0 ? 0.4 : 1.0;
             ctx.fillStyle = this.isBoss ? '#ff5555' : 'red'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+            ctx.globalAlpha = 1.0;
         }
         fireCone(baseAngle, atk, count) {
             let spread = Math.PI / 4; let startAngle = baseAngle - (spread / 2); let step = count > 1 ? spread / (count - 1) : 0;
@@ -619,6 +644,7 @@
             if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.active = false;
             
             for (let e of enemies) {
+                if (e.spawnDelay > 0) continue; // ยิงทะลุตัวเกิดใหม่ที่ยังไม่ขยับ
                 if (this.hitList.includes(e)) continue; 
                 let dist = Math.hypot(e.x - this.x, e.y - this.y);
                 if (dist < this.size + e.size) {
@@ -689,6 +715,7 @@
         document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
         if (screenId) document.getElementById(screenId).classList.add('active');
         document.getElementById('topBar').style.display = (currentUser && screenId !== 'loginScreen') ? 'flex' : 'none';
+        resetKeys(); // แก้บั๊ก WASD ค้างเวลาเปลี่ยนจอ
     }
 
     function logout() { location.reload(); }
@@ -709,6 +736,7 @@
         enemies = []; bullets = []; enemyBullets = []; drops = [];
         currentPhase = 1; phaseTimer = 30; score = 0; coins = 0; adminGodMode = false;
         
+        resetKeys(); // แก้บั๊ก WASD
         switchScreen(null); gameState = 'PLAYING'; 
         lastTime = performance.now(); 
         requestAnimationFrame(gameLoop);
@@ -720,6 +748,12 @@
         document.getElementById('shop-diamonds').innerText = currentUser.diamonds; 
         document.getElementById('shop-reroll-cost').innerText = rerollCost; 
 
+        // อัปเดตสเตตัสตัวละครในร้าน
+        document.getElementById('shop-hp-stat').innerText = `${Math.ceil(player.hp)}/${player.maxHp}`;
+        document.getElementById('shop-atk-stat').innerText = player.atk;
+        document.getElementById('shop-def-stat').innerText = player.def;
+        document.getElementById('shop-spd-stat').innerText = player.spd;
+
         let statusHtml = ""; let hasStatus = false;
         for (let key in player.statuses) {
             if (player.statuses[key] > 0) { statusHtml += `- ${STATUS_NAMES[key]} (ระดับ ${player.statuses[key]})<br>`; hasStatus = true; }
@@ -729,6 +763,7 @@
 
     function enterShopPhase() { 
         gameState = 'SHOP'; switchScreen('shopScreen'); 
+        resetKeys();
         
         let cardBonus = [0, 10, 20, 30][player.inv.cardamine] || 0;
         let sysBonus = [0, 10, 20, 30][player.inv.systral] || 0;
@@ -777,6 +812,7 @@
             container.innerHTML += `
                 <div class="full-shop-item" onclick="buyItem('${item.id}', ${item.cost}, false)">
                     <strong>${item.name}</strong>
+                    <span style="font-size:10px; color:#aaa; margin: 2px 0;">${item.desc}</span>
                     <span style="color:yellow;">$${item.cost}</span>
                     <span style="font-size:10px;">มี: ${player.inv[item.id]}/${item.maxStack}</span>
                 </div>`;
@@ -795,26 +831,14 @@
         let hasAilment = (itemDef.cures !== 'hp' && player.statuses[itemDef.cures] > 0);
 
         if (coins < price) { alert("เหรียญไม่พอ!"); return; }
-        
-        // ถ้าบัฟเต็มแล้ว และ ไม่ได้มีอาการป่วยให้รักษา จะไม่ให้ซื้อ
         if (player.inv[itemId] >= itemDef.maxStack && !hasAilment && itemDef.cures !== 'hp') { 
-            alert("ไอเทมนี้ให้บัฟระดับสูงสุดแล้ว และไม่มีอาการป่วยให้รักษา!"); 
-            return; 
+            alert("ไอเทมนี้ให้บัฟระดับสูงสุดแล้ว และไม่มีอาการป่วยให้รักษา!"); return; 
         }
 
         coins -= price; 
-        
-        // เพิ่มบัฟถ้ายังไม่ตัน หรือเป็นกลุ่มยารักษา HP
-        if (player.inv[itemId] < itemDef.maxStack || itemDef.cures === 'hp') {
-            player.inv[itemId]++;
-        }
-        
-        // รักษาโรค
-        if (hasAilment) {
-            player.statuses[itemDef.cures]--;
-        }
+        if (player.inv[itemId] < itemDef.maxStack || itemDef.cures === 'hp') { player.inv[itemId]++; }
+        if (hasAilment) { player.statuses[itemDef.cures]--; }
 
-        // คอมโบ HP
         if (itemId === 'saline') { player.hp = Math.min(player.maxHp, player.hp + 2); if (player.inv.alcohol > 0) player.bonusMaxHp += 2; }
         if (itemId === 'alcohol') { player.hp = Math.min(player.maxHp, player.hp + 2); if (player.inv.betadine_sol > 0 || player.inv.betadine_scrub > 0) player.bonusMaxHp += 2; }
         if (itemId === 'plaster') { player.hp = Math.min(player.maxHp, player.hp + 2); if (player.inv.saline > 0) player.bonusMaxHp += 2; }
@@ -848,12 +872,10 @@
         currentPhase++; phaseTimer = 30; bossSpawnedThisPhase = false;
         enemies = []; bullets = []; enemyBullets = []; drops = [];
         
-        // รีเซ็ตบัฟ 1 เฟส
-        player.inv.air_x = 0;
-        player.inv.flying_rabit = 0;
-
+        player.inv.air_x = 0; player.inv.flying_rabit = 0;
         player.applyPhaseModifiers();
         
+        resetKeys();
         gameState = 'PLAYING'; switchScreen(null);
         lastTime = performance.now();
         requestAnimationFrame(gameLoop);
@@ -865,20 +887,13 @@
 
     function gameOver() {
         gameState = 'GAMEOVER';
-        
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = 'white';
-        ctx.font = '60px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
-        ctx.textAlign = 'left'; 
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.4)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'white'; ctx.font = '60px Arial'; ctx.textAlign = 'center';
+        ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2); ctx.textAlign = 'left'; 
 
         setTimeout(async () => {
             await saveScoreToDB();
-            updateTopBar(); 
-            await loadLeaderboard(); 
-            switchScreen('menuScreen');
+            updateTopBar(); await loadLeaderboard(); switchScreen('menuScreen');
         }, 100);
     }
 
@@ -894,8 +909,8 @@
         if (phaseTimer <= 0) { enterShopPhase(); return; }
 
         player.update(dt);
-
         enemySpawnTimer -= dt;
+        
         if (enemySpawnTimer <= 0) {
             if (!bossSpawnedThisPhase && (currentPhase === 3 || currentPhase === 5 || currentPhase === 7 || currentPhase === 9 || currentPhase >= 10)) {
                 let boss = new Enemy(5, currentPhase);
@@ -911,12 +926,16 @@
             let extraEnemies = [0, 10, 20, 30][player.activeStatuses.swelling] || 0;
             if (extraEnemies > 0 && Math.random() < 0.3) groupSize += 2; 
 
+            // สุ่มว่าจะเกิดจากด้านนอก (-20) หรือเกิดด้านใน (30)
+            let isInside = Math.random() < 0.5;
+            let offset = isInside ? 30 : -20;
             let edge = Math.floor(Math.random() * 4);
             let baseX, baseY;
-            if (edge === 0) { baseX = Math.random() * canvas.width; baseY = -20; }
-            else if (edge === 1) { baseX = canvas.width + 20; baseY = Math.random() * canvas.height; }
-            else if (edge === 2) { baseX = Math.random() * canvas.width; baseY = canvas.height + 20; }
-            else { baseX = -20; baseY = Math.random() * canvas.height; }
+            
+            if (edge === 0) { baseX = Math.random() * canvas.width; baseY = offset; }
+            else if (edge === 1) { baseX = canvas.width - offset; baseY = Math.random() * canvas.height; }
+            else if (edge === 2) { baseX = Math.random() * canvas.width; baseY = canvas.height - offset; }
+            else { baseX = offset; baseY = Math.random() * canvas.height; }
 
             for(let i=0; i<groupSize; i++) {
                 let type = 1; let rand = Math.random();
@@ -924,7 +943,6 @@
                 else {
                     if (rand < 0.5) type = 1; else if (rand < 0.8) type = 2; else if (rand < 0.9) type = 3; else type = 4;
                 }
-                
                 let e = new Enemy(type, currentPhase);
                 e.x = baseX + (Math.random() * 60 - 30);
                 e.y = baseY + (Math.random() * 60 - 30);
@@ -943,39 +961,20 @@
     }
 
     function drawStatusUI(ctx) {
-        let startX = canvas.width - 180;
-        let startY = 30;
-        let lines = [];
-        
-        if (currentUser && currentUser.is_admin && adminGodMode) {
-            lines.push({ text: "🌟 GOD MODE [ON]", color: '#00ffff' });
-        }
-
-        for (let key in player.activeStatuses) {
-            if (player.activeStatuses[key] > 0) lines.push({ text: `${STATUS_NAMES[key]} (Lv.${player.activeStatuses[key]})`, color: '#ff5555' });
-        }
+        let startX = canvas.width - 180; let startY = 70; let lines = [];
+        if (currentUser && currentUser.is_admin && adminGodMode) lines.push({ text: "🌟 GOD MODE [ON]", color: '#00ffff' });
+        for (let key in player.activeStatuses) { if (player.activeStatuses[key] > 0) lines.push({ text: `${STATUS_NAMES[key]} (Lv.${player.activeStatuses[key]})`, color: '#ff5555' }); }
         for (let key in player.inv) {
             if (player.inv[key] > 0) {
-                let item = ITEMS_DB.find(i => i.id === key);
-                lines.push({ text: `${item.name} x${player.inv[key]}`, color: '#55ff55' });
+                let item = ITEMS_DB.find(i => i.id === key); lines.push({ text: `${item.name} x${player.inv[key]}`, color: '#55ff55' });
             }
         }
         
         if (lines.length > 0) {
-            ctx.fillStyle = 'rgba(0,0,0,0.6)';
-            ctx.fillRect(startX - 10, 10, 180, 30 + (lines.length * 18));
-            
-            ctx.fillStyle = '#ffcc00';
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText("สถานะ & บัฟ", startX, startY);
-            startY += 20;
-            
-            ctx.font = '12px Arial';
-            for (let line of lines) {
-                ctx.fillStyle = line.color;
-                ctx.fillText(line.text, startX, startY);
-                startY += 18;
-            }
+            ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(startX - 10, startY - 20, 180, 30 + (lines.length * 18));
+            ctx.fillStyle = '#ffcc00'; ctx.font = 'bold 14px Arial'; ctx.fillText("สถานะ & บัฟ", startX, startY);
+            startY += 20; ctx.font = '12px Arial';
+            for (let line of lines) { ctx.fillStyle = line.color; ctx.fillText(line.text, startX, startY); startY += 18; }
         }
     }
 
@@ -988,29 +987,22 @@
         enemyBullets.forEach(b => b.draw(ctx));
         enemies.forEach(e => e.draw(ctx));
 
+        // เลื่อน HUD ลงมา 40px หลบ Top bar
         ctx.fillStyle = 'white'; ctx.font = 'bold 20px Arial';
-        ctx.fillText(`Phase: ${currentPhase}`, 10, 30);
-        ctx.fillText(`Time: ${Math.ceil(phaseTimer)}`, 10, 60);
-        ctx.fillText(`Score: ${score}`, 10, 90);
-        ctx.fillStyle = 'yellow'; ctx.fillText(`Coins: ${coins}`, 10, 120);
-        ctx.fillStyle = 'cyan'; ctx.fillText(`Diamonds: ${currentUser.diamonds}`, 10, 150);
+        ctx.fillText(`Phase: ${currentPhase}`, 10, 70);
+        ctx.fillText(`Time: ${Math.ceil(phaseTimer)}`, 10, 100);
+        ctx.fillText(`Score: ${score}`, 10, 130);
+        ctx.fillStyle = 'yellow'; ctx.fillText(`Coins: ${coins}`, 10, 160);
+        ctx.fillStyle = 'cyan'; ctx.fillText(`Diamonds: ${currentUser.diamonds}`, 10, 190);
 
         drawStatusUI(ctx);
 
         let boss = enemies.find(e => e.isBoss);
         if (boss) {
-            let barWidth = 500;
-            let barX = (canvas.width - barWidth) / 2;
-            let barY = 15;
-            
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(barX, barY, barWidth, 25); 
-            ctx.fillStyle = 'red';
-            ctx.fillRect(barX, barY, barWidth * (boss.hp / boss.maxHp), 25); 
-            
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 16px Arial';
-            ctx.textAlign = 'center';
+            let barWidth = 500; let barX = (canvas.width - barWidth) / 2; let barY = 55; // เลื่อนลงมาหลบ Top Bar
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; ctx.fillRect(barX, barY, barWidth, 25); 
+            ctx.fillStyle = 'red'; ctx.fillRect(barX, barY, barWidth * (boss.hp / boss.maxHp), 25); 
+            ctx.fillStyle = 'white'; ctx.font = 'bold 16px Arial'; ctx.textAlign = 'center';
             ctx.fillText(`BOSS HP: ${Math.ceil(boss.hp)} / ${boss.maxHp}`, canvas.width / 2, barY + 18);
             ctx.textAlign = 'left'; 
         }
