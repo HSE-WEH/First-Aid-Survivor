@@ -91,7 +91,7 @@
 
     <button id="btnToggleBuff" onclick="toggleBuffUI()">👁️ ซ่อน/แสดงบัฟ</button>
     
-    <!-- 📢 Container แจ้งเตือนใหม่ -->
+    <!-- 📢 Container แจ้งเตือนคิว -->
     <div id="notificationList"></div>
 
     <!-- Login -->
@@ -340,7 +340,7 @@
         { id: 'carbon', category: 'normal', name: "Carbon", cost: 15, cures: 'stomach', maxStack: 3, desc: "แก้ปวดท้อง | +ความเร็วเดิน 1, 2, 3" },
         { id: 'air_x', category: 'normal', name: "Air-X", cost: 20, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | ปืน 3 แฉก (มีผล 1 เฟส)" },
         { id: 'flying_rabit', category: 'normal', name: "Flying Rabit", cost: 20, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | กระสุนทะลุศัตรู (มีผล 1 เฟส)" },
-        { id: 'counterpain', category: 'normal', name: "Counterpain Cool", cost: 20, cures: 'muscle_ache', maxStack: 3, desc: "แก้ปวดกล้ามเนื้อ | กางออร่าสโลว์ศัตรู -1, -1.5, -2 Spd (มีผล 1 เฟส)" },
+        { id: 'counterpain', category: 'normal', name: "Counterpain Cool", cost: 20, cures: 'muscle_ache', maxStack: 3, desc: "แก้ปวดกล้ามเนื้อ | กางออร่าสโลว์ศัตรู -1, -1.5, -2 Spd & ทำดาเมจ 1, 2, 3 (มีผล 1 เฟส)" },
         { id: 'gumgig', category: 'normal', name: "Gumgig pean", cost: 15, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ยิงไวขึ้น 5, 10, 15% & กระสุนชิ่ง 10, 15, 20%" },
         { id: 'apache', category: 'normal', name: "Apache", cost: 15, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ยิงไวขึ้น 5, 10, 15% & กระสุนสตั้น 5, 10, 20%" },
         { id: 'cardamine', category: 'normal', name: "Cardamine", cost: 30, cures: 'rash', maxStack: 3, desc: "แก้ผื่นแพ้ | รับโบนัสเหรียญจบด่าน +20, 30, 45" },
@@ -367,7 +367,6 @@
         return item ? item.cost : 0;
     }
 
-    // 📢 ระบบ Toast แบบเรียงคิวด้านซ้าย
     function showToast(message, color = "#ffeb3b", duration = 2000) {
         const list = document.getElementById('notificationList');
         if (!list) return;
@@ -415,7 +414,7 @@
                 let d = debuffKeys[k];
                 if (player.statuses[d] < 3) {
                     player.statuses[d]++;
-                    showToast(`👑 [Admin] เสกอาการป่วย: ${STATUS_NAMES[d]}`, "#ff5555", 2500);
+                    showToast(`👑 [Admin] เสกอาการป่วย: ${STATUS_NAMES[d]}`, "#ff5555");
                     player.applyPhaseModifiers();
                     if (gameState === 'SHOP') updateShopUI(); 
                 }
@@ -748,7 +747,6 @@
             let cupLv = Math.min(this.inv.golden_cup, 3);
             this.magnetRange = (cupLv * 60) + (this.magnetBonusRange || 0); 
             
-            // ระบบน้ำร้อนลวก (Scald DoT)
             if (this.activeStatuses.scald > 0) {
                 this.scaldTimer -= dt;
                 if (this.scaldTimer <= 0) {
@@ -764,7 +762,6 @@
                 this.scaldTimer = 6.0;
             }
 
-            // ระบบซิลเวอร์ครีม ฮีลอัตโนมัติ
             if (this.inv.silver_cream > 0) {
                 this.silverCreamTimer -= dt;
                 if (this.silverCreamTimer <= 0) {
@@ -800,10 +797,9 @@
         draw(ctx) {
             if (this.isDead) return;
 
-            // วาดออร่า Counterpain
             if (this.activeCounterpain) {
                 let cpLv = Math.min(this.inv.counterpain, 3);
-                let cpRange = [0, 120, 150, 180][cpLv] || 0;
+                let cpRange = [0, 180, 250, 320][cpLv] || 0;
                 if (cpRange > 0) {
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, cpRange, 0, Math.PI*2);
@@ -946,6 +942,8 @@
             this.shootTimer = 0; this.bossPattern = 0; 
             this.spawnDelay = 0.3; 
             this.stunTimer = 0;
+            this.cpDamageTimer = 0.5;
+            this.deadProcessed = false;
             
             let loop = phase >= 10 ? phase - 10 : 0;
             
@@ -1058,7 +1056,6 @@
             
             if (this.spawnDelay > 0) { this.spawnDelay -= dt; return; }
 
-            // ระบบสตั้น (Apache)
             if (this.stunTimer > 0) {
                 this.stunTimer -= dt;
                 return; 
@@ -1067,12 +1064,21 @@
             let currentSpd = this.spd;
             if (player.activeCounterpain) {
                 let cpLv = Math.min(player.inv.counterpain, 3);
-                let cpRange = [0, 120, 150, 180][cpLv] || 0;
+                let cpRange = [0, 180, 250, 320][cpLv] || 0;
                 let cpSlow = [0, 1, 1.5, 2][cpLv] || 0;
+                let cpDmg = [0, 1, 2, 3][cpLv] || 0;
                 if (cpRange > 0) {
                     let pDist = Math.hypot(player.x - this.x, player.y - this.y);
                     if (pDist < cpRange + this.size) {
                         currentSpd = Math.max(0.5, currentSpd - cpSlow);
+                        
+                        this.cpDamageTimer -= dt;
+                        if (this.cpDamageTimer <= 0) {
+                            this.hp -= cpDmg;
+                            this.cpDamageTimer = 0.5;
+                        }
+                    } else {
+                        this.cpDamageTimer = 0.5;
                     }
                 }
             }
@@ -1087,7 +1093,7 @@
                 if (hitProcessed && !this.isBoss) this.hp = 0; 
             }
             
-            if (this.isRanged) {
+            if (this.isRanged && this.hp > 0) {
                 this.shootTimer -= dt;
                 if (this.shootTimer <= 0) {
                     this.shootTimer = this.isBoss ? this.fireRateBase : 2.0;
@@ -1163,46 +1169,7 @@
                     if (this.stunChance > 0 && Math.random() < this.stunChance) {
                         e.stunTimer = 0.4;
                     }
-                    
-                    if (e.hp <= 0) {
-                        score += (e.isBoss ? 100 : (e.isElite ? 30 : 10));
-                        let dropCoin = true;
-                        
-                        let dropRate = 1.0;
-                        if (currentPhase >= 8) dropRate = 0.5;
-                        else if (currentPhase >= 4) dropRate = 0.7;
-                        
-                        if (Math.random() > dropRate) dropCoin = false;
 
-                        let rashLv = Math.min(player.activeStatuses.rash, 3);
-                        let rashChance = [0, 0.3, 0.5, 0.7][rashLv];
-                        if (Math.random() < rashChance) dropCoin = false;
-
-                        if (dropCoin) {
-                            let sysLv = Math.min(player.inv.systral, 3);
-                            let sysChance = [0, 0.05, 0.10, 0.20][sysLv];
-                            let numCoins = Math.random() < sysChance ? 2 : 1;
-                            
-                            for (let c=0; c<numCoins; c++) {
-                                if (drops.length > 200) drops.splice(0, drops.length - 200); 
-                                drops.push(new ItemDrop(e.x + (Math.random()*10-5), e.y + (Math.random()*10-5), 'coin'));
-                            }
-                            
-                            let silvLv = Math.min(player.inv.silver_cream, 3);
-                            let silverChance = [0, 0.20, 0.35, 0.50][silvLv] || 0;
-                            if (Math.random() < silverChance) {
-                                let extra = 1 + Math.floor(Math.random() * 2); 
-                                for(let j=0; j<extra; j++) {
-                                    if (drops.length > 200) drops.splice(0, drops.length - 200);
-                                    drops.push(new ItemDrop(e.x + (Math.random()*20-10), e.y + (Math.random()*20-10), 'coin'));
-                                }
-                            }
-                            if(Math.random() < 0.05) drops.push(new ItemDrop(e.x + 10, e.y + 10, 'diamond')); 
-                            if(Math.random() < 0.05) drops.push(new ItemDrop(e.x - 10, e.y - 10, 'magnet')); 
-                        }
-                    }
-
-                    // ลอจิกกระสุนชิ่ง (Bounce) ทำงานแยกกับระบบทะลุ (Pierce)
                     let willBounce = (this.bounces > 0 && Math.random() < this.bounceChance);
 
                     if (willBounce) {
@@ -1216,7 +1183,7 @@
                             this.angle = Math.atan2(nearest.y - this.y, nearest.x - this.x);
                             this.bounces--;
                             this.active = true;
-                            break; // เลิกเช็คชนตัวอื่นในเฟรมนี้เพื่อพุ่งไปหาเป้าหมายใหม่
+                            break; 
                         } else {
                             if (!this.pierce) this.active = false;
                         }
@@ -1657,7 +1624,7 @@
         
         if (player.inv[itemId] >= itemDef.maxStack && itemDef.cures !== 'hp') {
             if (itemId === 'counterpain' && !player.activeCounterpain) {
-                // อนุญาตให้ซื้อ Counterpain ซ้ำเพื่อ Active ได้แม้ Stack จะเต็ม 3 แล้ว
+                // ยอมให้ซื้อได้เพื่อกดใช้งาน Active
             } else {
                 showToast("คุณมีไอเทมนี้เต็มแล้ว!", "#ff5555", 2500); 
                 return; 
@@ -1678,7 +1645,7 @@
         
         if (player.inv[itemId] >= itemDef.maxStack && !hasAilment && itemDef.cures !== 'hp') { 
             if (itemId === 'counterpain' && !player.activeCounterpain) {
-                // อนุญาตให้ซื้อเพื่อเปิด Active
+                // ซื้อผ่าน
             } else if (!isDiscounted) {
                 showToast("ไอเทมนี้ให้บัฟระดับสูงสุดแล้ว!", "#ff5555", 2500); 
                 return; 
@@ -1921,7 +1888,50 @@
 
         bullets.forEach(b => b.update(dt)); bullets = bullets.filter(b => b.active);
         enemyBullets.forEach(b => b.update(dt)); enemyBullets = enemyBullets.filter(b => b.active);
-        enemies.forEach(e => e.update(dt)); enemies = enemies.filter(e => e.hp > 0);
+        enemies.forEach(e => e.update(dt)); 
+        
+        enemies.forEach(e => {
+            if (e.hp <= 0 && !e.deadProcessed) {
+                e.deadProcessed = true;
+                score += (e.isBoss ? 100 : (e.isElite ? 30 : 10));
+                let dropCoin = true;
+                
+                let dropRate = 1.0;
+                if (currentPhase >= 8) dropRate = 0.5;
+                else if (currentPhase >= 4) dropRate = 0.7;
+                
+                if (Math.random() > dropRate) dropCoin = false;
+
+                let rashLv = Math.min(player.activeStatuses.rash, 3);
+                let rashChance = [0, 0.3, 0.5, 0.7][rashLv];
+                if (Math.random() < rashChance) dropCoin = false;
+
+                if (dropCoin) {
+                    let sysLv = Math.min(player.inv.systral, 3);
+                    let sysChance = [0, 0.05, 0.10, 0.20][sysLv];
+                    let numCoins = Math.random() < sysChance ? 2 : 1;
+                    
+                    for (let c=0; c<numCoins; c++) {
+                        if (drops.length > 200) drops.splice(0, drops.length - 200); 
+                        drops.push(new ItemDrop(e.x + (Math.random()*10-5), e.y + (Math.random()*10-5), 'coin'));
+                    }
+                    
+                    let silvLv = Math.min(player.inv.silver_cream, 3);
+                    let silverChance = [0, 0.20, 0.35, 0.50][silvLv] || 0;
+                    if (Math.random() < silverChance) {
+                        let extra = 1 + Math.floor(Math.random() * 2); 
+                        for(let j=0; j<extra; j++) {
+                            if (drops.length > 200) drops.splice(0, drops.length - 200);
+                            drops.push(new ItemDrop(e.x + (Math.random()*20-10), e.y + (Math.random()*20-10), 'coin'));
+                        }
+                    }
+                    if(Math.random() < 0.05) drops.push(new ItemDrop(e.x + 10, e.y + 10, 'diamond')); 
+                    if(Math.random() < 0.05) drops.push(new ItemDrop(e.x - 10, e.y - 10, 'magnet')); 
+                }
+            }
+        });
+
+        enemies = enemies.filter(e => e.hp > 0);
         drops.forEach(d => d.update(dt)); drops = drops.filter(d => d.active);
     }
 
