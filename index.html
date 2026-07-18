@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V2.6F</title>
+    <title>First Aid Survivor V2.6G</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -41,15 +41,19 @@
         .highlight-cure { border: 2px solid #ff5555 !important; box-shadow: 0 0 15px rgba(255, 85, 85, 0.8) !important; animation: pulse-red 1.5s infinite; }
         @keyframes pulse-red { 0% { box-shadow: 0 0 5px rgba(255,85,85,0.5); } 50% { box-shadow: 0 0 20px rgba(255,85,85,1); } 100% { box-shadow: 0 0 5px rgba(255,85,85,0.5); } }
 
+        /* ระบบกระพริบปุ่ม Activate คอมโบ */
+        @keyframes blink-btn { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.03); filter: brightness(1.2); box-shadow: 0 0 15px rgba(33, 150, 243, 0.8); } 100% { transform: scale(1); filter: brightness(1); } }
+        @keyframes blink-btn-gold { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.03); filter: brightness(1.2); box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); } 100% { transform: scale(1); filter: brightness(1); } }
+        .btn-blink { animation: blink-btn 1.2s infinite ease-in-out; }
+        .btn-blink-gold { animation: blink-btn-gold 1.2s infinite ease-in-out; }
+
         .btn-action-group { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
-        .btn-quick-buy { background: #e67e22; font-size: 15px; padding: 12px; border-radius: 8px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; min-height: 75px; box-sizing: border-box;}
-        .btn-quick-buy small { font-weight: normal; font-size: 12px; color: #eee; }
+        .btn-quick-buy { background: #e67e22; font-size: 15px; padding: 8px 12px; border-radius: 8px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; min-height: 75px; box-sizing: border-box;}
         .btn-next { background: #2196F3; font-size: 20px; padding: 15px; border-radius: 8px; }
         .btn-catalog { background: #9c27b0; font-size: 18px; padding: 12px; border-radius: 8px; }
         .btn-reroll { background: #f39c12; font-size: 16px; padding: 12px; border-radius: 8px; margin: 0 auto; display: block; width: 350px; }
         .btn-surrender { background: #e74c3c; font-size: 16px; padding: 12px; border-radius: 8px; }
         
-        /* Modal ซ้อนเฉพาะฝั่งขวา */
         #fullShopModal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20,20,20,0.98); z-index: 40; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; border-radius: 0 12px 12px 0; }
         #fullShopModal.active-modal { display: flex; }
         .full-shop-list { width: 100%; max-height: 80%; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-top: 15px; padding-right: 15px; }
@@ -66,7 +70,6 @@
         
         #btnToggleBuff { position: absolute; top: 50px; right: 20px; z-index: 15; background: rgba(0,0,0,0.6); padding: 8px 15px; font-size: 14px; border: 1px solid #aaa; color: white; border-radius: 5px; cursor: pointer; display: none; }
         
-        /* Floating Toast Notification */
         #toastNotification { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.85); color: #fff; padding: 20px 40px; border-radius: 12px; border: 2px solid #ffeb3b; font-size: 24px; font-weight: bold; z-index: 1000; opacity: 0; pointer-events: none; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.6); display: none; }
     </style>
 </head>
@@ -89,7 +92,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6F)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6G)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -162,7 +165,6 @@
     <div id="shopScreen" class="screen">
         <div class="shop-layout">
             
-            <!-- ⬅️ ซ้าย: Status & Inventory -->
             <div class="shop-left">
                 <h3 style="margin: 0; color: #4CAF50; border-bottom: 2px solid #555; padding-bottom: 10px;">📊 Player Status</h3>
                 
@@ -182,7 +184,6 @@
                 </div>
             </div>
 
-            <!-- ➡️ ขวา: Shop Cards & Actions -->
             <div class="shop-right">
                 <div class="shop-right-header">
                     <h1 style="margin:0; font-size: 32px;">Phase <span id="shop-phase-num" style="color: #4CAF50;"></span> - Pharmacy</h1>
@@ -192,7 +193,6 @@
                     </div>
                 </div>
 
-                <!-- โซนสุ่มการ์ด -->
                 <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
                     <h3 style="text-align:center; margin: 10px 0; color:#4CAF50; font-size: 22px;">📦 สินค้าสุ่มลดราคาพิเศษ (70% Off)</h3>
                     <div class="shop-cards-wrapper" id="shopCards">
@@ -201,7 +201,6 @@
                     <button onclick="rerollShop()" id="btnReroll" class="btn-reroll">🔄 สุ่มกระดานใหม่ (ใช้ <span id="shop-reroll-cost">1</span> เหรียญ)</button>
                 </div>
 
-                <!-- โซนปุ่มกดด้านล่าง -->
                 <div class="btn-action-group">
                     <button onclick="toggleFullShop(true)" class="btn-catalog">🛒 เปิดแคตตาล็อกยาทั้งหมด (Full Shop)</button>
                     
@@ -214,9 +213,12 @@
                         <button onclick="surrenderGame()" class="btn-surrender" style="flex: 1;">🏳️ ยอมแพ้</button>
                         <button onclick="nextPhase()" class="btn-next" style="flex: 3;">➡️ ลุย Phase ถัดไป</button>
                     </div>
+                    
+                    <!-- ปุ่มแอดมินวาร์ป -->
+                    <button id="btnAdminSkip" onclick="adminSkipPhase()" class="btn-reroll" style="display:none; background-color: #ff5722; margin-top: 5px;">👑 [Admin] วาร์ปข้าม Phase</button>
                 </div>
                 
-                <!-- Modal แคตตาล็อกยาทั้งหมด (ซ้อนแค่ฝั่งขวา) -->
+                <!-- Modal แคตตาล็อกยาทั้งหมด -->
                 <div id="fullShopModal">
                     <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;">
                         <h2 style="margin: 0; color: #4CAF50; font-size: 24px;">🛒 แคตตาล็อกยาทั้งหมด</h2>
@@ -236,7 +238,6 @@
                 </div>
 
             </div>
-            
         </div>
     </div>
 
@@ -379,6 +380,7 @@
                     player.statuses[d]++;
                     showToast(`👑 [Admin] เสกอาการป่วย: ${STATUS_NAMES[d]} (${player.statuses[d]}/3)`, "#ff5555", 2500);
                     player.applyPhaseModifiers();
+                    if (gameState === 'SHOP') syncStatsToUI(); // Update UI in shop
                 }
             }
         }
@@ -747,7 +749,6 @@
                 if (this.statuses[randomStatus] < 3) {
                     this.statuses[randomStatus]++;
                     showToast(`⚠️ ติดอาการป่วย: ${STATUS_NAMES[randomStatus]}!`, "#ff5555", 2500);
-                    // แสดงผลดีบัฟทันทีในตานั้น
                     this.applyPhaseModifiers();
                 }
             }
@@ -1092,12 +1093,16 @@
         let isSet1 = player.inv.saline > 0 && player.inv.plaster > 0;
         let isSet2 = player.inv.alcohol > 0 && player.inv.betadine > 0;
         let isSet3 = player.inv.gauze > 0 && player.inv.dressing_set > 0;
-        let isFullSet = (isSet1 && isSet2 && isSet3);
+        
+        let hasSet1 = player.appliedCombos.has('saline_plaster');
+        let hasSet2 = player.appliedCombos.has('alc_bet');
+        let hasSet3 = player.appliedCombos.has('gauze_dressing');
+        let canActivateFull = hasSet1 && hasSet2 && hasSet3;
 
-        let statusSet1 = player.appliedCombos.has('saline_plaster') ? '<span style="color:#0f0">[✅ ACTIVATED]</span>' : (isSet1 ? `<button onclick="activateCombo('saline_plaster', 15, 5)" style="padding: 2px 10px; font-size:11px; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;">เปิดใช้ ($15)</button>` : '');
-        let statusSet2 = player.appliedCombos.has('alc_bet') ? '<span style="color:#0f0">[✅ ACTIVATED]</span>' : (isSet2 ? `<button onclick="activateCombo('alc_bet', 15, 5)" style="padding: 2px 10px; font-size:11px; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;">เปิดใช้ ($15)</button>` : '');
-        let statusSet3 = player.appliedCombos.has('gauze_dressing') ? '<span style="color:#0f0">[✅ ACTIVATED]</span>' : (isSet3 ? `<button onclick="activateCombo('gauze_dressing', 15, 5)" style="padding: 2px 10px; font-size:11px; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;">เปิดใช้ ($15)</button>` : '');
-        let statusFullSet = player.appliedCombos.has('full_set') ? '<span style="color:#0f0;">[✅ ACTIVATED]</span>' : (isFullSet ? `<button onclick="activateCombo('full_set', 45, 20)" style="padding: 5px 15px; font-weight:bold; background:#FFD700; color:black; border:none; border-radius:4px; cursor:pointer;">⭐ เปิดใช้ Full Combo ($45) ⭐</button>` : '❌');
+        let statusSet1 = hasSet1 ? '<span style="color:#0f0">[✅ ACTIVATED]</span>' : (isSet1 ? `<button class="btn-blink" onclick="activateCombo('saline_plaster', 15, 5)" style="padding: 2px 10px; font-size:11px; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;">เปิดใช้ ($15)</button>` : '');
+        let statusSet2 = hasSet2 ? '<span style="color:#0f0">[✅ ACTIVATED]</span>' : (isSet2 ? `<button class="btn-blink" onclick="activateCombo('alc_bet', 15, 5)" style="padding: 2px 10px; font-size:11px; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;">เปิดใช้ ($15)</button>` : '');
+        let statusSet3 = hasSet3 ? '<span style="color:#0f0">[✅ ACTIVATED]</span>' : (isSet3 ? `<button class="btn-blink" onclick="activateCombo('gauze_dressing', 15, 5)" style="padding: 2px 10px; font-size:11px; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;">เปิดใช้ ($15)</button>` : '');
+        let statusFullSet = player.appliedCombos.has('full_set') ? '<span style="color:#0f0;">[✅ ACTIVATED]</span>' : (canActivateFull ? `<button class="btn-blink-gold" onclick="activateCombo('full_set', 45, 20)" style="padding: 5px 15px; font-weight:bold; background:#FFD700; color:black; border:none; border-radius:4px; cursor:pointer;">⭐ เปิดใช้ Full Combo ($45) ⭐</button>` : '❌');
 
         invHtml += `
         <div style="padding-top: 10px; border-top: 1px dashed #555;">
@@ -1156,19 +1161,19 @@
         let btnRabit = document.getElementById('btn-quick-rabbit');
         if (btnAirX) {
             if (player.inv.air_x > 0) {
-                btnAirX.innerHTML = "🚀 Air-X <span style='color:#0f0; font-size: 14px;'>[✅ ACTIVATED]</span><br><small style='font-size:12px; color:#eee;'>ปืน 3 แฉก (ทำงานแล้ว)</small>";
+                btnAirX.innerHTML = `<span style="font-weight:bold;">🚀 Air-X <span style="color:#0f0;">[✅ ACTIVATED]</span></span><span style="font-size:12px; color:#eee; margin-top:2px;">ปืน 3 แฉก (ทำงานแล้ว)</span>`;
                 btnAirX.style.backgroundColor = "#27ae60";
             } else {
-                btnAirX.innerHTML = "🚀 ซื้อด่วน Air-X ($30)<br><small style='font-size:12px; color:#eee;'>ปืน 3 แฉก (1 เฟส)</small>";
+                btnAirX.innerHTML = `<span style="font-weight:bold;">🚀 ซื้อด่วน Air-X ($30)</span><span style="font-size:12px; color:#eee; margin-top:2px;">ปืน 3 แฉก (1 เฟส)</span>`;
                 btnAirX.style.backgroundColor = "#e67e22";
             }
         }
         if (btnRabit) {
             if (player.inv.flying_rabit > 0) {
-                btnRabit.innerHTML = "🚀 Flying Rabit <span style='color:#0f0; font-size: 14px;'>[✅ ACTIVATED]</span><br><small style='font-size:12px; color:#eee;'>กระสุนทะลุ (ทำงานแล้ว)</small>";
+                btnRabit.innerHTML = `<span style="font-weight:bold;">🚀 Flying Rabit <span style="color:#0f0;">[✅ ACTIVATED]</span></span><span style="font-size:12px; color:#eee; margin-top:2px;">กระสุนทะลุ (ทำงานแล้ว)</span>`;
                 btnRabit.style.backgroundColor = "#27ae60";
             } else {
-                btnRabit.innerHTML = "🚀 ซื้อด่วน Flying Rabit ($30)<br><small style='font-size:12px; color:#eee;'>กระสุนทะลุศัตรู (1 เฟส)</small>";
+                btnRabit.innerHTML = `<span style="font-weight:bold;">🚀 ซื้อด่วน Flying Rabit ($30)</span><span style="font-size:12px; color:#eee; margin-top:2px;">กระสุนทะลุศัตรู (1 เฟส)</span>`;
                 btnRabit.style.backgroundColor = "#e67e22";
             }
         }
@@ -1207,6 +1212,8 @@
         if(m) m.className = show ? 'active-modal' : '';
         if(show) {
             renderFullShop();
+            let fc = document.getElementById('full-shop-coins');
+            if(fc) fc.innerText = coins;
         }
     }
 
@@ -1354,6 +1361,8 @@
         
         if (itemId === 'cpm') { player.cpmDebuffToApply++; }
 
+        player.checkCombos(); 
+
         if (isDiscounted && index !== -1) {
             currentDiscountItems[index].bought = true;
             discountedBoughtCount++;
@@ -1367,6 +1376,8 @@
             let m = document.getElementById('fullShopModal');
             if (m && m.classList.contains('active-modal')) {
                 renderFullShop();
+                let fc = document.getElementById('full-shop-coins');
+                if (fc) fc.innerText = coins;
             }
         }
 
@@ -1389,6 +1400,14 @@
         resetKeys();
         switchScreen(null);
         startLoop();
+    }
+    
+    function adminSkipPhase() {
+        let target = prompt("ป้อนเลข Phase ที่ต้องการวาร์ปไป (เช่น 10, 20, 50):", currentPhase + 1);
+        if (target !== null && !isNaN(target) && parseInt(target) > 0) {
+            currentPhase = parseInt(target) - 1;
+            nextPhase();
+        }
     }
 
     // ----------------------------------------------------------------
