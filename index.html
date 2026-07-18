@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V2.6B</title>
+    <title>First Aid Survivor V2.6C</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -38,14 +38,13 @@
         .max-badge { color: #ff5555; font-weight: bold; border: 1px solid #ff5555; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: rgba(255,0,0,0.1); margin-left: 5px; }
 
         .btn-action-group { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
-        /* Lock Quick Buy height to prevent jumping */
         .btn-quick-buy { background: #e67e22; font-size: 15px; padding: 12px; border-radius: 8px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; height: 75px; box-sizing: border-box;}
+        .btn-quick-buy small { font-weight: normal; font-size: 12px; color: #eee; }
         .btn-next { background: #2196F3; font-size: 20px; padding: 15px; border-radius: 8px; }
         .btn-catalog { background: #9c27b0; font-size: 18px; padding: 12px; border-radius: 8px; }
         .btn-reroll { background: #f39c12; font-size: 16px; padding: 12px; border-radius: 8px; margin: 0 auto; display: block; width: 350px; }
         .btn-surrender { background: #e74c3c; font-size: 16px; padding: 12px; border-radius: 8px; }
         
-        /* Modal */
         #fullShopModal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20,20,20,0.98); z-index: 40; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; border-radius: 0 12px 12px 0; }
         #fullShopModal.active-modal { display: flex; }
         .full-shop-list { width: 100%; max-height: 80%; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-top: 15px; padding-right: 15px; }
@@ -62,7 +61,6 @@
         
         #btnToggleBuff { position: absolute; top: 50px; right: 20px; z-index: 15; background: rgba(0,0,0,0.6); padding: 8px 15px; font-size: 14px; border: 1px solid #aaa; color: white; border-radius: 5px; cursor: pointer; display: none; }
         
-        /* Floating Toast Notification */
         #toastNotification { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.85); color: #fff; padding: 20px 40px; border-radius: 12px; border: 2px solid #ffeb3b; font-size: 24px; font-weight: bold; z-index: 1000; opacity: 0; pointer-events: none; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.6); display: none; }
     </style>
 </head>
@@ -84,7 +82,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6B)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6C)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -356,7 +354,6 @@
             if (k === 'c') coins += 1000;
             if (k === 'v') currentUser.diamonds += 100;
             
-            // Admin กดปุ่ม 1-0 เพื่อเสกดีบัฟ
             const debuffKeys = {
                 '1': 'headache', '2': 'allergy', '3': 'stomach', '4': 'rash', '5': 'swelling',
                 '6': 'mouth_ulcer', '7': 'red_eye', '8': 'sore_throat', '9': 'fresh_wound', '0': 'scald'
@@ -400,7 +397,7 @@
             let lpThai = new Date(lp.getTime() + (lp.getTimezoneOffset() * 60000) + (3600000 * 7));
             if (lpThai.getDate() !== thaiNow.getDate() || lpThai.getMonth() !== thaiNow.getMonth()) {
                 currentUser.daily_energy = 5; currentUser.last_played_at = new Date().toISOString();
-                updateTopBar(); supabaseClient.from('players').update({ daily_energy: 5, last_played_at: currentUser.last_played_at }).eq('username', currentUser.username).then();
+                updateTopBar(); supabaseClient.from('players').update({ daily_energy: 5, last_played_at: currentUser.last_played_at }).eq('username', currentUser.username).then().catch(e => console.error(e));
             }
         }
         if (currentUser.daily_energy < 5) {
@@ -461,12 +458,13 @@
     async function saveScoreToDB() {
         if (!currentUser) return;
         try {
-            await supabaseClient.from('players').update({ diamonds: currentUser.diamonds, daily_energy: currentUser.daily_energy }).eq('username', currentUser.username);
+            // ไม่ await ตอนจบเกมเพื่อให้ลื่นไหล
+            supabaseClient.from('players').update({ diamonds: currentUser.diamonds, daily_energy: currentUser.daily_energy }).eq('username', currentUser.username).then().catch(e => console.error(e));
             if (currentUser.is_admin) return;
 
             const { data: cur } = await supabaseClient.from('leaderboards').select('max_score').eq('username', currentUser.username).maybeSingle();
             let oldScore = cur ? cur.max_score : 0;
-            if (score > oldScore) { await supabaseClient.from('leaderboards').upsert({ username: currentUser.username, max_score: score, max_phase: currentPhase, updated_at: new Date() }); } 
+            if (score > oldScore) { supabaseClient.from('leaderboards').upsert({ username: currentUser.username, max_score: score, max_phase: currentPhase, updated_at: new Date() }).then().catch(e => console.error(e)); } 
         } catch(e){}
     }
 
@@ -516,7 +514,7 @@
 
         currentUser.diamonds -= cost; currentUser[`upgraded_${stat}`] = currentLvl + 1;
         updateUpgradeUI(); updateTopBar();
-        try { await supabaseClient.from('players').update({ diamonds: currentUser.diamonds, [`upgraded_${stat}`]: currentUser[`upgraded_${stat}`] }).eq('username', currentUser.username); } catch (err) {}
+        try { supabaseClient.from('players').update({ diamonds: currentUser.diamonds, [`upgraded_${stat}`]: currentUser[`upgraded_${stat}`] }).eq('username', currentUser.username).then().catch(e => console.error(e)); } catch (err) {}
     }
 
     // ----------------------------------------------------------------
@@ -639,7 +637,6 @@
         draw(ctx) {
             if (this.isDead) return;
             
-            // เอฟเฟกต์กระพริบตอนอมตะ (I-Frames)
             if (this.invulnerableTimer > 0) {
                 ctx.globalAlpha = (Math.floor(Date.now() / 100) % 2 === 0) ? 0.5 : 1.0;
             } else {
@@ -659,7 +656,7 @@
             ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
             ctx.fillText(`${Math.ceil(this.hp)}/${this.maxHp}`, this.x, this.y - 42); ctx.textAlign = 'left';
             
-            ctx.globalAlpha = 1.0; // Reset alpha
+            ctx.globalAlpha = 1.0; 
         }
         
         shootNearest() {
@@ -703,10 +700,10 @@
         takeDamage(amt, statusList, isBoss = false) {
             if (this.isDead) return false;
             if (currentUser && currentUser.is_admin && adminGodMode) return false; 
-            if (this.invulnerableTimer > 0) return false; // I-Frames ป้องกันการโดนรัวๆ
+            if (this.invulnerableTimer > 0) return false;
 
             let dodgeChance = Math.min(0.7, (this.def / 100) * 0.7); 
-            if (Math.random() < dodgeChance) return true; // ถ้าหลบสำเร็จ ให้คืนค่า true (เพื่อลบกระสุน/มอนสเตอร์ลูกกระจ๊อกทิ้ง)
+            if (Math.random() < dodgeChance) return true; 
             
             let extraDmg = [0, 2, 4, 6][this.activeStatuses.fresh_wound] || 0;
             this.hp -= (amt + extraDmg);
@@ -720,7 +717,7 @@
                 }
             }
             
-            this.invulnerableTimer = 0.5; // อมตะ 0.5 วิ
+            this.invulnerableTimer = 0.5; 
             
             if (this.hp <= 0) {
                 this.hp = 0; this.isDead = true; gameOver();
@@ -819,7 +816,7 @@
             let dist = Math.hypot(player.x - this.x, player.y - this.y);
             if (dist < this.size + player.size) {
                 let hitProcessed = player.takeDamage(this.atk, this.statusList, this.isBoss);
-                if (hitProcessed && !this.isBoss) this.hp = 0; // มอนสเตอร์ธรรมดาชนแล้วตายเลย ถ้าดาเมจเข้าหรือหลบพ้น (แต่ไม่นับรวมตอนอมตะ)
+                if (hitProcessed && !this.isBoss) this.hp = 0; 
             }
             if (this.isRanged) {
                 this.shootTimer -= dt;
@@ -1007,7 +1004,7 @@
         }
     }
 
-    async function startGame() {
+    function startGame() {
         if (gameState === 'PLAYING') return; 
         if (!currentUser.is_admin && currentUser.daily_energy <= 0) { showToast("พลังงานหมด!", "#ff5555"); return; }
         if (!currentUser.is_admin) currentUser.daily_energy -= 1; 
@@ -1015,10 +1012,11 @@
         currentUser.last_played_at = new Date().toISOString(); 
         updateTopBar();
         
-        await supabaseClient.from('players').update({ 
+        // เซฟเบื้องหลัง ไม่บล็อกหน้าจอเพื่อป้องกันการค้าง
+        supabaseClient.from('players').update({ 
             daily_energy: currentUser.daily_energy, 
             last_played_at: currentUser.last_played_at 
-        }).eq('username', currentUser.username);
+        }).eq('username', currentUser.username).then().catch(e => console.error(e));
         
         player = new Player(); player.applyPhaseModifiers(); 
         enemies = []; bullets = []; enemyBullets = []; drops = [];
@@ -1141,7 +1139,7 @@
             showToast(`ได้รับโบนัสเหรียญจบด่าน: +${cardBonus + sysBonus}`, "#FFD700");
         }
 
-        try { supabaseClient.from('players').update({ diamonds: currentUser.diamonds }).eq('username', currentUser.username).then(); } catch(e){}
+        try { supabaseClient.from('players').update({ diamonds: currentUser.diamonds }).eq('username', currentUser.username).then().catch(e => console.error(e)); } catch(e){}
 
         rerollCost = currentPhase; discountedBoughtCount = 0;
         
@@ -1163,7 +1161,7 @@
     }
 
     function getRandomShopItem() {
-        let hpWeight = player.hp < player.maxHp ? 1.5 : 0.05; // เนิร์ฟยาฮีลตอนเลือดเต็มไม่ให้ออกมารกตา
+        let hpWeight = player.hp < player.maxHp ? 1.5 : 0.05; 
         let totalWeight = 0;
         let weights = ITEMS_DB.map(item => {
             let w = item.cures === 'hp' ? hpWeight : 1;
@@ -1309,6 +1307,7 @@
         } else {
             if (document.getElementById('fullShopModal').classList.contains('active-modal')) {
                 renderFullShop();
+                document.getElementById('full-shop-coins').innerText = coins;
             }
         }
 
@@ -1417,7 +1416,6 @@
             else if (edge === 2) { baseX = Math.random() * canvas.width; baseY = canvas.height - offset; }
             else { baseX = offset; baseY = Math.random() * canvas.height; }
 
-            // ล็อกจำนวนศัตรูบนจอไม่ให้ล้นจนเกมค้าง
             if (enemies.length < 200) {
                 for(let i=0; i<groupSize; i++) {
                     let type = 1; let rand = Math.random();
