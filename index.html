@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V1.16</title>
+    <title>First Aid Survivor V1.17</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; background-color: #222; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
@@ -65,7 +65,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active" style="justify-content: center;">
-        <h2>First Aid Survivor (V1.16)</h2>
+        <h2>First Aid Survivor (V1.17)</h2>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required>
         <input type="password" id="pincode" placeholder="PIN" required>
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none;">
@@ -166,7 +166,6 @@
         <button onclick="toggleFullShop(true)" style="background-color: #9c27b0; padding: 10px 40px; margin-top: 10px; font-size: 18px; width: 95%;">เปิดแคตตาล็อกยาทั้งหมด 🛒</button>
         <button onclick="nextPhase()" style="background-color: #2196F3; padding: 12px 50px; margin-top: 15px; font-size: 18px; width: 95%;">ลุย Phase ถัดไป ➡️</button>
         
-        <!-- ปุ่ม Admin Warp สำหรับข้ามด่าน -->
         <button id="btnAdminSkip" onclick="currentPhase = 9; nextPhase();" style="display: none; background-color: #ff5722; padding: 10px 50px; margin-top: 10px; font-size: 16px; width: 95%; border: 1px solid #fff;">👑 [Admin] ข้ามไป Phase 10 ➡️</button>
     </div>
 
@@ -253,7 +252,7 @@
         { id: 'cpm', category: 'normal', name: "CPM", cost: 15, cures: 'allergy', maxStack: 3, desc: "แก้ภูมิแพ้ | +ภูมิคุ้มกัน 10,20,30 (ลด Spd 1 เฟส)" },
         { id: 'telfast', category: 'normal', name: "Telfast", cost: 15, cures: 'allergy', maxStack: 3, desc: "แก้ภูมิแพ้ | +ภูมิคุ้มกัน 10,15,20" },
         { id: 'carbon', category: 'normal', name: "Carbon", cost: 15, cures: 'stomach', maxStack: 3, desc: "แก้ปวดท้อง | +ความเร็วเดิน 1, 2, 3" },
-        { id: 'air_x', category: 'normal', name: "Air-X", cost: 30, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | ปืนยิง 3 แฉก (มีผล 1 เฟส)" },
+        { id: 'air_x', category: 'normal', name: "Air-X", cost: 30, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | ปืน 3 แฉก & ยิงรอบทิศทุก 2 วิ (1 เฟส)" },
         { id: 'flying_rabit', category: 'normal', name: "Flying Rabit", cost: 30, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | กระสุนทะลุศัตรู (มีผล 1 เฟส)" },
         { id: 'gumgig', category: 'normal', name: "Gumgig pean", cost: 15, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ความเร็วปืนยิงไวขึ้น" },
         { id: 'apache', category: 'normal', name: "Apache", cost: 15, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ความเร็วปืนยิงไวขึ้น" },
@@ -401,7 +400,7 @@
     }
 
     function getUpgradeCost(stat, lvl) {
-        if (stat === 'hp') return lvl < 20 ? 2 : 4; // เปลี่ยน HP อัปเกรดตันที่ 40 ครั้ง
+        if (stat === 'hp') return lvl < 20 ? 2 : 4; 
         if (stat === 'atk') return 4;
         if (stat === 'def') return lvl < 20 ? 2 : (lvl < 40 ? 4 : 6);
         if (stat === 'spd') return 30; return Infinity;
@@ -431,7 +430,7 @@
 
     async function buyUpgrade(stat) {
         let currentLvl = currentUser[`upgraded_${stat}`] || 0;
-        let maxLvl = { hp: 40, atk: 10, def: 50, spd: 3 }[stat]; // ปรับ max HP เป็น 40
+        let maxLvl = { hp: 40, atk: 10, def: 50, spd: 3 }[stat]; 
         if (currentLvl >= maxLvl) return;
         let cost = getUpgradeCost(stat, currentLvl);
         if (currentUser.diamonds < cost) { alert("เพชรไม่พอ!"); return; }
@@ -460,6 +459,8 @@
             
             this.fireTimer = 0; this.magnetRange = 0;
             this.magnetActiveTime = 0; this.magnetMaxTime = 1.2; this.magnetBonusRange = 0;
+            
+            this.novaTimer = 2.0;
 
             this.isDead = false; 
             this.statuses = { headache: 0, allergy: 0, stomach: 0, rash: 0, swelling: 0, mouth_ulcer: 0, red_eye: 0, sore_throat: 0, fresh_wound: 0, scald: 0 }; 
@@ -544,7 +545,38 @@
                 }
                 this.fireTimer = this.fireRate; 
             }
+            
+            // ปล่อยพลัง Nova (ยิงรอบทิศ) สำหรับบัฟ Air-X
+            if (this.inv.air_x > 0 && enemies.length > 0) {
+                this.novaTimer -= dt;
+                if (this.novaTimer <= 0) {
+                    this.fireNova();
+                    this.novaTimer = 2.0;
+                }
+            } else {
+                this.novaTimer = 2.0; 
+            }
         }
+        
+        fireNova() {
+            let numBullets = 6;
+            if (this.bulletCount === 2) numBullets = 9;
+            else if (this.bulletCount === 3) numBullets = 12;
+            else if (this.bulletCount >= 4) numBullets = 16;
+
+            let bSize = 5 + (this.inv.oral_paste * 3); 
+            let isPierce = (this.inv.flying_rabit > 0);
+            let critChance = [0, 0.15, 0.30, 0.40][this.inv.eye_lotion] || 0;
+            
+            let step = (Math.PI * 2) / numBullets;
+            for(let i=0; i < numBullets; i++) {
+                let angle = i * step;
+                let isCrit = Math.random() < critChance;
+                let finalAtk = isCrit ? this.atk * 2.5 : this.atk;
+                bullets.push(new Bullet(this.x, this.y, angle, finalAtk, bSize, isPierce, isCrit));
+            }
+        }
+
         draw(ctx) {
             if (this.isDead) return;
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)'; ctx.lineWidth = 1; ctx.beginPath();
@@ -560,6 +592,7 @@
             ctx.fillStyle = 'white'; ctx.font = '12px Arial'; ctx.textAlign = 'center';
             ctx.fillText(`${Math.ceil(this.hp)}/${this.maxHp}`, this.x, this.y - 30); ctx.textAlign = 'left';
         }
+        
         shootNearest() {
             let nearest = null; let minDist = Infinity;
             for (let e of enemies) {
@@ -597,11 +630,11 @@
                 }
             }
         }
+        
         takeDamage(amt, statusList) {
             if (this.isDead) return;
             if (currentUser.is_admin && adminGodMode) return; 
 
-            // สูตรหลบหลีก 1 DEF = 0.7% | ล็อกเพดานสูงสุดที่ 70% (เมื่อ DEF = 100)
             let dodgeChance = Math.min(0.7, (this.def / 100) * 0.7); 
             if (Math.random() < dodgeChance) return; 
             
@@ -882,7 +915,7 @@
     function logout() { location.reload(); }
 
     async function startGame() {
-        if (gameState === 'PLAYING') return; // กันคลิกเบิ้ล
+        if (gameState === 'PLAYING') return; 
         if (!currentUser.is_admin && currentUser.daily_energy <= 0) { alert("พลังงานหมด!"); return; }
         if (!currentUser.is_admin) currentUser.daily_energy -= 1; 
         
@@ -926,7 +959,6 @@
         
         let isFullSet = (player.inv.saline > 0 && player.inv.plaster > 0 && player.inv.alcohol > 0 && player.inv.betadine > 0 && player.inv.gauze > 0 && player.inv.dressing_set > 0);
 
-        // หน้าต่างแสดงรางวัลคู่คอมโบแบบมีสีสัน
         invHtml += `
         <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #555;">
             <strong style="color: #ffcc00;">🩹 เซ็ตคอมโบทำแผล</strong><br>
@@ -1006,8 +1038,14 @@
         try { supabaseClient.from('players').update({ diamonds: currentUser.diamonds }).eq('username', currentUser.username).then(); } catch(e){}
 
         rerollCost = currentPhase; discountedBoughtCount = 0;
-        player.activeCpmDebuff = 0; 
-        player.applyPhaseModifiers();
+        
+        // ---- FIX BUG: Reset บัฟชั่วคราวให้ถูกจังหวะตอนจบด่าน ----
+        if(player) {
+            player.inv.air_x = 0;
+            player.inv.flying_rabit = 0;
+            player.activeCpmDebuff = 0; 
+            player.applyPhaseModifiers();
+        }
 
         updateShopUI(); rollShopCards(); 
     }
@@ -1158,12 +1196,9 @@
     }
 
     function nextPhase() {
-        if (gameState === 'PLAYING') return; // กันบั๊กคลิกเบิ้ลที่ทำให้เกมค้าง
+        if (gameState === 'PLAYING') return; 
         currentPhase++; phaseTimer = 30; bossSpawnedThisPhase = false;
         enemies = []; bullets = []; enemyBullets = []; drops = [];
-        
-        player.inv.air_x = 0;
-        player.inv.flying_rabit = 0;
         
         player.activeCpmDebuff = player.cpmDebuffToApply;
         player.cpmDebuffToApply = 0;
@@ -1224,7 +1259,6 @@
                 boss.x = canvas.width / 2; boss.y = -50; 
                 enemies.push(boss);
                 
-                // เฟส 14 ขึ้นไป ให้สปอว์นมินิบอส 1 ตัวขนาบข้าง
                 if (currentPhase >= 14) {
                     let miniBoss = new Enemy(5, currentPhase);
                     miniBoss.hp *= 0.7; miniBoss.maxHp *= 0.7;
