@@ -37,8 +37,12 @@
         .shop-card.sold { opacity: 0.4; pointer-events: none; border-color: #555; filter: grayscale(100%); }
         .max-badge { color: #ff5555; font-weight: bold; border: 1px solid #ff5555; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: rgba(255,0,0,0.1); margin-left: 5px; }
 
+        /* ระบบกระพริบแดงเตือนยารักษาโรคที่ตรงกับอาการ */
+        .highlight-cure { border: 2px solid #ff5555 !important; box-shadow: 0 0 15px rgba(255, 85, 85, 0.8) !important; animation: pulse-red 1.5s infinite; }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 5px rgba(255,85,85,0.5); } 50% { box-shadow: 0 0 20px rgba(255,85,85,1); } 100% { box-shadow: 0 0 5px rgba(255,85,85,0.5); } }
+
         .btn-action-group { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
-        .btn-quick-buy { background: #e67e22; font-size: 15px; padding: 12px; border-radius: 8px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; height: 75px; box-sizing: border-box;}
+        .btn-quick-buy { background: #e67e22; font-size: 15px; padding: 12px; border-radius: 8px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; min-height: 75px; box-sizing: border-box;}
         .btn-quick-buy small { font-weight: normal; font-size: 12px; color: #eee; }
         .btn-next { background: #2196F3; font-size: 20px; padding: 15px; border-radius: 8px; }
         .btn-catalog { background: #9c27b0; font-size: 18px; padding: 12px; border-radius: 8px; }
@@ -323,7 +327,7 @@
         { id: 'dressing_set', category: 'combo', name: "Dressing set", cost: 14, cures: 'hp', maxStack: 99, desc: "Heal 5 | คู่กับ Gauze รับ +5 MaxHP ถาวร" }
     ];
 
-    function showToast(message, color = "#ffeb3b", duration = 3000) {
+    function showToast(message, color = "#ffeb3b", duration = 2500) {
         const toast = document.getElementById('toastNotification');
         if (!toast) return;
         toast.innerHTML = message;
@@ -367,7 +371,7 @@
                 let d = debuffKeys[k];
                 if (player.statuses[d] < 3) {
                     player.statuses[d]++;
-                    showToast(`👑 [Admin] เสกอาการป่วย: ${STATUS_NAMES[d]} (${player.statuses[d]}/3)`, "#ff5555");
+                    showToast(`👑 [Admin] เสกอาการป่วย: ${STATUS_NAMES[d]} (${player.statuses[d]}/3)`, "#ff5555", 2500);
                     player.applyPhaseModifiers();
                 }
             }
@@ -540,7 +544,7 @@
         let maxLvl = { hp: 40, atk: 10, def: 50, spd: 3 }[stat]; 
         if (currentLvl >= maxLvl) return;
         let cost = getUpgradeCost(stat, currentLvl);
-        if (currentUser.diamonds < cost) { showToast("เพชรไม่พอ!", "#ff5555"); return; }
+        if (currentUser.diamonds < cost) { showToast("เพชรไม่พอ!", "#ff5555", 2500); return; }
 
         currentUser.diamonds -= cost; currentUser[`upgraded_${stat}`] = currentLvl + 1;
         updateUpgradeUI(); updateTopBar();
@@ -593,7 +597,7 @@
             }
 
             if (comboMessages.length > 0) {
-                showToast(comboMessages.join('<br>'), '#0f0', 4000);
+                showToast(comboMessages.join('<br>'), '#0f0', 2500);
             }
         }
 
@@ -744,6 +748,8 @@
                 if (this.statuses[randomStatus] < 3) {
                     this.statuses[randomStatus]++;
                     showToast(`⚠️ ติดอาการป่วย: ${STATUS_NAMES[randomStatus]}!`, "#ff5555", 2500);
+                    // อัปเดตสถานะทันทีเมื่อโดนตี (Instant Debuff)
+                    this.applyPhaseModifiers();
                 }
             }
             
@@ -1148,7 +1154,7 @@
         let btnRabit = document.getElementById('btn-quick-rabbit');
         if (btnAirX) {
             if (player.inv.air_x > 0) {
-                btnAirX.innerHTML = "🚀 Air-X <span style='color:#0f0; font-size: 14px;'>[✅ ACTIVATED]</span><br><small style='font-size:12px; color:#eee;'>ปืน 3 แฉก (ทำงานแล้ว)</small>";
+                btnAirX.innerHTML = "🚀 Air-X<br><span style='color:#0f0; font-size: 14px;'>[✅ ACTIVATED]</span><br><small style='font-size:12px; color:#eee;'>ปืน 3 แฉก (ทำงานแล้ว)</small>";
                 btnAirX.style.backgroundColor = "#27ae60";
             } else {
                 btnAirX.innerHTML = "🚀 ซื้อด่วน Air-X ($30)<br><small style='font-size:12px; color:#eee;'>ปืน 3 แฉก (1 เฟส)</small>";
@@ -1157,7 +1163,7 @@
         }
         if (btnRabit) {
             if (player.inv.flying_rabit > 0) {
-                btnRabit.innerHTML = "🚀 Flying Rabit <span style='color:#0f0; font-size: 14px;'>[✅ ACTIVATED]</span><br><small style='font-size:12px; color:#eee;'>กระสุนทะลุ (ทำงานแล้ว)</small>";
+                btnRabit.innerHTML = "🚀 Flying Rabit<br><span style='color:#0f0; font-size: 14px;'>[✅ ACTIVATED]</span><br><small style='font-size:12px; color:#eee;'>กระสุนทะลุ (ทำงานแล้ว)</small>";
                 btnRabit.style.backgroundColor = "#27ae60";
             } else {
                 btnRabit.innerHTML = "🚀 ซื้อด่วน Flying Rabit ($30)<br><small style='font-size:12px; color:#eee;'>กระสุนทะลุศัตรู (1 เฟส)</small>";
@@ -1177,7 +1183,7 @@
         let sysBonus = [0, 10, 20, 30][player.inv.systral] || 0;
         if (cardBonus + sysBonus > 0) {
             coins += (cardBonus + sysBonus);
-            showToast(`ได้รับโบนัสเหรียญจบด่าน: +${cardBonus + sysBonus}`, "#FFD700");
+            showToast(`ได้รับโบนัสเหรียญจบด่าน: +${cardBonus + sysBonus}`, "#FFD700", 2500);
         }
 
         try { supabaseClient.from('players').update({ diamonds: currentUser.diamonds }).eq('username', currentUser.username).then().catch(()=>{}); } catch(e){}
@@ -1247,8 +1253,12 @@
                 let maxBadge = isMax ? `<span class="max-badge">MAX</span>` : "";
                 let maxStr = item.maxStack === 99 ? "" : `[${player.inv[item.id]}/${item.maxStack}]`;
 
+                // ไฮไลท์ถ้าติดโรคนี้อยู่
+                let isCureNeeded = item.cures !== 'hp' && player.statuses[item.cures] > 0;
+                let highlightClass = isCureNeeded ? "highlight-cure" : "";
+
                 container.innerHTML += `
-                    <div class="shop-card" onclick="buyItem('${item.id}', ${item.discPrice}, true, ${index})">
+                    <div class="shop-card ${highlightClass}" onclick="buyItem('${item.id}', ${item.discPrice}, true, ${index})">
                         <h3 style="margin:5px 0; color: #4CAF50; font-size: 20px;">${item.name} ${maxBadge}</h3>
                         <p style="font-size:13px; margin:10px 0; color: #ddd; height: 35px;">${item.desc}</p>
                         <p style="color:yellow; font-weight:bold; margin:5px 0; text-decoration: line-through; color:gray;">$${item.cost}</p>
@@ -1264,19 +1274,25 @@
         const cCombo = document.getElementById('fullShopCombo'); if(cCombo) cCombo.innerHTML = '';
         
         ITEMS_DB.forEach(item => {
+            let maxStr = item.maxStack === 99 ? "∞" : item.maxStack;
             let isMax = item.maxStack !== 99 && player.inv[item.id] >= item.maxStack;
             let maxBadge = isMax ? `<span class="max-badge">MAX</span>` : "";
-            let maxStr = item.maxStack === 99 ? "" : `[${player.inv[item.id]}/${item.maxStack}]`;
 
             let btnText = isMax ? 'ซื้อรักษาโรค' : 'ซื้อ';
             let btnColor = isMax ? '#555' : '#2196F3';
             let btnBorder = isMax ? '1px solid #ff5555' : 'none';
 
+            let displayMaxStr = item.maxStack === 99 ? "" : `[${player.inv[item.id]}/${maxStr}]`;
+
+            // ไฮไลท์ถ้าติดโรคนี้อยู่
+            let isCureNeeded = item.cures !== 'hp' && player.statuses[item.cures] > 0;
+            let highlightClass = isCureNeeded ? "highlight-cure" : "";
+
             let htmlStr = `
-                <div class="full-shop-item" style="${isMax ? 'border-color:#ff5555;' : ''}">
+                <div class="full-shop-item ${highlightClass}" style="${isMax ? 'border-color:#ff5555;' : ''}">
                     <div style="width: 100%; text-align: left;">
                         <strong style="color: #4CAF50; font-size:16px;">${item.name}</strong> ${maxBadge}
-                        <span style="font-size:12px; color:#aaa;">${maxStr !== "" ? `มีอยู่: ${maxStr}` : ""}</span><br>
+                        <span style="font-size:12px; color:#aaa;">${displayMaxStr !== "" ? `มีอยู่: ${displayMaxStr}` : ""}</span><br>
                         <span style="font-size:12px; color:#ddd; display: block; margin-top: 5px;">${item.desc}</span>
                     </div>
                     <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
@@ -1294,13 +1310,13 @@
         if (coins >= rerollCost) { 
             coins -= rerollCost; rerollCost += 2; 
             updateShopUI(); rollShopCards(); 
-        } else showToast("เหรียญไม่พอสำหรับสุ่มใหม่!", "#ff5555"); 
+        } else showToast("เหรียญไม่พอสำหรับสุ่มใหม่!", "#ff5555", 2500); 
     }
 
     function buyQuickItem(itemId) {
         let itemDef = ITEMS_DB.find(i => i.id === itemId);
-        if (coins < itemDef.cost) { showToast("เหรียญไม่พอ!", "#ff5555"); return; }
-        if (player.inv[itemId] >= itemDef.maxStack) { showToast("คุณเปิดใช้บัฟนี้ไปแล้วในตานี้!", "#ff5555"); return; }
+        if (coins < itemDef.cost) { showToast("เหรียญไม่พอ!", "#ff5555", 2500); return; }
+        if (player.inv[itemId] >= itemDef.maxStack) { showToast("คุณเปิดใช้บัฟนี้ไปแล้วในตานี้!", "#ff5555", 2500); return; }
         buyItem(itemId, itemDef.cost, false, -1);
     }
 
@@ -1308,10 +1324,10 @@
         let itemDef = ITEMS_DB.find(i => i.id === itemId);
         let hasAilment = (itemDef.cures !== 'hp' && player.statuses[itemDef.cures] > 0);
 
-        if (coins < price) { showToast("เหรียญไม่พอ!", "#ff5555"); return; }
+        if (coins < price) { showToast("เหรียญไม่พอ!", "#ff5555", 2500); return; }
         
         if (player.inv[itemId] >= itemDef.maxStack && !hasAilment && itemDef.cures !== 'hp') { 
-            showToast("ไอเทมนี้ให้บัฟระดับสูงสุดแล้ว!", "#ff5555"); 
+            showToast("ไอเทมนี้ให้บัฟระดับสูงสุดแล้ว!", "#ff5555", 2500); 
             return; 
         }
 
