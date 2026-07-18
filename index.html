@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V2.0</title>
+    <title>First Aid Survivor V2.1</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -23,7 +23,7 @@
         /* ================= Modern Shop UI Layout ================= */
         .shop-layout { display: flex; flex-direction: row; width: 90vw; height: 85vh; max-width: 1400px; background: rgba(20, 20, 20, 0.95); border: 2px solid #4CAF50; border-radius: 12px; box-shadow: 0 0 30px rgba(76, 175, 80, 0.3); overflow: hidden; }
         .shop-left { width: 35%; border-right: 2px solid #333; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: rgba(0, 0, 0, 0.4); }
-        .shop-right { width: 65%; padding: 30px; display: flex; flex-direction: column; justify-content: space-between; background: rgba(30, 30, 30, 0.5); position: relative; }
+        .shop-right { width: 65%; padding: 30px; display: flex; flex-direction: column; background: rgba(30, 30, 30, 0.5); position: relative; }
         
         .stat-badge { background: rgba(0,0,0,0.6); padding: 12px; border-radius: 8px; border: 1px solid #555; display: flex; justify-content: space-between; font-size: 15px; }
         .stat-badge strong { color: #fff; }
@@ -37,14 +37,14 @@
         .shop-card.sold { opacity: 0.4; pointer-events: none; border-color: #555; filter: grayscale(100%); }
         .max-badge { color: #ff5555; font-weight: bold; border: 1px solid #ff5555; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: rgba(255,0,0,0.1); margin-left: 5px; }
 
-        .btn-action-group { display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
+        .btn-action-group { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
         .btn-quick-buy { background: #e67e22; font-size: 16px; padding: 12px; border-radius: 8px; flex: 1; }
         .btn-next { background: #2196F3; font-size: 20px; padding: 15px; border-radius: 8px; }
         .btn-catalog { background: #9c27b0; font-size: 18px; padding: 12px; border-radius: 8px; }
-        .btn-reroll { background: #f39c12; font-size: 16px; padding: 12px; border-radius: 8px; }
+        .btn-reroll { background: #f39c12; font-size: 16px; padding: 12px; border-radius: 8px; margin: 0 auto; display: block; width: 350px; }
         .btn-surrender { background: #e74c3c; font-size: 16px; padding: 12px; border-radius: 8px; }
         
-        /* Modal ย้ายมาบังแค่ฝั่งขวา */
+        /* Modal ซ้อนเฉพาะฝั่งขวา */
         #fullShopModal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20,20,20,0.98); z-index: 40; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; border-radius: 0 12px 12px 0; }
         #fullShopModal.active-modal { display: flex; }
         .full-shop-list { width: 100%; max-height: 80%; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-top: 15px; padding-right: 15px; }
@@ -78,7 +78,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.0)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.1)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -138,8 +138,16 @@
         <div id="leaderboardList" style="text-align: left; background: #333; padding: 20px; border-radius: 8px; width: 500px; max-height: 400px; overflow-y: auto; margin: 20px 0; font-size: 18px; border: 2px solid #FFD700;">Loading...</div>
         <button onclick="switchScreen('menuScreen')" style="background-color: #777; padding: 15px 40px; font-size: 18px;">กลับสู่เมนูหลัก</button>
     </div>
+    
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen" class="screen">
+        <h1 style="font-size: 80px; color: #ff5555; margin-bottom: 20px;">GAME OVER</h1>
+        <h2 id="go-phase" style="color: white; font-size: 30px;">Phase Reached: 1</h2>
+        <h2 id="go-score" style="color: yellow; font-size: 30px; margin-bottom: 40px;">Score: 0</h2>
+        <button onclick="switchScreen('menuScreen')" style="font-size: 24px; padding: 15px 40px; background-color: #2196F3;">กลับสู่เมนูหลัก</button>
+    </div>
 
-    <!-- 🏪 SHOP PHASE (New UI) -->
+    <!-- 🏪 SHOP PHASE (UI ใหม่แบบไร้บั๊ก) -->
     <div id="shopScreen" class="screen">
         <div class="shop-layout">
             
@@ -173,24 +181,28 @@
                     </div>
                 </div>
 
-                <div>
-                    <h3 style="margin: 10px 0; color:#4CAF50; font-size: 22px;">📦 สินค้าสุ่มลดราคาพิเศษ (70% Off)</h3>
+                <!-- โซนสุ่มการ์ด -->
+                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                    <h3 style="text-align:center; margin: 10px 0; color:#4CAF50; font-size: 22px;">📦 สินค้าสุ่มลดราคาพิเศษ (70% Off)</h3>
                     <div class="shop-cards-wrapper" id="shopCards">
                         <!-- Cards injected by JS -->
                     </div>
+                    <button onclick="rerollShop()" id="btnReroll" class="btn-reroll">🔄 สุ่มกระดานใหม่ (ใช้ <span id="shop-reroll-cost">1</span> เหรียญ)</button>
                 </div>
 
+                <!-- โซนปุ่มกดด้านล่าง -->
                 <div class="btn-action-group">
+                    <button onclick="toggleFullShop(true)" class="btn-catalog">🛒 เปิดแคตตาล็อกยาทั้งหมด (Full Shop)</button>
+                    
                     <div style="display: flex; gap: 10px;">
                         <button onclick="buyQuickItem('air_x')" class="btn-quick-buy">🚀 ซื้อด่วน Air-X ($30)</button>
                         <button onclick="buyQuickItem('flying_rabit')" class="btn-quick-buy">🚀 ซื้อด่วน Flying Rabit ($30)</button>
                     </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button onclick="rerollShop()" id="btnReroll" class="btn-reroll" style="flex: 1;">🔄 สุ่มกระดานใหม่ (ใช้ <span id="shop-reroll-cost">1</span> เหรียญ)</button>
-                        <button onclick="toggleFullShop(true)" class="btn-catalog" style="flex: 1;">🛒 เปิดแคตตาล็อกยา (Full Shop)</button>
+
+                    <div style="display: flex; gap: 10px; margin-top: 5px;">
+                        <button onclick="surrenderGame()" class="btn-surrender" style="flex: 1;">🏳️ ยอมแพ้</button>
+                        <button onclick="nextPhase()" class="btn-next" style="flex: 3;">➡️ ลุย Phase ถัดไป</button>
                     </div>
-                    <button onclick="nextPhase()" class="btn-next">➡️ ลุย Phase ถัดไป</button>
-                    <button onclick="surrenderGame()" class="btn-surrender">🏳️ ยอมแพ้ (จบเกมและบันทึกคะแนน)</button>
                     <button id="btnAdminSkip" onclick="currentPhase = 9; nextPhase();" class="btn-reroll" style="display:none; background-color: #ff5722;">👑 [Admin] ข้ามไป Phase 10</button>
                 </div>
                 
@@ -198,7 +210,10 @@
                 <div id="fullShopModal">
                     <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;">
                         <h2 style="margin: 0; color: #4CAF50; font-size: 24px;">🛒 แคตตาล็อกยาทั้งหมด</h2>
-                        <button onclick="toggleFullShop(false)" style="background-color: #f44336; padding: 8px 20px; font-size: 14px;">ปิด (X)</button>
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <h3 style="margin:0; color: yellow;">เงิน: 💰 <span id="full-shop-coins">0</span></h3>
+                            <button onclick="toggleFullShop(false)" style="background-color: #f44336; padding: 8px 20px; font-size: 14px;">ปิด (X)</button>
+                        </div>
                     </div>
                     
                     <div class="full-shop-list">
@@ -301,8 +316,6 @@
         { id: 'gauze', category: 'combo', name: "Gauze", cost: 7, cures: 'hp', maxStack: 99, desc: "Heal 2 | คู่กับ Dressing Set รับ +5 MaxHP ถาวร" },
         { id: 'dressing_set', category: 'combo', name: "Dressing set", cost: 14, cures: 'hp', maxStack: 99, desc: "Heal 5 | คู่กับ Gauze รับ +5 MaxHP ถาวร" }
     ];
-
-    const STATUS_NAMES = { headache: "ปวดศีรษะ", allergy: "อาการแพ้", stomach: "ปวดท้อง", rash: "ผื่นแพ้", swelling: "ผื่นบวม", mouth_ulcer: "แผลในปาก", red_eye: "ตาแดง", sore_throat: "เจ็บคอ", fresh_wound: "แผลสด", scald: "น้ำร้อนลวก" };
 
     function toggleBuffUI() { showBuffsUI = !showBuffsUI; }
 
@@ -699,7 +712,7 @@
                 if (phase >= 10) atkAdd = 3 + 1 + loop; 
                 this.atk = 1 + atkAdd;
 
-                this.spd = 2.5; this.size = 20; 
+                this.spd = 2.5; this.size = 20;
                 this.statusList = type === 1 ? ['headache', 'allergy'] : ['stomach', 'scald'];
                 this.isRanged = type === 2; this.shootTimer = 2.0;
             } 
@@ -975,7 +988,7 @@
         for (let key in player.inv) {
             if (player.inv[key] > 0) {
                 let item = ITEMS_DB.find(i => i.id === key);
-                if(!item) continue; // กันบั๊ก
+                if(!item) continue; 
                 let isMax = item.maxStack !== 99 && player.inv[key] >= item.maxStack;
                 let maxBadge = isMax ? `<span style="color:#ff5555; font-weight:bold;">[MAX]</span>` : `[${player.inv[key]}/${item.maxStack === 99 ? '∞' : item.maxStack}]`;
                 invHtml += `<div style="background: rgba(0,0,0,0.4); padding: 5px; border-radius: 4px; text-align: center; border: 1px solid #555;">✔️ ${item.name} ${maxBadge}</div>`;
@@ -1027,6 +1040,11 @@
         document.getElementById('shop-def-stat').innerText = defStr;
         document.getElementById('shop-spd-stat').innerText = player.spd;
         
+        document.getElementById('modal-hp-stat').innerText = hpStr;
+        document.getElementById('modal-atk-stat').innerText = player.atk;
+        document.getElementById('modal-def-stat').innerText = defStr;
+        document.getElementById('modal-spd-stat').innerText = player.spd;
+
         let statusHtml = ""; let hasStatus = false;
         for (let key in player.statuses) {
             if (player.statuses[key] > 0) { 
@@ -1160,7 +1178,7 @@
 
     function rerollShop() { 
         if (coins >= rerollCost) { 
-            coins -= rerollCost; rerollCost += 2; 
+            coins -= rerollCost; rerollCost += 2; // Reroll cost increases faster
             updateShopUI(); rollShopCards(); 
         } else alert("เหรียญไม่พอสำหรับ Reroll"); 
     }
@@ -1256,20 +1274,15 @@
         gameState = 'GAMEOVER';
         document.getElementById('btnToggleBuff').style.display = 'none';
         
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = 'white';
-        ctx.font = '80px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
-        ctx.textAlign = 'left'; 
+        document.getElementById('go-phase').innerText = `Phase Reached: ${currentPhase}`;
+        document.getElementById('go-score').innerText = `Score: ${score}`;
+        
+        switchScreen('gameOverScreen');
 
-        setTimeout(async () => {
-            await saveScoreToDB();
+        saveScoreToDB().then(() => {
             updateTopBar(); 
-            await loadLeaderboard(); 
-            switchScreen('menuScreen');
-        }, 100);
+            loadLeaderboard(); 
+        });
     }
 
     function gameLoop(timestamp) {
@@ -1431,11 +1444,11 @@
         bosses.forEach((boss, index) => {
             let barWidth = 600; 
             let barX = (canvas.width - barWidth) / 2;
-            let barY = 55 + (index * 35); // แยกบรรทัดกัน
+            let barY = 55 + (index * 35); 
             
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             ctx.fillRect(barX, barY, barWidth, 25); 
-            ctx.fillStyle = index === 0 ? '#ff3333' : '#ff9900'; // บอสหลักสีแดง มินิบอสสีส้ม
+            ctx.fillStyle = index === 0 ? '#ff3333' : '#ff9900'; 
             ctx.fillRect(barX, barY, barWidth * (boss.hp / boss.maxHp), 25); 
             
             ctx.fillStyle = 'white';
