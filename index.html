@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V2.6J</title>
+    <title>First Aid Survivor V2.6K</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -96,7 +96,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6J)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6K)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -249,21 +249,6 @@
 </div>
 
 <script>
-    const ASSETS = {
-        player: new Image(), coin: new Image(), diamond: new Image(), magnet: new Image(),
-        bullet: new Image(), enemyBullet: new Image(), enemy1: new Image(), enemy2: new Image(), 
-        enemy3: new Image(), enemy4: new Image(), boss: new Image()    
-    };
-    
-    function drawSprite(ctx, img, x, y, size, fallbackDraw) {
-        if (img && img.complete && img.naturalWidth > 0) { ctx.drawImage(img, x - size, y - size, size * 2, size * 2); } 
-        else { fallbackDraw(); }
-    }
-
-    const SUPABASE_URL = 'https://budgugzxmgmptxycfyeb.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1ZGd1Z3p4bWdtcHR4eWNmeWViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxODgyNDMsImV4cCI6MjA5OTc2NDI0M30.85-Yr-DDFQa0eioI_rydxhljP96pg24t3GVnj7PrP0E';
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     let currentUser = null;
     let gameState = 'LOGIN'; 
     let currentPhase = 1;
@@ -279,26 +264,42 @@
     let reqId = null; 
     let toastTimeout = null; 
 
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    function resizeCanvas() {
-        canvas.width = window.innerWidth || 1280;
-        canvas.height = window.innerHeight || 720;
-        if (typeof player !== 'undefined' && player && !player.isDead) {
-            if (player.x > canvas.width - player.size) player.x = canvas.width - player.size;
-            if (player.y > canvas.height - player.size) player.y = canvas.height - player.size;
-        }
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas(); 
-
-    let player;
+    // ประกาศตัวแปรเกมให้อยู่ด้านบนสุดก่อนเรียกใช้ resizeCanvas()
+    let player = null;
     let enemies = [];
     let bullets = [];
     let enemyBullets = []; 
     let drops = []; 
     let enemySpawnTimer = 0;
     let bossSpawnedThisPhase = false;
+
+    const ASSETS = {
+        player: new Image(), coin: new Image(), diamond: new Image(), magnet: new Image(),
+        bullet: new Image(), enemyBullet: new Image(), enemy1: new Image(), enemy2: new Image(), 
+        enemy3: new Image(), enemy4: new Image(), boss: new Image()    
+    };
+    
+    function drawSprite(ctx, img, x, y, size, fallbackDraw) {
+        if (img && img.complete && img.naturalWidth > 0) { ctx.drawImage(img, x - size, y - size, size * 2, size * 2); } 
+        else { fallbackDraw(); }
+    }
+
+    const SUPABASE_URL = 'https://budgugzxmgmptxycfyeb.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1ZGd1Z3p4bWdtcHR4eWNmeWViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxODgyNDMsImV4cCI6MjA5OTc2NDI0M30.85-Yr-DDFQa0eioI_rydxhljP96pg24t3GVnj7PrP0E';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas() {
+        canvas.width = window.innerWidth || 1280;
+        canvas.height = window.innerHeight || 720;
+        if (player && !player.isDead) {
+            if (player.x > canvas.width - player.size) player.x = canvas.width - player.size;
+            if (player.y > canvas.height - player.size) player.y = canvas.height - player.size;
+        }
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas(); 
 
     const keys = {};
 
@@ -1565,7 +1566,8 @@
             let groupSize = Math.floor(Math.random() * (maxSpawn - minSpawn + 1)) + minSpawn;
             if (currentPhase >= 5) groupSize += Math.floor(currentPhase / 2); 
             
-            let extraEnemies = [0, 10, 20, 30][player.activeStatuses.swelling] || 0;
+            let swellLv = Math.min(player.activeStatuses.swelling, 3);
+            let extraEnemies = [0, 10, 20, 30][swellLv] || 0;
             if (extraEnemies > 0 && Math.random() < 0.3) groupSize += 2; 
 
             let isInside = Math.random() < 0.5;
