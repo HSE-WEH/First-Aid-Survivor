@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V2.1</title>
+    <title>First Aid Survivor V2.3</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -78,7 +78,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.1)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.3)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -147,7 +147,7 @@
         <button onclick="switchScreen('menuScreen')" style="font-size: 24px; padding: 15px 40px; background-color: #2196F3;">กลับสู่เมนูหลัก</button>
     </div>
 
-    <!-- 🏪 SHOP PHASE (UI ใหม่แบบไร้บั๊ก) -->
+    <!-- 🏪 SHOP PHASE -->
     <div id="shopScreen" class="screen">
         <div class="shop-layout">
             
@@ -203,7 +203,7 @@
                         <button onclick="surrenderGame()" class="btn-surrender" style="flex: 1;">🏳️ ยอมแพ้</button>
                         <button onclick="nextPhase()" class="btn-next" style="flex: 3;">➡️ ลุย Phase ถัดไป</button>
                     </div>
-                    <button id="btnAdminSkip" onclick="currentPhase = 9; nextPhase();" class="btn-reroll" style="display:none; background-color: #ff5722;">👑 [Admin] ข้ามไป Phase 10</button>
+                    <button id="btnAdminSkip" onclick="currentPhase = 9; nextPhase();" class="btn-reroll" style="display:none; background-color: #ff5722; margin-top: 5px;">👑 [Admin] ข้ามไป Phase 10</button>
                 </div>
                 
                 <!-- Modal แคตตาล็อกยาทั้งหมด (ซ้อนแค่ฝั่งขวา) -->
@@ -584,7 +584,6 @@
                 this.fireTimer = this.fireRate; 
             }
             
-            // ปล่อยพลัง Nova สำหรับบัฟ Air-X
             if (this.inv.air_x > 0 && enemies.length > 0) {
                 this.novaTimer -= dt;
                 if (this.novaTimer <= 0) {
@@ -712,7 +711,7 @@
                 if (phase >= 10) atkAdd = 3 + 1 + loop; 
                 this.atk = 1 + atkAdd;
 
-                this.spd = 2.5; this.size = 20;
+                this.spd = 2.5; this.size = 20; 
                 this.statusList = type === 1 ? ['headache', 'allergy'] : ['stomach', 'scald'];
                 this.isRanged = type === 2; this.shootTimer = 2.0;
             } 
@@ -1039,11 +1038,6 @@
         document.getElementById('shop-atk-stat').innerText = player.atk;
         document.getElementById('shop-def-stat').innerText = defStr;
         document.getElementById('shop-spd-stat').innerText = player.spd;
-        
-        document.getElementById('modal-hp-stat').innerText = hpStr;
-        document.getElementById('modal-atk-stat').innerText = player.atk;
-        document.getElementById('modal-def-stat').innerText = defStr;
-        document.getElementById('modal-spd-stat').innerText = player.spd;
 
         let statusHtml = ""; let hasStatus = false;
         for (let key in player.statuses) {
@@ -1060,7 +1054,6 @@
         document.getElementById('shop-coins').innerText = coins; 
         document.getElementById('shop-diamonds').innerText = currentUser.diamonds; 
         document.getElementById('shop-reroll-cost').innerText = rerollCost; 
-        document.getElementById('full-shop-coins').innerText = coins;
         
         syncStatsToUI();
         syncInventoryUI();
@@ -1178,7 +1171,7 @@
 
     function rerollShop() { 
         if (coins >= rerollCost) { 
-            coins -= rerollCost; rerollCost += 2; // Reroll cost increases faster
+            coins -= rerollCost; rerollCost += 2; 
             updateShopUI(); rollShopCards(); 
         } else alert("เหรียญไม่พอสำหรับ Reroll"); 
     }
@@ -1238,6 +1231,7 @@
         } else {
             if (document.getElementById('fullShopModal').classList.contains('active-modal')) {
                 renderFullShop();
+                document.getElementById('full-shop-coins').innerText = coins;
             }
         }
 
