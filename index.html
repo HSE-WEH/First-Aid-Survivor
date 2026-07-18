@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V1.18 (Full Screen)</title>
+    <title>First Aid Survivor V2.0</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
-        /* ขยาย Canvas เต็มจอ */
         #game-container { position: relative; width: 100vw; height: 100vh; background-color: #000; }
         canvas { display: block; width: 100%; height: 100%; }
         
@@ -24,7 +23,7 @@
         /* ================= Modern Shop UI Layout ================= */
         .shop-layout { display: flex; flex-direction: row; width: 90vw; height: 85vh; max-width: 1400px; background: rgba(20, 20, 20, 0.95); border: 2px solid #4CAF50; border-radius: 12px; box-shadow: 0 0 30px rgba(76, 175, 80, 0.3); overflow: hidden; }
         .shop-left { width: 35%; border-right: 2px solid #333; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: rgba(0, 0, 0, 0.4); }
-        .shop-right { width: 65%; padding: 30px; display: flex; flex-direction: column; justify-content: space-between; background: rgba(30, 30, 30, 0.5); }
+        .shop-right { width: 65%; padding: 30px; display: flex; flex-direction: column; justify-content: space-between; background: rgba(30, 30, 30, 0.5); position: relative; }
         
         .stat-badge { background: rgba(0,0,0,0.6); padding: 12px; border-radius: 8px; border: 1px solid #555; display: flex; justify-content: space-between; font-size: 15px; }
         .stat-badge strong { color: #fff; }
@@ -32,22 +31,24 @@
         .combo-box { background: rgba(40, 40, 40, 0.9); border: 1px solid #4CAF50; border-radius: 8px; padding: 15px; font-size: 14px; }
         
         .shop-right-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #555; padding-bottom: 15px; margin-bottom: 10px; }
-        .shop-cards-wrapper { display: flex; gap: 20px; justify-content: center; margin: 20px 0; }
+        .shop-cards-wrapper { display: flex; gap: 20px; justify-content: center; margin: 15px 0; }
         .shop-card { background: #2a2a2a; border: 2px solid #FFD700; border-radius: 12px; padding: 20px; text-align: center; flex: 1; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .shop-card:hover { transform: translateY(-5px) scale(1.03); background: #383838; box-shadow: 0 8px 20px rgba(255, 215, 0, 0.2); }
         .shop-card.sold { opacity: 0.4; pointer-events: none; border-color: #555; filter: grayscale(100%); }
         .max-badge { color: #ff5555; font-weight: bold; border: 1px solid #ff5555; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: rgba(255,0,0,0.1); margin-left: 5px; }
 
-        .btn-action-group { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
+        .btn-action-group { display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
+        .btn-quick-buy { background: #e67e22; font-size: 16px; padding: 12px; border-radius: 8px; flex: 1; }
         .btn-next { background: #2196F3; font-size: 20px; padding: 15px; border-radius: 8px; }
         .btn-catalog { background: #9c27b0; font-size: 18px; padding: 12px; border-radius: 8px; }
         .btn-reroll { background: #f39c12; font-size: 16px; padding: 12px; border-radius: 8px; }
+        .btn-surrender { background: #e74c3c; font-size: 16px; padding: 12px; border-radius: 8px; }
         
-        /* Modal & Misc */
-        #fullShopModal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 40; flex-direction: column; align-items: center; padding-top: 40px; box-sizing: border-box; }
+        /* Modal ย้ายมาบังแค่ฝั่งขวา */
+        #fullShopModal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20,20,20,0.98); z-index: 40; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; border-radius: 0 12px 12px 0; }
         #fullShopModal.active-modal { display: flex; }
-        .full-shop-list { width: 90%; max-width: 1200px; max-height: 70vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-top: 20px; padding-right: 15px; }
-        .full-shop-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .full-shop-list { width: 100%; max-height: 80%; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-top: 15px; padding-right: 15px; }
+        .full-shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         .full-shop-item { background: #333; padding: 15px; border-radius: 8px; font-size: 14px; border: 1px solid #555; display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
         .full-shop-item:hover { border-color: #4CAF50; background: #444; }
 
@@ -77,7 +78,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V1.18)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.0)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -180,32 +181,37 @@
                 </div>
 
                 <div class="btn-action-group">
-                    <button onclick="rerollShop()" id="btnReroll" class="btn-reroll">🔄 สุ่มกระดานใหม่ (ใช้ <span id="shop-reroll-cost">1</span> เหรียญ)</button>
-                    <button onclick="toggleFullShop(true)" class="btn-catalog">🛒 เปิดแคตตาล็อกยาทั้งหมด (Full Shop)</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="buyQuickItem('air_x')" class="btn-quick-buy">🚀 ซื้อด่วน Air-X ($30)</button>
+                        <button onclick="buyQuickItem('flying_rabit')" class="btn-quick-buy">🚀 ซื้อด่วน Flying Rabit ($30)</button>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="rerollShop()" id="btnReroll" class="btn-reroll" style="flex: 1;">🔄 สุ่มกระดานใหม่ (ใช้ <span id="shop-reroll-cost">1</span> เหรียญ)</button>
+                        <button onclick="toggleFullShop(true)" class="btn-catalog" style="flex: 1;">🛒 เปิดแคตตาล็อกยา (Full Shop)</button>
+                    </div>
                     <button onclick="nextPhase()" class="btn-next">➡️ ลุย Phase ถัดไป</button>
+                    <button onclick="surrenderGame()" class="btn-surrender">🏳️ ยอมแพ้ (จบเกมและบันทึกคะแนน)</button>
                     <button id="btnAdminSkip" onclick="currentPhase = 9; nextPhase();" class="btn-reroll" style="display:none; background-color: #ff5722;">👑 [Admin] ข้ามไป Phase 10</button>
                 </div>
-            </div>
-            
-        </div>
-    </div>
+                
+                <!-- Modal แคตตาล็อกยาทั้งหมด (ซ้อนแค่ฝั่งขวา) -->
+                <div id="fullShopModal">
+                    <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;">
+                        <h2 style="margin: 0; color: #4CAF50; font-size: 24px;">🛒 แคตตาล็อกยาทั้งหมด</h2>
+                        <button onclick="toggleFullShop(false)" style="background-color: #f44336; padding: 8px 20px; font-size: 14px;">ปิด (X)</button>
+                    </div>
+                    
+                    <div class="full-shop-list">
+                        <h3 style="color: #2196F3; border-bottom: 2px solid #555; padding-bottom: 5px; margin-top: 5px;">💊 หมวดหมู่ยาและบัฟทั่วไป</h3>
+                        <div class="full-shop-grid" id="fullShopNormal"></div>
+                        
+                        <h3 style="color: #ff5555; border-bottom: 2px solid #555; padding-bottom: 5px; margin-top: 10px;">🩹 หมวดหมู่อุปกรณ์ทำแผล (รักษา HP & บัฟถาวร)</h3>
+                        <div class="full-shop-grid" id="fullShopCombo"></div>
+                    </div>
+                </div>
 
-    <!-- Modal แคตตาล็อกยาทั้งหมด -->
-    <div id="fullShopModal">
-        <div style="width: 90%; max-width: 1200px; display: flex; justify-content: space-between; align-items: center; background: rgba(20,20,20,0.9); padding: 15px 30px; border-radius: 8px; border: 2px solid #4CAF50;">
-            <h2 style="margin: 0; color: #4CAF50; font-size: 28px;">🛒 แคตตาล็อกยาทั้งหมด (Full Shop)</h2>
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <h2 style="margin:0; color: yellow;">เงินที่มี: 💰 <span id="full-shop-coins">0</span></h2>
-                <button onclick="toggleFullShop(false)" style="background-color: #f44336; padding: 10px 25px; font-size: 16px;">ปิดหน้านี้ (X)</button>
             </div>
-        </div>
-        
-        <div class="full-shop-list">
-            <h3 style="color: #2196F3; border-bottom: 2px solid #555; padding-bottom: 10px; margin-top: 15px;">💊 หมวดหมู่ยาและบัฟทั่วไป</h3>
-            <div class="full-shop-grid" id="fullShopNormal"></div>
             
-            <h3 style="color: #ff5555; border-bottom: 2px solid #555; padding-bottom: 10px; margin-top: 20px;">🩹 หมวดหมู่อุปกรณ์ทำแผล (รักษา HP & บัฟถาวร)</h3>
-            <div class="full-shop-grid" id="fullShopCombo"></div>
         </div>
     </div>
 
@@ -245,7 +251,16 @@
     let currentDiscountItems = []; 
     let adminGodMode = false; 
     let showBuffsUI = true;
-    let reqId = null; // System to prevent loop freezing
+    let reqId = null; 
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas(); 
 
     let player;
     let enemies = [];
@@ -254,16 +269,6 @@
     let drops = []; 
     let enemySpawnTimer = 0;
     let bossSpawnedThisPhase = false;
-
-    // --- FULL SCREEN CANVAS LOGIC ---
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas(); // init
 
     const keys = {};
 
@@ -283,7 +288,7 @@
         { id: 'gumgig', category: 'normal', name: "Gumgig pean", cost: 15, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ความเร็วปืนยิงไวขึ้น" },
         { id: 'apache', category: 'normal', name: "Apache", cost: 15, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ความเร็วปืนยิงไวขึ้น" },
         { id: 'cardamine', category: 'normal', name: "Cardamine", cost: 30, cures: 'rash', maxStack: 3, desc: "แก้ผื่นแพ้ | รับโบนัสเหรียญเมื่อเข้า Shop" },
-        { id: 'golden_cup', category: 'normal', name: "Golden Cup Blam", cost: 30, cures: 'swelling', maxStack: 3, desc: "แก้ผื่นบวม | ขยายระยะการดูดเหรียญ" },
+        { id: 'golden_cup', category: 'normal', name: "Golden Cup Blam", cost: 30, cures: 'swelling', maxStack: 3, desc: "แก้ผื่นบวม | ขยายระยะการดูดเหรียญมหาศาล" },
         { id: 'systral', category: 'normal', name: "Systral cream", cost: 23, cures: 'rash', maxStack: 3, desc: "แก้ผื่นแพ้ | รับโบนัสเหรียญเมื่อเข้า Shop" },
         { id: 'silver_cream', category: 'normal', name: "Silver cream", cost: 45, cures: 'scald', maxStack: 3, desc: "แก้น้ำร้อนลวก | ตกเหรียญเพิ่ม 1-3 เหรียญ" },
         { id: 'oral_paste', category: 'normal', name: "Oral paste", cost: 30, cures: 'mouth_ulcer', maxStack: 3, desc: "แก้แผลในปาก | ขยายกระสุน และ +ATK 1,3,5" },
@@ -465,13 +470,13 @@
     class Player {
         constructor() {
             this.x = canvas.width / 2; this.y = canvas.height / 2; 
-            this.size = 25; // อัปสเกลผู้เล่นใหญ่ขึ้นในจอ Full HD
+            this.size = 25; 
             
             let upgHp = currentUser.upgraded_hp || 0; let upgAtk = currentUser.upgraded_atk || 0; let upgDef = currentUser.upgraded_def || 0; let upgSpd = currentUser.upgraded_spd || 0;
 
             this.baseMaxHp = 10 + upgHp; this.bonusMaxHp = 0; 
             this.baseAtk = 1 + upgAtk; this.baseDef = 0 + upgDef; 
-            this.baseSpd = 4 + upgSpd; // เดินไวขึ้นเพื่อให้วิ่งทั่วจอใหญ่ทัน
+            this.baseSpd = 4 + upgSpd; 
             this.baseFireRate = 1.0; this.baseBullets = 1;
             
             this.hp = this.baseMaxHp; this.maxHp = this.baseMaxHp; this.atk = this.baseAtk; 
@@ -535,7 +540,7 @@
             let baseCount = this.baseBullets - this.activeStatuses.headache;
             this.bulletCount = Math.max(1, baseCount + tyBullets);
             
-            this.magnetRange = (this.inv.golden_cup * 20) + (this.magnetBonusRange || 0);
+            this.magnetRange = (this.inv.golden_cup * 100) + (this.magnetBonusRange || 0);
         }
 
         update(dt) {
@@ -543,13 +548,13 @@
             
             if (this.magnetActiveTime > 0) {
                 this.magnetActiveTime -= dt;
-                let progress = 1 - (this.magnetActiveTime / this.magnetMaxTime); // 0 to 1
-                this.magnetBonusRange = progress * 1500; // รัศมีแม่เหล็กไกลขึ้นสำหรับจอใหญ่
+                let progress = 1 - (this.magnetActiveTime / this.magnetMaxTime); 
+                this.magnetBonusRange = progress * 1500; 
                 if (this.magnetActiveTime <= 0) {
                     this.magnetBonusRange = 0;
                 }
             }
-            this.magnetRange = (this.inv.golden_cup * 20) + (this.magnetBonusRange || 0); 
+            this.magnetRange = (this.inv.golden_cup * 100) + (this.magnetBonusRange || 0); 
 
             let moveSpd = this.spd * 60 * dt;
             if (keys['w'] && this.y > this.size) this.y -= moveSpd;
@@ -566,7 +571,7 @@
                 this.fireTimer = this.fireRate; 
             }
             
-            // ปล่อยพลัง Nova (ยิงรอบทิศ) สำหรับบัฟ Air-X
+            // ปล่อยพลัง Nova สำหรับบัฟ Air-X
             if (this.inv.air_x > 0 && enemies.length > 0) {
                 this.novaTimer -= dt;
                 if (this.novaTimer <= 0) {
@@ -622,7 +627,7 @@
             }
             if (nearest) {
                 let angle = Math.atan2(nearest.y - this.y, nearest.x - this.x);
-                let bSize = 6 + (this.inv.oral_paste * 3); // ขยายใหญ่ขึ้นกว่าเดิมในจอ Full screen
+                let bSize = 6 + (this.inv.oral_paste * 3); 
                 let isPierce = (this.inv.flying_rabit > 0);
                 
                 let critChance = [0, 0.15, 0.30, 0.40][this.inv.eye_lotion] || 0;
@@ -641,7 +646,6 @@
                 };
 
                 if (this.inv.air_x > 0) {
-                    // ยิง 3 แฉก
                     let angles = [-0.15, 0, 0.15];
                     angles.forEach(offset => {
                         fireBulletStream(offset);
@@ -656,7 +660,7 @@
             if (this.isDead) return;
             if (currentUser.is_admin && adminGodMode) return; 
 
-            let dodgeChance = Math.min(0.5, (this.def / 100) * 0.5); // ล็อกหลบหลีก 50%
+            let dodgeChance = Math.min(0.5, (this.def / 100) * 0.5); 
             if (Math.random() < dodgeChance) return; 
             
             let extraDmg = [0, 2, 4, 6][this.activeStatuses.fresh_wound] || 0;
@@ -695,7 +699,7 @@
                 if (phase >= 10) atkAdd = 3 + 1 + loop; 
                 this.atk = 1 + atkAdd;
 
-                this.spd = 2.5; this.size = 20; // ใหญ่ขึ้น
+                this.spd = 2.5; this.size = 20; 
                 this.statusList = type === 1 ? ['headache', 'allergy'] : ['stomach', 'scald'];
                 this.isRanged = type === 2; this.shootTimer = 2.0;
             } 
@@ -715,7 +719,7 @@
                 if (phase >= 10) spd = 3.5 + (5 * 0.4); 
                 this.spd = spd;
 
-                this.size = 18; // ใหญ่ขึ้น
+                this.size = 18; 
                 this.statusList = ['rash', 'swelling', 'fresh_wound']; this.isRanged = false; 
             } 
             else if (type === 4) { 
@@ -731,11 +735,11 @@
                 this.atk = 5 + atkAdd;
                 this.rangedAtk = 3 + atkAdd;
                 
-                this.spd = 2.5; this.size = 25; // ใหญ่ขึ้น
+                this.spd = 2.5; this.size = 25; 
                 this.statusList = ['mouth_ulcer', 'red_eye', 'sore_throat']; this.isRanged = true; this.shootTimer = 2.5; 
             } 
             else if (type === 5) {
-                this.size = 55; // บอสใหญ่ขึ้นมาก
+                this.size = 55; 
                 this.isRanged = true;
                 this.statusList = ['headache', 'allergy', 'stomach', 'scald', 'rash', 'swelling', 'fresh_wound', 'mouth_ulcer', 'red_eye', 'sore_throat'];
                 if (phase === 3) { this.hp = 80; this.atk = 3; this.spd = 2.5; this.fireRateBase = 2.0; }
@@ -935,6 +939,14 @@
 
     function logout() { location.reload(); }
 
+    function surrenderGame() {
+        if(confirm("คุณแน่ใจหรือไม่ว่าต้องการยอมแพ้? (จบเกมและบันทึกคะแนนรอบนี้ทันที)")) {
+            player.hp = 0;
+            player.isDead = true;
+            gameOver();
+        }
+    }
+
     async function startGame() {
         if (gameState === 'PLAYING') return; 
         if (!currentUser.is_admin && currentUser.daily_energy <= 0) { alert("พลังงานหมด!"); return; }
@@ -959,10 +971,11 @@
     }
 
     function syncInventoryUI() {
-        let invHtml = `<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px;">`;
+        let invHtml = `<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 10px;">`;
         for (let key in player.inv) {
             if (player.inv[key] > 0) {
                 let item = ITEMS_DB.find(i => i.id === key);
+                if(!item) continue; // กันบั๊ก
                 let isMax = item.maxStack !== 99 && player.inv[key] >= item.maxStack;
                 let maxBadge = isMax ? `<span style="color:#ff5555; font-weight:bold;">[MAX]</span>` : `[${player.inv[key]}/${item.maxStack === 99 ? '∞' : item.maxStack}]`;
                 invHtml += `<div style="background: rgba(0,0,0,0.4); padding: 5px; border-radius: 4px; text-align: center; border: 1px solid #555;">✔️ ${item.name} ${maxBadge}</div>`;
@@ -1014,11 +1027,6 @@
         document.getElementById('shop-def-stat').innerText = defStr;
         document.getElementById('shop-spd-stat').innerText = player.spd;
         
-        document.getElementById('modal-hp-stat').innerText = hpStr;
-        document.getElementById('modal-atk-stat').innerText = player.atk;
-        document.getElementById('modal-def-stat').innerText = defStr;
-        document.getElementById('modal-spd-stat').innerText = player.spd;
-
         let statusHtml = ""; let hasStatus = false;
         for (let key in player.statuses) {
             if (player.statuses[key] > 0) { 
@@ -1070,7 +1078,6 @@
         if(show) {
             renderFullShop();
             document.getElementById('full-shop-coins').innerText = coins;
-            syncStatsToUI();
         }
     }
 
@@ -1153,9 +1160,16 @@
 
     function rerollShop() { 
         if (coins >= rerollCost) { 
-            coins -= rerollCost; rerollCost += 2; // Reroll cost increases faster
+            coins -= rerollCost; rerollCost += 2; 
             updateShopUI(); rollShopCards(); 
         } else alert("เหรียญไม่พอสำหรับ Reroll"); 
+    }
+
+    function buyQuickItem(itemId) {
+        let itemDef = ITEMS_DB.find(i => i.id === itemId);
+        if (coins < itemDef.cost) { alert("เหรียญไม่พอ!"); return; }
+        if (player.inv[itemId] >= itemDef.maxStack) { alert("คุณมียาชนิดนี้เต็มแล้ว!"); return; }
+        buyItem(itemId, itemDef.cost, false, -1);
     }
 
     function buyItem(itemId, price, isDiscounted, index) { 
@@ -1194,7 +1208,7 @@
 
         player.checkCombos(); 
 
-        if (isDiscounted) {
+        if (isDiscounted && index !== -1) {
             currentDiscountItems[index].bought = true;
             discountedBoughtCount++;
             if (discountedBoughtCount >= 3) {
@@ -1204,7 +1218,9 @@
                 renderDiscountShop();
             }
         } else {
-            renderFullShop();
+            if (document.getElementById('fullShopModal').classList.contains('active-modal')) {
+                renderFullShop();
+            }
         }
 
         player.applyPhaseModifiers(); 
@@ -1357,6 +1373,7 @@
         for (let key in player.inv) {
             if (player.inv[key] > 0) {
                 let item = ITEMS_DB.find(i => i.id === key);
+                if(!item) continue;
                 let maxStr = item.maxStack === 99 ? "∞" : item.maxStack;
                 let isMaxText = (item.maxStack !== 99 && player.inv[key] >= item.maxStack) ? "[MAX]" : "";
                 lines.push({ text: `${item.name} [${player.inv[key]}/${maxStr}] ${isMaxText}`, color: '#55ff55' });
@@ -1410,23 +1427,24 @@
 
         drawStatusUI(ctx);
 
-        let boss = enemies.find(e => e.isBoss);
-        if (boss) {
+        let bosses = enemies.filter(e => e.isBoss);
+        bosses.forEach((boss, index) => {
             let barWidth = 600; 
             let barX = (canvas.width - barWidth) / 2;
-            let barY = 55;
+            let barY = 55 + (index * 35); // แยกบรรทัดกัน
             
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             ctx.fillRect(barX, barY, barWidth, 25); 
-            ctx.fillStyle = 'red';
+            ctx.fillStyle = index === 0 ? '#ff3333' : '#ff9900'; // บอสหลักสีแดง มินิบอสสีส้ม
             ctx.fillRect(barX, barY, barWidth * (boss.hp / boss.maxHp), 25); 
             
             ctx.fillStyle = 'white';
             ctx.font = 'bold 16px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText(`BOSS HP: ${Math.ceil(boss.hp)} / ${Math.ceil(boss.maxHp)}`, canvas.width / 2, barY + 18);
+            let titleStr = index === 0 ? "BOSS HP" : "MINI-BOSS HP";
+            ctx.fillText(`${titleStr}: ${Math.ceil(boss.hp)} / ${Math.ceil(boss.maxHp)}`, canvas.width / 2, barY + 18);
             ctx.textAlign = 'left'; 
-        }
+        });
     }
 </script>
 
