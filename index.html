@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V2.6G</title>
+    <title>First Aid Survivor V2.6H</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -87,12 +87,11 @@
 
     <button id="btnToggleBuff" onclick="toggleBuffUI()">👁️ ซ่อน/แสดงบัฟ</button>
     
-    <!-- Toast Notification Element -->
     <div id="toastNotification"></div>
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6G)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6H)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -214,11 +213,9 @@
                         <button onclick="nextPhase()" class="btn-next" style="flex: 3;">➡️ ลุย Phase ถัดไป</button>
                     </div>
                     
-                    <!-- ปุ่มแอดมินวาร์ป -->
                     <button id="btnAdminSkip" onclick="adminSkipPhase()" class="btn-reroll" style="display:none; background-color: #ff5722; margin-top: 5px;">👑 [Admin] วาร์ปข้าม Phase</button>
                 </div>
                 
-                <!-- Modal แคตตาล็อกยาทั้งหมด -->
                 <div id="fullShopModal">
                     <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;">
                         <h2 style="margin: 0; color: #4CAF50; font-size: 24px;">🛒 แคตตาล็อกยาทั้งหมด</h2>
@@ -380,7 +377,7 @@
                     player.statuses[d]++;
                     showToast(`👑 [Admin] เสกอาการป่วย: ${STATUS_NAMES[d]} (${player.statuses[d]}/3)`, "#ff5555", 2500);
                     player.applyPhaseModifiers();
-                    if (gameState === 'SHOP') syncStatsToUI(); // Update UI in shop
+                    if (gameState === 'SHOP') updateShopUI(); // รีเฟรช UI ร้านค้าทันทีเพื่อโชว์กรอบแดง
                 }
             }
         }
@@ -561,6 +558,18 @@
 
     window.activateCombo = function(comboId, cost, hpBonus) {
         if (coins < cost) { showToast("เหรียญไม่พอ!", "#ff5555", 2500); return; }
+        
+        // เช็คเงื่อนไข Full Combo ต้องปลดล็อคชุด 1,2,3 ให้ครบก่อน
+        if (comboId === 'full_set') {
+            let has1 = player.appliedCombos.has('saline_plaster');
+            let has2 = player.appliedCombos.has('alc_bet');
+            let has3 = player.appliedCombos.has('gauze_dressing');
+            if (!has1 || !has2 || !has3) {
+                showToast("ต้องจ่ายเงินเปิดใช้งานชุด 1, 2 และ 3 ให้ครบก่อน!", "#ff5555", 3500);
+                return;
+            }
+        }
+        
         coins -= cost;
         player.appliedCombos.add(comboId);
         player.bonusMaxHp += hpBonus;
@@ -1161,19 +1170,19 @@
         let btnRabit = document.getElementById('btn-quick-rabbit');
         if (btnAirX) {
             if (player.inv.air_x > 0) {
-                btnAirX.innerHTML = `<span style="font-weight:bold;">🚀 Air-X <span style="color:#0f0;">[✅ ACTIVATED]</span></span><span style="font-size:12px; color:#eee; margin-top:2px;">ปืน 3 แฉก (ทำงานแล้ว)</span>`;
+                btnAirX.innerHTML = `<div style="font-weight:bold;">🚀 Air-X <span style="color:#0f0;">[✅ ACTIVATED]</span></div><small style="font-size:12px; color:#eee;">ปืน 3 แฉก (ทำงานแล้ว)</small>`;
                 btnAirX.style.backgroundColor = "#27ae60";
             } else {
-                btnAirX.innerHTML = `<span style="font-weight:bold;">🚀 ซื้อด่วน Air-X ($30)</span><span style="font-size:12px; color:#eee; margin-top:2px;">ปืน 3 แฉก (1 เฟส)</span>`;
+                btnAirX.innerHTML = `<div style="font-weight:bold;">🚀 ซื้อด่วน Air-X ($30)</div><small style="font-size:12px; color:#eee;">ปืน 3 แฉก (1 เฟส)</small>`;
                 btnAirX.style.backgroundColor = "#e67e22";
             }
         }
         if (btnRabit) {
             if (player.inv.flying_rabit > 0) {
-                btnRabit.innerHTML = `<span style="font-weight:bold;">🚀 Flying Rabit <span style="color:#0f0;">[✅ ACTIVATED]</span></span><span style="font-size:12px; color:#eee; margin-top:2px;">กระสุนทะลุ (ทำงานแล้ว)</span>`;
+                btnRabit.innerHTML = `<div style="font-weight:bold;">🚀 Flying Rabit <span style="color:#0f0;">[✅ ACTIVATED]</span></div><small style="font-size:12px; color:#eee;">กระสุนทะลุ (ทำงานแล้ว)</small>`;
                 btnRabit.style.backgroundColor = "#27ae60";
             } else {
-                btnRabit.innerHTML = `<span style="font-weight:bold;">🚀 ซื้อด่วน Flying Rabit ($30)</span><span style="font-size:12px; color:#eee; margin-top:2px;">กระสุนทะลุศัตรู (1 เฟส)</span>`;
+                btnRabit.innerHTML = `<div style="font-weight:bold;">🚀 ซื้อด่วน Flying Rabit ($30)</div><small style="font-size:12px; color:#eee;">กระสุนทะลุศัตรู (1 เฟส)</small>";
                 btnRabit.style.backgroundColor = "#e67e22";
             }
         }
@@ -1360,8 +1369,6 @@
         if (itemId === 'dressing_set') { player.hp += 5; }
         
         if (itemId === 'cpm') { player.cpmDebuffToApply++; }
-
-        player.checkCombos(); 
 
         if (isDiscounted && index !== -1) {
             currentDiscountItems[index].bought = true;
