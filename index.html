@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V2.6C</title>
+    <title>First Aid Survivor V2.6D</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -82,7 +82,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6C)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6D)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -155,7 +155,6 @@
     <div id="shopScreen" class="screen">
         <div class="shop-layout">
             
-            <!-- ⬅️ ซ้าย: Status & Inventory -->
             <div class="shop-left">
                 <h3 style="margin: 0; color: #4CAF50; border-bottom: 2px solid #555; padding-bottom: 10px;">📊 Player Status</h3>
                 
@@ -175,7 +174,6 @@
                 </div>
             </div>
 
-            <!-- ➡️ ขวา: Shop Cards & Actions -->
             <div class="shop-right">
                 <div class="shop-right-header">
                     <h1 style="margin:0; font-size: 32px;">Phase <span id="shop-phase-num" style="color: #4CAF50;"></span> - Pharmacy</h1>
@@ -207,7 +205,6 @@
                     </div>
                 </div>
                 
-                <!-- Modal แคตตาล็อกยาทั้งหมด -->
                 <div id="fullShopModal">
                     <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;">
                         <h2 style="margin: 0; color: #4CAF50; font-size: 24px;">🛒 แคตตาล็อกยาทั้งหมด</h2>
@@ -227,7 +224,6 @@
                 </div>
 
             </div>
-            
         </div>
     </div>
 
@@ -269,11 +265,12 @@
     let reqId = null; 
     let toastTimeout = null; 
 
+    // --- System Fallback ป้องกันจอดำ (0x0 Canvas) ---
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth || 1280;
+        canvas.height = window.innerHeight || 720;
     }
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas(); 
@@ -348,7 +345,6 @@
         let k = e.key.toLowerCase();
         keys[k] = true;
         
-        // Admin Hotkeys
         if (currentUser && currentUser.is_admin && gameState === 'PLAYING') {
             if (k === 'g') adminGodMode = !adminGodMode;
             if (k === 'c') coins += 1000;
@@ -397,7 +393,8 @@
             let lpThai = new Date(lp.getTime() + (lp.getTimezoneOffset() * 60000) + (3600000 * 7));
             if (lpThai.getDate() !== thaiNow.getDate() || lpThai.getMonth() !== thaiNow.getMonth()) {
                 currentUser.daily_energy = 5; currentUser.last_played_at = new Date().toISOString();
-                updateTopBar(); supabaseClient.from('players').update({ daily_energy: 5, last_played_at: currentUser.last_played_at }).eq('username', currentUser.username).then().catch(e => console.error(e));
+                updateTopBar(); 
+                try { supabaseClient.from('players').update({ daily_energy: 5, last_played_at: currentUser.last_played_at }).eq('username', currentUser.username).then(()=>{}).catch(()=>{}); } catch(e){}
             }
         }
         if (currentUser.daily_energy < 5) {
@@ -437,7 +434,7 @@
                 }]).select().single();
                 if (insErr) throw insErr; currentUser = newP;
                 
-                await supabaseClient.from('leaderboards').insert([{ username: userStr, max_score: 0, max_phase: 1 }]);
+                try { await supabaseClient.from('leaderboards').insert([{ username: userStr, max_score: 0, max_phase: 1 }]); }catch(e){}
                 document.getElementById('fullname').style.display = 'none'; document.getElementById('fullname').value = '';
             }
             
@@ -458,13 +455,12 @@
     async function saveScoreToDB() {
         if (!currentUser) return;
         try {
-            // ไม่ await ตอนจบเกมเพื่อให้ลื่นไหล
-            supabaseClient.from('players').update({ diamonds: currentUser.diamonds, daily_energy: currentUser.daily_energy }).eq('username', currentUser.username).then().catch(e => console.error(e));
+            try { supabaseClient.from('players').update({ diamonds: currentUser.diamonds, daily_energy: currentUser.daily_energy }).eq('username', currentUser.username).then(()=>{}).catch(()=>{}); }catch(e){}
             if (currentUser.is_admin) return;
 
             const { data: cur } = await supabaseClient.from('leaderboards').select('max_score').eq('username', currentUser.username).maybeSingle();
             let oldScore = cur ? cur.max_score : 0;
-            if (score > oldScore) { supabaseClient.from('leaderboards').upsert({ username: currentUser.username, max_score: score, max_phase: currentPhase, updated_at: new Date() }).then().catch(e => console.error(e)); } 
+            if (score > oldScore) { try{ supabaseClient.from('leaderboards').upsert({ username: currentUser.username, max_score: score, max_phase: currentPhase, updated_at: new Date() }).then(()=>{}).catch(()=>{}); }catch(e){} } 
         } catch(e){}
     }
 
@@ -514,7 +510,7 @@
 
         currentUser.diamonds -= cost; currentUser[`upgraded_${stat}`] = currentLvl + 1;
         updateUpgradeUI(); updateTopBar();
-        try { supabaseClient.from('players').update({ diamonds: currentUser.diamonds, [`upgraded_${stat}`]: currentUser[`upgraded_${stat}`] }).eq('username', currentUser.username).then().catch(e => console.error(e)); } catch (err) {}
+        try { await supabaseClient.from('players').update({ diamonds: currentUser.diamonds, [`upgraded_${stat}`]: currentUser[`upgraded_${stat}`] }).eq('username', currentUser.username); } catch (err) {}
     }
 
     // ----------------------------------------------------------------
@@ -537,7 +533,7 @@
             
             this.fireTimer = 0; this.magnetRange = 0;
             this.magnetActiveTime = 0; this.magnetMaxTime = 1.2; this.magnetBonusRange = 0;
-            this.invulnerableTimer = 0; // I-Frame
+            this.invulnerableTimer = 0; 
 
             this.isDead = false; 
             this.statuses = { headache: 0, allergy: 0, stomach: 0, rash: 0, swelling: 0, mouth_ulcer: 0, red_eye: 0, sore_throat: 0, fresh_wound: 0, scald: 0 }; 
@@ -700,7 +696,7 @@
         takeDamage(amt, statusList, isBoss = false) {
             if (this.isDead) return false;
             if (currentUser && currentUser.is_admin && adminGodMode) return false; 
-            if (this.invulnerableTimer > 0) return false;
+            if (this.invulnerableTimer > 0) return false; 
 
             let dodgeChance = Math.min(0.7, (this.def / 100) * 0.7); 
             if (Math.random() < dodgeChance) return true; 
@@ -1005,27 +1001,33 @@
     }
 
     function startGame() {
-        if (gameState === 'PLAYING') return; 
-        if (!currentUser.is_admin && currentUser.daily_energy <= 0) { showToast("พลังงานหมด!", "#ff5555"); return; }
-        if (!currentUser.is_admin) currentUser.daily_energy -= 1; 
-        
-        currentUser.last_played_at = new Date().toISOString(); 
-        updateTopBar();
-        
-        // เซฟเบื้องหลัง ไม่บล็อกหน้าจอเพื่อป้องกันการค้าง
-        supabaseClient.from('players').update({ 
-            daily_energy: currentUser.daily_energy, 
-            last_played_at: currentUser.last_played_at 
-        }).eq('username', currentUser.username).then().catch(e => console.error(e));
-        
-        player = new Player(); player.applyPhaseModifiers(); 
-        enemies = []; bullets = []; enemyBullets = []; drops = [];
-        currentPhase = 1; phaseTimer = 30; score = 0; coins = 0; adminGodMode = false;
-        
-        resetKeys(); 
-        gameState = 'PLAYING'; 
-        switchScreen(null); 
-        startLoop();
+        try {
+            if (gameState === 'PLAYING') return; 
+            if (!currentUser.is_admin && currentUser.daily_energy <= 0) { showToast("พลังงานหมด!", "#ff5555"); return; }
+            if (!currentUser.is_admin) currentUser.daily_energy -= 1; 
+            
+            currentUser.last_played_at = new Date().toISOString(); 
+            updateTopBar();
+            
+            try {
+                supabaseClient.from('players').update({ 
+                    daily_energy: currentUser.daily_energy, 
+                    last_played_at: currentUser.last_played_at 
+                }).eq('username', currentUser.username).then(()=>{}).catch(()=>{});
+            } catch(err){}
+            
+            player = new Player(); player.applyPhaseModifiers(); 
+            enemies = []; bullets = []; enemyBullets = []; drops = [];
+            currentPhase = 1; phaseTimer = 30; score = 0; coins = 0; adminGodMode = false;
+            
+            resetKeys(); 
+            gameState = 'PLAYING'; 
+            switchScreen(null); 
+            startLoop();
+        } catch (err) {
+            console.error("Start Game Error:", err);
+            showToast("ระบบขัดข้อง: " + err.message, "#ff0000");
+        }
     }
 
     function syncInventoryUI() {
@@ -1139,7 +1141,7 @@
             showToast(`ได้รับโบนัสเหรียญจบด่าน: +${cardBonus + sysBonus}`, "#FFD700");
         }
 
-        try { supabaseClient.from('players').update({ diamonds: currentUser.diamonds }).eq('username', currentUser.username).then().catch(e => console.error(e)); } catch(e){}
+        try { supabaseClient.from('players').update({ diamonds: currentUser.diamonds }).eq('username', currentUser.username).then().catch(()=>{}); } catch(e){}
 
         rerollCost = currentPhase; discountedBoughtCount = 0;
         
@@ -1183,7 +1185,8 @@
         const container = document.getElementById('shopCards'); container.innerHTML = ''; 
         
         for(let i=0; i<3; i++) { 
-            let item = getRandomShopItem();
+            let randomIndex = Math.floor(Math.random() * weightedItems.length);
+            let item = weightedItems[randomIndex] || ITEMS_DB[0]; 
             let discPrice = Math.ceil(item.cost * 0.3); 
             currentDiscountItems.push({ ...item, discPrice: discPrice, bought: false });
         }
@@ -1307,7 +1310,6 @@
         } else {
             if (document.getElementById('fullShopModal').classList.contains('active-modal')) {
                 renderFullShop();
-                document.getElementById('full-shop-coins').innerText = coins;
             }
         }
 
@@ -1333,7 +1335,7 @@
     }
 
     // ----------------------------------------------------------------
-    // 🔄 GAME LOOP (Anti-Freeze Protected)
+    // 🔄 GAME LOOP (Anti-Freeze Protected & Crash Reporter)
     // ----------------------------------------------------------------
 
     function startLoop() {
@@ -1358,17 +1360,35 @@
     }
 
     function gameLoop(timestamp) {
-        if (gameState !== 'PLAYING') return;
-        if (!lastTime) { lastTime = timestamp; reqId = requestAnimationFrame(gameLoop); return; }
+        try {
+            if (gameState !== 'PLAYING') return;
+            if (!lastTime) { lastTime = timestamp; reqId = requestAnimationFrame(gameLoop); return; }
 
-        let dt = (timestamp - lastTime) / 1000; 
-        if (dt > 0.05) dt = 0.05; 
-        if (dt < 0) dt = 0; 
-        lastTime = timestamp;
+            let dt = (timestamp - lastTime) / 1000; 
+            if (dt > 0.05) dt = 0.05; 
+            if (dt < 0) dt = 0; 
+            lastTime = timestamp;
 
-        update(dt); 
-        draw(); 
-        reqId = requestAnimationFrame(gameLoop);
+            update(dt); 
+            draw(); 
+            reqId = requestAnimationFrame(gameLoop);
+        } catch (err) {
+            // หากเกิด Crash จอจะไม่ดำ แต่จะโชว์ Error สีแดงให้รู้ทันที
+            console.error("GameLoop Crash:", err);
+            ctx.fillStyle = '#aa0000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'white';
+            ctx.font = '24px Arial';
+            ctx.fillText("CRASH DETECTED:", 50, 50);
+            ctx.fillText(err.message, 50, 90);
+            if (err.stack) {
+                ctx.font = '14px Arial';
+                let lines = err.stack.split('\n');
+                for (let i = 0; i < lines.length; i++) {
+                    ctx.fillText(lines[i], 50, 130 + (i * 20));
+                }
+            }
+        }
     }
 
     function update(dt) {
