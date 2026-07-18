@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V2.6 I</title>
+    <title>First Aid Survivor V2.6J</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -71,6 +71,10 @@
         #btnToggleBuff { position: absolute; top: 50px; right: 20px; z-index: 15; background: rgba(0,0,0,0.6); padding: 8px 15px; font-size: 14px; border: 1px solid #aaa; color: white; border-radius: 5px; cursor: pointer; display: none; }
         
         #toastNotification { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.85); color: #fff; padding: 20px 40px; border-radius: 12px; border: 2px solid #ffeb3b; font-size: 24px; font-weight: bold; z-index: 1000; opacity: 0; pointer-events: none; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.6); display: none; }
+
+        /* CSS สำหรับรายการ Leaderboard */
+        .lb-entry { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #555; }
+        .lb-entry:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
@@ -92,7 +96,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6 I)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6J)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -149,7 +153,7 @@
     <!-- Leaderboard -->
     <div id="leaderboardScreen" class="screen">
         <h2 style="font-size: 36px;">🏆 Leader Board (Top 10)</h2>
-        <div id="leaderboardList" style="text-align: left; background: #333; padding: 20px; border-radius: 8px; width: 500px; max-height: 400px; overflow-y: auto; margin: 20px 0; font-size: 18px; border: 2px solid #FFD700;">Loading...</div>
+        <div id="leaderboardList" style="background: #333; padding: 20px; border-radius: 8px; width: 500px; max-height: 400px; overflow-y: auto; margin: 20px 0; font-size: 18px; border: 2px solid #FFD700;">Loading...</div>
         <button onclick="switchScreen('menuScreen')" style="background-color: #777; padding: 15px 40px; font-size: 18px;">กลับสู่เมนูหลัก</button>
     </div>
     
@@ -250,10 +254,7 @@
         bullet: new Image(), enemyBullet: new Image(), enemy1: new Image(), enemy2: new Image(), 
         enemy3: new Image(), enemy4: new Image(), boss: new Image()    
     };
-    ASSETS.player.src = ''; ASSETS.coin.src = ''; ASSETS.diamond.src = ''; ASSETS.magnet.src = '';
-    ASSETS.bullet.src = ''; ASSETS.enemyBullet.src = ''; ASSETS.enemy1.src = ''; ASSETS.enemy2.src = '';
-    ASSETS.enemy3.src = ''; ASSETS.enemy4.src = ''; ASSETS.boss.src = '';
-
+    
     function drawSprite(ctx, img, x, y, size, fallbackDraw) {
         if (img && img.complete && img.naturalWidth > 0) { ctx.drawImage(img, x - size, y - size, size * 2, size * 2); } 
         else { fallbackDraw(); }
@@ -283,6 +284,10 @@
     function resizeCanvas() {
         canvas.width = window.innerWidth || 1280;
         canvas.height = window.innerHeight || 720;
+        if (typeof player !== 'undefined' && player && !player.isDead) {
+            if (player.x > canvas.width - player.size) player.x = canvas.width - player.size;
+            if (player.y > canvas.height - player.size) player.y = canvas.height - player.size;
+        }
     }
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas(); 
@@ -1560,8 +1565,7 @@
             let groupSize = Math.floor(Math.random() * (maxSpawn - minSpawn + 1)) + minSpawn;
             if (currentPhase >= 5) groupSize += Math.floor(currentPhase / 2); 
             
-            let swellLv = Math.min(player.activeStatuses.swelling, 3);
-            let extraEnemies = [0, 10, 20, 30][swellLv] || 0;
+            let extraEnemies = [0, 10, 20, 30][player.activeStatuses.swelling] || 0;
             if (extraEnemies > 0 && Math.random() < 0.3) groupSize += 2; 
 
             let isInside = Math.random() < 0.5;
