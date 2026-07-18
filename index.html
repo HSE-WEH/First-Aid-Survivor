@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V2.5</title>
+    <title>First Aid Survivor V2.6</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -84,7 +84,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.5)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -323,7 +323,6 @@
         { id: 'dressing_set', category: 'combo', name: "Dressing set", cost: 14, cures: 'hp', maxStack: 99, desc: "Heal 5 | คู่กับ Gauze รับ +5 MaxHP ถาวร" }
     ];
 
-    // --- ฟังก์ชันแสดงข้อความเด้งกลางจอ (Toast Notification) ---
     function showToast(message, color = "#ffeb3b", duration = 3000) {
         const toast = document.getElementById('toastNotification');
         toast.innerHTML = message;
@@ -589,7 +588,7 @@
             let baseCount = this.baseBullets - this.activeStatuses.headache;
             this.bulletCount = Math.max(1, baseCount + tyBullets);
             
-            // เนิร์ฟแม่เหล็กเหลือ Stack ละ 60
+            // เนิร์ฟแม่เหล็กเหลือ 60px ต่อระดับ (เดิม 100)
             this.magnetRange = (this.inv.golden_cup * 60) + (this.magnetBonusRange || 0);
         }
 
@@ -599,12 +598,11 @@
             if (this.magnetActiveTime > 0) {
                 this.magnetActiveTime -= dt;
                 let progress = 1 - (this.magnetActiveTime / this.magnetMaxTime); 
-                this.magnetBonusRange = progress * 1200; 
+                this.magnetBonusRange = progress * 1500; 
                 if (this.magnetActiveTime <= 0) {
                     this.magnetBonusRange = 0;
                 }
             }
-            // คำนวณรัศมีอีกรอบ
             this.magnetRange = (this.inv.golden_cup * 60) + (this.magnetBonusRange || 0); 
 
             let moveSpd = this.spd * 60 * dt;
@@ -622,7 +620,6 @@
                 this.fireTimer = this.fireRate; 
             }
             
-            // ปล่อยพลัง Nova สำหรับบัฟ Air-X
             if (this.inv.air_x > 0 && enemies.length > 0) {
                 this.novaTimer -= dt;
                 if (this.novaTimer <= 0) {
@@ -896,7 +893,7 @@
                         if (Math.random() > rashChance || Math.random() < scaldChance) dropCoin = false;
 
                         if (dropCoin) {
-                            if (drops.length > 250) drops.shift(); // กันแลค
+                            if (drops.length > 250) drops.shift(); // ลิมิตไอเทมตกบนจอ
                             drops.push(new ItemDrop(e.x, e.y, 'coin'));
                             let silverChance = [0, 0.20, 0.35, 0.50][player.inv.silver_cream] || 0;
                             if (Math.random() < silverChance) {
@@ -1032,9 +1029,9 @@
                 let item = ITEMS_DB.find(i => i.id === key);
                 if(!item) continue; 
                 
-                // ถ้ายาเป็นอินฟินิตี้ ซ่อนตัวหนังสือเหลือแค่ ✔️ ยา 
                 let isMax = item.maxStack !== 99 && player.inv[key] >= item.maxStack;
                 let maxBadge = "";
+                // ซ่อนตัวเลข 1/∞ ถ้ายาเป็นประเภท Max 99
                 if (item.maxStack !== 99) {
                     maxBadge = isMax ? `<span style="color:#ff5555; font-weight:bold;">[MAX]</span>` : `[${player.inv[key]}/${item.maxStack}]`;
                 }
@@ -1083,15 +1080,11 @@
         let hpStr = `${Math.ceil(player.hp)} / ${player.maxHp}`;
         let defStr = `${player.def} (หลบหลีก ${dodgePerc}%)`;
         
+        // เราจะไม่ไปยุ่งกับ modal-hp-stat อีกต่อไป ป้องกันบักพังทลาย
         document.getElementById('shop-hp-stat').innerText = hpStr;
         document.getElementById('shop-atk-stat').innerText = player.atk;
         document.getElementById('shop-def-stat').innerText = defStr;
         document.getElementById('shop-spd-stat').innerText = player.spd;
-        
-        document.getElementById('modal-hp-stat').innerText = hpStr;
-        document.getElementById('modal-atk-stat').innerText = player.atk;
-        document.getElementById('modal-def-stat').innerText = defStr;
-        document.getElementById('modal-spd-stat').innerText = player.spd;
 
         let statusHtml = ""; let hasStatus = false;
         for (let key in player.statuses) {
@@ -1108,7 +1101,10 @@
         document.getElementById('shop-coins').innerText = coins; 
         document.getElementById('shop-diamonds').innerText = currentUser.diamonds; 
         document.getElementById('shop-reroll-cost').innerText = rerollCost; 
-        document.getElementById('full-shop-coins').innerText = coins;
+        
+        // ใน 2.6 เราตัด Full Shop Coins ทิ้งจาก Modal แล้ว
+        let modalCoins = document.getElementById('full-shop-coins');
+        if (modalCoins) modalCoins.innerText = coins;
         
         syncStatsToUI();
         syncInventoryUI();
@@ -1143,7 +1139,8 @@
         document.getElementById('fullShopModal').className = show ? 'active-modal' : '';
         if(show) {
             renderFullShop();
-            document.getElementById('full-shop-coins').innerText = coins;
+            let modalCoins = document.getElementById('full-shop-coins');
+            if (modalCoins) modalCoins.innerText = coins;
         }
     }
 
@@ -1180,7 +1177,7 @@
                 let isMax = item.maxStack !== 99 && player.inv[item.id] >= item.maxStack;
                 let maxBadge = isMax ? `<span class="max-badge">MAX</span>` : "";
                 
-                // สำหรับหน้าจอซื้อ ลบ 1/∞ ออกเหมือนกัน 
+                // ไม่โชว์ 1/∞
                 let maxStr = item.maxStack === 99 ? "" : `[${player.inv[item.id]}/${item.maxStack}]`;
 
                 container.innerHTML += `
@@ -1189,7 +1186,7 @@
                         <p style="font-size:13px; margin:10px 0; color: #ddd; height: 35px;">${item.desc}</p>
                         <p style="color:yellow; font-weight:bold; margin:5px 0; text-decoration: line-through; color:gray;">$${item.cost}</p>
                         <p style="color:yellow; font-weight:bold; margin:5px 0; font-size:24px;">$${item.discPrice}</p>
-                        <p style="font-size:11px; color:#aaa; margin-top:10px;">มีอยู่: ${maxStr}</p>
+                        <p style="font-size:11px; color:#aaa; margin-top:10px;">${maxStr ? `มีอยู่: ${maxStr}` : ""}</p>
                     </div>`;
             }
         });
@@ -1200,19 +1197,21 @@
         const cCombo = document.getElementById('fullShopCombo'); cCombo.innerHTML = '';
         
         ITEMS_DB.forEach(item => {
+            let maxStr = item.maxStack === 99 ? "∞" : item.maxStack;
             let isMax = item.maxStack !== 99 && player.inv[item.id] >= item.maxStack;
             let maxBadge = isMax ? `<span class="max-badge">MAX</span>` : "";
-            let maxStr = item.maxStack === 99 ? "" : `[${player.inv[item.id]}/${item.maxStack}]`;
 
             let btnText = isMax ? 'ซื้อรักษาโรค' : 'ซื้อ';
             let btnColor = isMax ? '#555' : '#2196F3';
             let btnBorder = isMax ? '1px solid #ff5555' : 'none';
 
+            let displayMaxStr = item.maxStack === 99 ? "" : `[${player.inv[item.id]}/${maxStr}]`;
+
             let htmlStr = `
                 <div class="full-shop-item" style="${isMax ? 'border-color:#ff5555;' : ''}">
                     <div style="width: 100%; text-align: left;">
                         <strong style="color: #4CAF50; font-size:16px;">${item.name}</strong> ${maxBadge}
-                        <span style="font-size:12px; color:#aaa;">${maxStr !== "" ? `มีอยู่: ${maxStr}` : ""}</span><br>
+                        <span style="font-size:12px; color:#aaa;">${displayMaxStr !== "" ? `มีอยู่: ${displayMaxStr}` : ""}</span><br>
                         <span style="font-size:12px; color:#ddd; display: block; margin-top: 5px;">${item.desc}</span>
                     </div>
                     <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
@@ -1288,7 +1287,8 @@
         } else {
             if (document.getElementById('fullShopModal').classList.contains('active-modal')) {
                 renderFullShop();
-                document.getElementById('full-shop-coins').innerText = coins;
+                let modalCoins = document.getElementById('full-shop-coins');
+                if (modalCoins) modalCoins.innerText = coins;
             }
         }
 
@@ -1296,7 +1296,7 @@
         updateShopUI();
     }
 
-    // ล็อกปุ่มกันผู้เล่นกดรัวๆ (แก้บั๊กค้าง)
+    // ล็อกปุ่มกดลุยด่าน ป้องกันเบิ้ลคลิก
     function nextPhase() {
         if (gameState === 'PLAYING') return; 
         gameState = 'PLAYING'; 
@@ -1320,7 +1320,7 @@
 
     function startLoop() {
         if (reqId) cancelAnimationFrame(reqId);
-        lastTime = 0;
+        lastTime = performance.now(); // รีเซ็ตเวลาตั้งต้นให้เป๊ะ ป้องกันเฟรมเรตกระโดดเวลาแวะร้านค้านานๆ
         reqId = requestAnimationFrame(gameLoop);
     }
 
@@ -1341,10 +1341,9 @@
 
     function gameLoop(timestamp) {
         if (gameState !== 'PLAYING') return;
-        if (!lastTime) lastTime = timestamp; // ล็อกเวลาตั้งต้นให้เป๊ะ
 
         let dt = (timestamp - lastTime) / 1000; 
-        if (dt > 0.1) dt = 0.1; 
+        if (dt > 0.1) dt = 0.1; // Limit delta time to prevent massive jumps
         if (dt < 0) dt = 0; 
         lastTime = timestamp;
 
@@ -1398,7 +1397,7 @@
             else if (edge === 2) { baseX = Math.random() * canvas.width; baseY = canvas.height - offset; }
             else { baseX = offset; baseY = Math.random() * canvas.height; }
 
-            // ลิมิตมอนสเตอร์ไม่เกิน 200 ตัว ป้องกันเกมค้าง (Anti-freeze)
+            // ล็อกจำนวนศัตรูบนจอไม่ให้ล้นจนเกมค้าง
             if (enemies.length < 200) {
                 for(let i=0; i<groupSize; i++) {
                     let type = 1; let rand = Math.random();
