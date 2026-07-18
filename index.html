@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V2.6E</title>
+    <title>First Aid Survivor V2.6F</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -49,6 +49,7 @@
         .btn-reroll { background: #f39c12; font-size: 16px; padding: 12px; border-radius: 8px; margin: 0 auto; display: block; width: 350px; }
         .btn-surrender { background: #e74c3c; font-size: 16px; padding: 12px; border-radius: 8px; }
         
+        /* Modal ซ้อนเฉพาะฝั่งขวา */
         #fullShopModal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20,20,20,0.98); z-index: 40; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; border-radius: 0 12px 12px 0; }
         #fullShopModal.active-modal { display: flex; }
         .full-shop-list { width: 100%; max-height: 80%; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-top: 15px; padding-right: 15px; }
@@ -65,6 +66,7 @@
         
         #btnToggleBuff { position: absolute; top: 50px; right: 20px; z-index: 15; background: rgba(0,0,0,0.6); padding: 8px 15px; font-size: 14px; border: 1px solid #aaa; color: white; border-radius: 5px; cursor: pointer; display: none; }
         
+        /* Floating Toast Notification */
         #toastNotification { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.85); color: #fff; padding: 20px 40px; border-radius: 12px; border: 2px solid #ffeb3b; font-size: 24px; font-weight: bold; z-index: 1000; opacity: 0; pointer-events: none; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.6); display: none; }
     </style>
 </head>
@@ -82,11 +84,12 @@
 
     <button id="btnToggleBuff" onclick="toggleBuffUI()">👁️ ซ่อน/แสดงบัฟ</button>
     
+    <!-- Toast Notification Element -->
     <div id="toastNotification"></div>
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6E)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6F)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -159,6 +162,7 @@
     <div id="shopScreen" class="screen">
         <div class="shop-layout">
             
+            <!-- ⬅️ ซ้าย: Status & Inventory -->
             <div class="shop-left">
                 <h3 style="margin: 0; color: #4CAF50; border-bottom: 2px solid #555; padding-bottom: 10px;">📊 Player Status</h3>
                 
@@ -178,6 +182,7 @@
                 </div>
             </div>
 
+            <!-- ➡️ ขวา: Shop Cards & Actions -->
             <div class="shop-right">
                 <div class="shop-right-header">
                     <h1 style="margin:0; font-size: 32px;">Phase <span id="shop-phase-num" style="color: #4CAF50;"></span> - Pharmacy</h1>
@@ -187,6 +192,7 @@
                     </div>
                 </div>
 
+                <!-- โซนสุ่มการ์ด -->
                 <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
                     <h3 style="text-align:center; margin: 10px 0; color:#4CAF50; font-size: 22px;">📦 สินค้าสุ่มลดราคาพิเศษ (70% Off)</h3>
                     <div class="shop-cards-wrapper" id="shopCards">
@@ -195,6 +201,7 @@
                     <button onclick="rerollShop()" id="btnReroll" class="btn-reroll">🔄 สุ่มกระดานใหม่ (ใช้ <span id="shop-reroll-cost">1</span> เหรียญ)</button>
                 </div>
 
+                <!-- โซนปุ่มกดด้านล่าง -->
                 <div class="btn-action-group">
                     <button onclick="toggleFullShop(true)" class="btn-catalog">🛒 เปิดแคตตาล็อกยาทั้งหมด (Full Shop)</button>
                     
@@ -207,11 +214,9 @@
                         <button onclick="surrenderGame()" class="btn-surrender" style="flex: 1;">🏳️ ยอมแพ้</button>
                         <button onclick="nextPhase()" class="btn-next" style="flex: 3;">➡️ ลุย Phase ถัดไป</button>
                     </div>
-                    
-                    <button id="btnAdminSkip" onclick="currentPhase = 9; nextPhase();" class="btn-reroll" style="display:none; background-color: #ff5722; margin-top: 5px;">👑 [Admin] ข้ามไป Phase 10</button>
                 </div>
                 
-                <!-- Modal แคตตาล็อกยาทั้งหมด -->
+                <!-- Modal แคตตาล็อกยาทั้งหมด (ซ้อนแค่ฝั่งขวา) -->
                 <div id="fullShopModal">
                     <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;">
                         <h2 style="margin: 0; color: #4CAF50; font-size: 24px;">🛒 แคตตาล็อกยาทั้งหมด</h2>
@@ -231,6 +236,7 @@
                 </div>
 
             </div>
+            
         </div>
     </div>
 
@@ -551,6 +557,17 @@
         try { supabaseClient.from('players').update({ diamonds: currentUser.diamonds, [`upgraded_${stat}`]: currentUser[`upgraded_${stat}`] }).eq('username', currentUser.username).then().catch(()=>{}); } catch (err) {}
     }
 
+    window.activateCombo = function(comboId, cost, hpBonus) {
+        if (coins < cost) { showToast("เหรียญไม่พอ!", "#ff5555", 2500); return; }
+        coins -= cost;
+        player.appliedCombos.add(comboId);
+        player.bonusMaxHp += hpBonus;
+        player.hp += hpBonus;
+        showToast(`ปลดล็อกคอมโบสำเร็จ (+${hpBonus} Max HP)`, "#0f0", 3000);
+        player.applyPhaseModifiers();
+        updateShopUI();
+    }
+
     // ----------------------------------------------------------------
     // ⚔️ GAME MECHANICS
     // ----------------------------------------------------------------
@@ -570,7 +587,7 @@
             this.def = this.baseDef; this.spd = this.baseSpd; this.fireRate = 1.0; this.bulletCount = 1;
             
             this.fireTimer = 0; this.magnetRange = 0;
-            this.magnetActiveTime = 0; this.magnetMaxTime = 1.2; this.magnetBonusRange = 0;
+            this.magnetActiveTime = 0; this.magnetMaxTime = 1.5; this.magnetBonusRange = 0;
             this.invulnerableTimer = 0; 
 
             this.isDead = false; 
@@ -581,24 +598,6 @@
             
             this.appliedCombos = new Set();
             this.cpmDebuffToApply = 0; this.activeCpmDebuff = 0;
-        }
-
-        checkCombos() {
-            let inv = this.inv; let applied = this.appliedCombos;
-            let comboMessages = [];
-            
-            if (inv.saline > 0 && inv.plaster > 0 && !applied.has('saline_plaster')) { applied.add('saline_plaster'); this.bonusMaxHp += 5; this.hp += 5; comboMessages.push("💧 ปลดล็อกคอมโบ: Saline + Plaster (+5 Max HP)"); }
-            if (inv.alcohol > 0 && inv.betadine > 0 && !applied.has('alc_bet')) { applied.add('alc_bet'); this.bonusMaxHp += 5; this.hp += 5; comboMessages.push("🧪 ปลดล็อกคอมโบ: Alcohol + Betadine (+5 Max HP)"); }
-            if (inv.gauze > 0 && inv.dressing_set > 0 && !applied.has('gauze_dressing')) { applied.add('gauze_dressing'); this.bonusMaxHp += 5; this.hp += 5; comboMessages.push("🩹 ปลดล็อกคอมโบ: Gauze + Dressing Set (+5 Max HP)"); }
-            
-            if (inv.saline > 0 && inv.plaster > 0 && inv.alcohol > 0 && inv.betadine > 0 && inv.gauze > 0 && inv.dressing_set > 0 && !applied.has('full_set')) { 
-                applied.add('full_set'); this.bonusMaxHp += 20; this.hp += 20; 
-                comboMessages.push("🌟 ปลดล็อกคอมโบใหญ่: สำเร็จคอมโบชุดที่ 1, 2, 3 (+20 Max HP) 🌟");
-            }
-
-            if (comboMessages.length > 0) {
-                showToast(comboMessages.join('<br>'), '#0f0', 2500);
-            }
         }
 
         applyPhaseModifiers() {
@@ -748,7 +747,7 @@
                 if (this.statuses[randomStatus] < 3) {
                     this.statuses[randomStatus]++;
                     showToast(`⚠️ ติดอาการป่วย: ${STATUS_NAMES[randomStatus]}!`, "#ff5555", 2500);
-                    // อัปเดตสถานะทันทีเมื่อโดนตี (Instant Debuff)
+                    // แสดงผลดีบัฟทันทีในตานั้น
                     this.applyPhaseModifiers();
                 }
             }
@@ -989,7 +988,12 @@
                 this.active = false;
                 if (this.type === 'coin') coins++;
                 if (this.type === 'diamond') { currentUser.diamonds++; let dUi = document.getElementById('shop-diamonds'); if(dUi) dUi.innerText = currentUser.diamonds; }
-                if (this.type === 'magnet') { player.magnetActiveTime = player.magnetMaxTime; }
+                if (this.type === 'magnet') {
+                    if (player.magnetActiveTime <= 0) {
+                        player.magnetActiveTime = 1.5; 
+                        player.magnetMaxTime = 1.5;
+                    }
+                }
             }
         }
         draw(ctx) {
@@ -1090,31 +1094,29 @@
         let isSet3 = player.inv.gauze > 0 && player.inv.dressing_set > 0;
         let isFullSet = (isSet1 && isSet2 && isSet3);
 
-        let cSaline = player.inv.saline > 0 ? "✅" : "❌";
-        let cPlaster = player.inv.plaster > 0 ? "✅" : "❌";
-        let cAlcohol = player.inv.alcohol > 0 ? "✅" : "❌";
-        let cBetadine = player.inv.betadine > 0 ? "✅" : "❌";
-        let cGauze = player.inv.gauze > 0 ? "✅" : "❌";
-        let cDressing = player.inv.dressing_set > 0 ? "✅" : "❌";
+        let statusSet1 = player.appliedCombos.has('saline_plaster') ? '<span style="color:#0f0">[✅ ACTIVATED]</span>' : (isSet1 ? `<button onclick="activateCombo('saline_plaster', 15, 5)" style="padding: 2px 10px; font-size:11px; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;">เปิดใช้ ($15)</button>` : '');
+        let statusSet2 = player.appliedCombos.has('alc_bet') ? '<span style="color:#0f0">[✅ ACTIVATED]</span>' : (isSet2 ? `<button onclick="activateCombo('alc_bet', 15, 5)" style="padding: 2px 10px; font-size:11px; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;">เปิดใช้ ($15)</button>` : '');
+        let statusSet3 = player.appliedCombos.has('gauze_dressing') ? '<span style="color:#0f0">[✅ ACTIVATED]</span>' : (isSet3 ? `<button onclick="activateCombo('gauze_dressing', 15, 5)" style="padding: 2px 10px; font-size:11px; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;">เปิดใช้ ($15)</button>` : '');
+        let statusFullSet = player.appliedCombos.has('full_set') ? '<span style="color:#0f0;">[✅ ACTIVATED]</span>' : (isFullSet ? `<button onclick="activateCombo('full_set', 45, 20)" style="padding: 5px 15px; font-weight:bold; background:#FFD700; color:black; border:none; border-radius:4px; cursor:pointer;">⭐ เปิดใช้ Full Combo ($45) ⭐</button>` : '❌');
 
         invHtml += `
         <div style="padding-top: 10px; border-top: 1px dashed #555;">
             <div style="font-size: 13px; display: flex; flex-direction: column; gap: 8px;">
-                <div style="background: rgba(100, 181, 246, 0.1); border-left: 4px solid #64B5F6; padding: 8px; border-radius: 0 4px 4px 0;">
-                    <span style="color: #64B5F6; font-weight: bold;">💧 ชุดที่ 1 (+5 HP) ${isSet1 ? '<span style="color:#0f0">[✅ ACTIVATED]</span>' : ''}</span><br>
-                    ${cSaline} Saline &nbsp;|&nbsp; ${cPlaster} Plaster
+                <div style="background: rgba(100, 181, 246, 0.1); border-left: 4px solid #64B5F6; padding: 8px; border-radius: 0 4px 4px 0; display:flex; justify-content:space-between;">
+                    <div><span style="color: #64B5F6; font-weight: bold;">💧 ชุดที่ 1 (+5 HP)</span><br>Saline &nbsp;|&nbsp; Plaster</div>
+                    <div>${statusSet1}</div>
                 </div>
-                <div style="background: rgba(129, 199, 132, 0.1); border-left: 4px solid #81C784; padding: 8px; border-radius: 0 4px 4px 0;">
-                    <span style="color: #81C784; font-weight: bold;">🧪 ชุดที่ 2 (+5 HP) ${isSet2 ? '<span style="color:#0f0">[✅ ACTIVATED]</span>' : ''}</span><br>
-                    ${cAlcohol} Alcohol &nbsp;|&nbsp; ${cBetadine} Betadine
+                <div style="background: rgba(129, 199, 132, 0.1); border-left: 4px solid #81C784; padding: 8px; border-radius: 0 4px 4px 0; display:flex; justify-content:space-between;">
+                    <div><span style="color: #81C784; font-weight: bold;">🧪 ชุดที่ 2 (+5 HP)</span><br>Alcohol &nbsp;|&nbsp; Betadine</div>
+                    <div>${statusSet2}</div>
                 </div>
-                <div style="background: rgba(229, 115, 115, 0.1); border-left: 4px solid #E57373; padding: 8px; border-radius: 0 4px 4px 0;">
-                    <span style="color: #E57373; font-weight: bold;">🩹 ชุดที่ 3 (+5 HP) ${isSet3 ? '<span style="color:#0f0">[✅ ACTIVATED]</span>' : ''}</span><br>
-                    ${cGauze} Gauze &nbsp;|&nbsp; ${cDressing} Dressing
+                <div style="background: rgba(229, 115, 115, 0.1); border-left: 4px solid #E57373; padding: 8px; border-radius: 0 4px 4px 0; display:flex; justify-content:space-between;">
+                    <div><span style="color: #E57373; font-weight: bold;">🩹 ชุดที่ 3 (+5 HP)</span><br>Gauze &nbsp;|&nbsp; Dressing</div>
+                    <div>${statusSet3}</div>
                 </div>
             </div>
             <div style="text-align: center; background: rgba(255, 215, 0, 0.15); padding: 10px; border-radius: 8px; border: 1px solid #FFD700; margin-top: 12px;">
-                <strong style="color: #FFD700; font-size: 16px;">🌟 FULL COMBO ${isFullSet ? '<span style="color:#0f0;">[✅ ACTIVATED]</span>' : '❌'} 🌟</strong><br>
+                <strong style="color: #FFD700; font-size: 16px;">🌟 FULL COMBO ${statusFullSet} 🌟</strong><br>
                 <span style="font-size: 12px; color: #ccc;">สำเร็จคอมโบชุดที่ 1, 2, 3 รับโบนัสพิเศษ <span style="color:#0f0; font-weight:bold;">+20 Max HP!</span></span>
             </div>
         </div>`;
@@ -1154,7 +1156,7 @@
         let btnRabit = document.getElementById('btn-quick-rabbit');
         if (btnAirX) {
             if (player.inv.air_x > 0) {
-                btnAirX.innerHTML = "🚀 Air-X<br><span style='color:#0f0; font-size: 14px;'>[✅ ACTIVATED]</span><br><small style='font-size:12px; color:#eee;'>ปืน 3 แฉก (ทำงานแล้ว)</small>";
+                btnAirX.innerHTML = "🚀 Air-X <span style='color:#0f0; font-size: 14px;'>[✅ ACTIVATED]</span><br><small style='font-size:12px; color:#eee;'>ปืน 3 แฉก (ทำงานแล้ว)</small>";
                 btnAirX.style.backgroundColor = "#27ae60";
             } else {
                 btnAirX.innerHTML = "🚀 ซื้อด่วน Air-X ($30)<br><small style='font-size:12px; color:#eee;'>ปืน 3 แฉก (1 เฟส)</small>";
@@ -1163,7 +1165,7 @@
         }
         if (btnRabit) {
             if (player.inv.flying_rabit > 0) {
-                btnRabit.innerHTML = "🚀 Flying Rabit<br><span style='color:#0f0; font-size: 14px;'>[✅ ACTIVATED]</span><br><small style='font-size:12px; color:#eee;'>กระสุนทะลุ (ทำงานแล้ว)</small>";
+                btnRabit.innerHTML = "🚀 Flying Rabit <span style='color:#0f0; font-size: 14px;'>[✅ ACTIVATED]</span><br><small style='font-size:12px; color:#eee;'>กระสุนทะลุ (ทำงานแล้ว)</small>";
                 btnRabit.style.backgroundColor = "#27ae60";
             } else {
                 btnRabit.innerHTML = "🚀 ซื้อด่วน Flying Rabit ($30)<br><small style='font-size:12px; color:#eee;'>กระสุนทะลุศัตรู (1 เฟส)</small>";
@@ -1205,8 +1207,6 @@
         if(m) m.className = show ? 'active-modal' : '';
         if(show) {
             renderFullShop();
-            let fc = document.getElementById('full-shop-coins');
-            if(fc) fc.innerText = coins;
         }
     }
 
@@ -1253,7 +1253,6 @@
                 let maxBadge = isMax ? `<span class="max-badge">MAX</span>` : "";
                 let maxStr = item.maxStack === 99 ? "" : `[${player.inv[item.id]}/${item.maxStack}]`;
 
-                // ไฮไลท์ถ้าติดโรคนี้อยู่
                 let isCureNeeded = item.cures !== 'hp' && player.statuses[item.cures] > 0;
                 let highlightClass = isCureNeeded ? "highlight-cure" : "";
 
@@ -1284,7 +1283,6 @@
 
             let displayMaxStr = item.maxStack === 99 ? "" : `[${player.inv[item.id]}/${maxStr}]`;
 
-            // ไฮไลท์ถ้าติดโรคนี้อยู่
             let isCureNeeded = item.cures !== 'hp' && player.statuses[item.cures] > 0;
             let highlightClass = isCureNeeded ? "highlight-cure" : "";
 
@@ -1327,8 +1325,10 @@
         if (coins < price) { showToast("เหรียญไม่พอ!", "#ff5555", 2500); return; }
         
         if (player.inv[itemId] >= itemDef.maxStack && !hasAilment && itemDef.cures !== 'hp') { 
-            showToast("ไอเทมนี้ให้บัฟระดับสูงสุดแล้ว!", "#ff5555", 2500); 
-            return; 
+            if (!isDiscounted) {
+                showToast("ไอเทมนี้ให้บัฟระดับสูงสุดแล้ว!", "#ff5555", 2500); 
+                return; 
+            }
         }
 
         coins -= price; 
@@ -1354,8 +1354,6 @@
         
         if (itemId === 'cpm') { player.cpmDebuffToApply++; }
 
-        player.checkCombos(); 
-
         if (isDiscounted && index !== -1) {
             currentDiscountItems[index].bought = true;
             discountedBoughtCount++;
@@ -1369,8 +1367,6 @@
             let m = document.getElementById('fullShopModal');
             if (m && m.classList.contains('active-modal')) {
                 renderFullShop();
-                let fc = document.getElementById('full-shop-coins');
-                if (fc) fc.innerText = coins;
             }
         }
 
@@ -1464,18 +1460,28 @@
             
             if (!bossSpawnedThisPhase && (currentPhase === 3 || currentPhase === 5 || currentPhase === 7 || currentPhase === 9 || currentPhase >= 10)) {
                 let boss = new Enemy(5, currentPhase);
-                boss.x = canvas.width / 2; boss.y = -50; 
+                let edge = Math.floor(Math.random() * 4);
+                if (edge === 0) { boss.x = Math.random() * canvas.width; boss.y = -50; }
+                else if (edge === 1) { boss.x = canvas.width + 50; boss.y = Math.random() * canvas.height; }
+                else if (edge === 2) { boss.x = Math.random() * canvas.width; boss.y = canvas.height + 50; }
+                else { boss.x = -50; boss.y = Math.random() * canvas.height; }
                 enemies.push(boss);
                 
                 if (currentPhase >= 14) {
                     let miniBoss = new Enemy(5, currentPhase);
                     miniBoss.hp *= 0.7; miniBoss.maxHp *= 0.7;
                     miniBoss.atk *= 0.7; miniBoss.size *= 0.8;
-                    miniBoss.x = canvas.width / 2 + 100;
-                    miniBoss.y = -50;
+                    
+                    let mbEdge;
+                    do { mbEdge = Math.floor(Math.random() * 4); } while (mbEdge === edge);
+
+                    if (mbEdge === 0) { miniBoss.x = Math.random() * canvas.width; miniBoss.y = -50; }
+                    else if (mbEdge === 1) { miniBoss.x = canvas.width + 50; miniBoss.y = Math.random() * canvas.height; }
+                    else if (mbEdge === 2) { miniBoss.x = Math.random() * canvas.width; miniBoss.y = canvas.height + 50; }
+                    else { miniBoss.x = -50; miniBoss.y = Math.random() * canvas.height; }
+                    
                     enemies.push(miniBoss);
                 }
-                
                 bossSpawnedThisPhase = true;
             }
 
