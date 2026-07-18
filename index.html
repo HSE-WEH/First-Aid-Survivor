@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V2.6D</title>
+    <title>First Aid Survivor V2.7</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -82,7 +82,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6D)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.7)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -203,6 +203,9 @@
                         <button onclick="surrenderGame()" class="btn-surrender" style="flex: 1;">🏳️ ยอมแพ้</button>
                         <button onclick="nextPhase()" class="btn-next" style="flex: 3;">➡️ ลุย Phase ถัดไป</button>
                     </div>
+                    
+                    <!-- กู้คืนปุ่ม Admin สำหรับการใช้งาน V2.7 -->
+                    <button id="btnAdminSkip" onclick="currentPhase = 9; nextPhase();" class="btn-reroll" style="display:none; background-color: #ff5722; margin-top: 5px;">👑 [Admin] ข้ามไป Phase 10</button>
                 </div>
                 
                 <div id="fullShopModal">
@@ -265,7 +268,6 @@
     let reqId = null; 
     let toastTimeout = null; 
 
-    // --- System Fallback ป้องกันจอดำ (0x0 Canvas) ---
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     function resizeCanvas() {
@@ -317,6 +319,7 @@
 
     function showToast(message, color = "#ffeb3b", duration = 3000) {
         const toast = document.getElementById('toastNotification');
+        if (!toast) return;
         toast.innerHTML = message;
         toast.style.borderColor = color;
         toast.style.color = color;
@@ -400,8 +403,12 @@
         if (currentUser.daily_energy < 5) {
             let diff = midnight - thaiNow; 
             let h = Math.floor(diff / 3600000); let m = Math.floor((diff % 3600000) / 60000); let s = Math.floor((diff % 60000) / 1000);
-            document.getElementById('tb-energy-timer').innerText = `(รีเซ็ตใน ${h<10?'0'+h:h}:${m<10?'0'+m:m}:${s<10?'0'+s:s})`;
-        } else document.getElementById('tb-energy-timer').innerText = ``;
+            let timeStr = document.getElementById('tb-energy-timer');
+            if (timeStr) timeStr.innerText = `(รีเซ็ตใน ${h<10?'0'+h:h}:${m<10?'0'+m:m}:${s<10?'0'+s:s})`;
+        } else {
+            let timeStr = document.getElementById('tb-energy-timer');
+            if (timeStr) timeStr.innerText = ``;
+        }
     }
 
     async function handleLogin() {
@@ -448,7 +455,7 @@
         try {
             const { data: lbData } = await supabaseClient.from('leaderboards').select('username, max_score, max_phase').order('max_score', { ascending: false }).limit(10);
             const lbList = document.getElementById('leaderboardList');
-            if (lbData && lbData.length > 0) lbList.innerHTML = lbData.map((p, i) => `<div class="lb-entry"><span><strong>#${i + 1}</strong> ${p.username}</span><span><strong style="color:#ffeb3b;">${p.max_score}</strong> Pts (Ph ${p.max_phase})</span></div>`).join('');
+            if (lbData && lbData.length > 0 && lbList) lbList.innerHTML = lbData.map((p, i) => `<div class="lb-entry"><span><strong>#${i + 1}</strong> ${p.username}</span><span><strong style="color:#ffeb3b;">${p.max_score}</strong> Pts (Ph ${p.max_phase})</span></div>`).join('');
         } catch(e){}
     }
 
@@ -465,11 +472,15 @@
     }
 
     function updateTopBar() {
+        if (!currentUser) return;
         let adminTag = currentUser.is_admin ? ' <span style="color:#ffcc00; font-size:12px;">(Admin)</span>' : '';
-        document.getElementById('tb-name').innerHTML = `Player: ${currentUser.username}${adminTag}`;
+        let tbName = document.getElementById('tb-name');
+        if (tbName) tbName.innerHTML = `Player: ${currentUser.username}${adminTag}`;
         let energyDisplay = currentUser.is_admin ? '∞' : currentUser.daily_energy;
-        document.getElementById('tb-energy').innerText = `Energy: ${energyDisplay}/5`;
-        document.getElementById('menu-diamonds').innerText = currentUser.diamonds;
+        let tbEnergy = document.getElementById('tb-energy');
+        if (tbEnergy) tbEnergy.innerText = `Energy: ${energyDisplay}/5`;
+        let tbDiamonds = document.getElementById('menu-diamonds');
+        if (tbDiamonds) tbDiamonds.innerText = currentUser.diamonds;
     }
 
     function getUpgradeCost(stat, lvl) {
@@ -480,23 +491,40 @@
     }
 
     function updateUpgradeUI() {
-        document.getElementById('upg-diamonds').innerText = currentUser.diamonds;
+        let upgDia = document.getElementById('upg-diamonds');
+        if (upgDia) upgDia.innerText = currentUser.diamonds;
         
-        let hpLvl = currentUser.upgraded_hp || 0; document.getElementById('upg-lvl-hp').innerText = hpLvl;
+        let hpLvl = currentUser.upgraded_hp || 0; 
+        let lblHp = document.getElementById('upg-lvl-hp');
+        if(lblHp) lblHp.innerText = hpLvl;
         let btnHp = document.getElementById('btn-upg-hp');
-        if (hpLvl >= 40) { btnHp.innerText = 'MAX'; btnHp.disabled = true; } else { let cost = getUpgradeCost('hp', hpLvl); btnHp.innerHTML = `อัปเกรด (💎 <span style="color:cyan;">${cost}</span>)`; btnHp.disabled = (currentUser.diamonds < cost); }
+        if(btnHp) {
+            if (hpLvl >= 40) { btnHp.innerText = 'MAX'; btnHp.disabled = true; } else { let cost = getUpgradeCost('hp', hpLvl); btnHp.innerHTML = `อัปเกรด (💎 <span style="color:cyan;">${cost}</span>)`; btnHp.disabled = (currentUser.diamonds < cost); }
+        }
         
-        let atkLvl = currentUser.upgraded_atk || 0; document.getElementById('upg-lvl-atk').innerText = atkLvl;
+        let atkLvl = currentUser.upgraded_atk || 0; 
+        let lblAtk = document.getElementById('upg-lvl-atk');
+        if(lblAtk) lblAtk.innerText = atkLvl;
         let btnAtk = document.getElementById('btn-upg-atk');
-        if (atkLvl >= 10) { btnAtk.innerText = 'MAX'; btnAtk.disabled = true; } else { let cost = getUpgradeCost('atk', atkLvl); btnAtk.innerHTML = `อัปเกรด (💎 <span style="color:cyan;">${cost}</span>)`; btnAtk.disabled = (currentUser.diamonds < cost); }
+        if(btnAtk){
+            if (atkLvl >= 10) { btnAtk.innerText = 'MAX'; btnAtk.disabled = true; } else { let cost = getUpgradeCost('atk', atkLvl); btnAtk.innerHTML = `อัปเกรด (💎 <span style="color:cyan;">${cost}</span>)`; btnAtk.disabled = (currentUser.diamonds < cost); }
+        }
 
-        let defLvl = currentUser.upgraded_def || 0; document.getElementById('upg-lvl-def').innerText = defLvl;
+        let defLvl = currentUser.upgraded_def || 0; 
+        let lblDef = document.getElementById('upg-lvl-def');
+        if(lblDef) lblDef.innerText = defLvl;
         let btnDef = document.getElementById('btn-upg-def');
-        if (defLvl >= 50) { btnDef.innerText = 'MAX'; btnDef.disabled = true; } else { let cost = getUpgradeCost('def', defLvl); btnDef.innerHTML = `อัปเกรด (💎 <span style="color:cyan;">${cost}</span>)`; btnDef.disabled = (currentUser.diamonds < cost); }
+        if(btnDef){
+            if (defLvl >= 50) { btnDef.innerText = 'MAX'; btnDef.disabled = true; } else { let cost = getUpgradeCost('def', defLvl); btnDef.innerHTML = `อัปเกรด (💎 <span style="color:cyan;">${cost}</span>)`; btnDef.disabled = (currentUser.diamonds < cost); }
+        }
 
-        let spdLvl = currentUser.upgraded_spd || 0; document.getElementById('upg-lvl-spd').innerText = spdLvl;
+        let spdLvl = currentUser.upgraded_spd || 0; 
+        let lblSpd = document.getElementById('upg-lvl-spd');
+        if(lblSpd) lblSpd.innerText = spdLvl;
         let btnSpd = document.getElementById('btn-upg-spd');
-        if (spdLvl >= 3) { btnSpd.innerText = 'MAX'; btnSpd.disabled = true; } else { let cost = getUpgradeCost('spd', spdLvl); btnSpd.innerHTML = `อัปเกรด (💎 <span style="color:cyan;">${cost}</span>)`; btnSpd.disabled = (currentUser.diamonds < cost); }
+        if(btnSpd){
+            if (spdLvl >= 3) { btnSpd.innerText = 'MAX'; btnSpd.disabled = true; } else { let cost = getUpgradeCost('spd', spdLvl); btnSpd.innerHTML = `อัปเกรด (💎 <span style="color:cyan;">${cost}</span>)`; btnSpd.disabled = (currentUser.diamonds < cost); }
+        }
     }
 
     function showUpgrade() { updateUpgradeUI(); switchScreen('upgradeScreen'); }
@@ -510,7 +538,7 @@
 
         currentUser.diamonds -= cost; currentUser[`upgraded_${stat}`] = currentLvl + 1;
         updateUpgradeUI(); updateTopBar();
-        try { await supabaseClient.from('players').update({ diamonds: currentUser.diamonds, [`upgraded_${stat}`]: currentUser[`upgraded_${stat}`] }).eq('username', currentUser.username); } catch (err) {}
+        try { supabaseClient.from('players').update({ diamonds: currentUser.diamonds, [`upgraded_${stat}`]: currentUser[`upgraded_${stat}`] }).eq('username', currentUser.username).then().catch(()=>{}); } catch (err) {}
     }
 
     // ----------------------------------------------------------------
@@ -948,7 +976,7 @@
             if (dist < player.size + this.size + player.magnetRange) { 
                 this.active = false;
                 if (this.type === 'coin') coins++;
-                if (this.type === 'diamond') { currentUser.diamonds++; document.getElementById('shop-diamonds').innerText = currentUser.diamonds; }
+                if (this.type === 'diamond') { currentUser.diamonds++; let dUi = document.getElementById('shop-diamonds'); if(dUi) dUi.innerText = currentUser.diamonds; }
                 if (this.type === 'magnet') { player.magnetActiveTime = player.magnetMaxTime; }
             }
         }
@@ -972,20 +1000,19 @@
     // ----------------------------------------------------------------
     function switchScreen(screenId) {
         document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-        if (screenId) document.getElementById(screenId).classList.add('active');
-        document.getElementById('topBar').style.display = (currentUser && screenId !== 'loginScreen') ? 'flex' : 'none';
-        
-        if (gameState === 'PLAYING' && screenId === null) {
-            document.getElementById('btnToggleBuff').style.display = 'block';
-        } else {
-            document.getElementById('btnToggleBuff').style.display = 'none';
+        if (screenId) {
+            let scr = document.getElementById(screenId);
+            if(scr) scr.classList.add('active');
         }
         
-        if (currentUser && currentUser.is_admin) {
-            document.getElementById('btnAdminSkip').style.display = 'block';
-        } else {
-            document.getElementById('btnAdminSkip').style.display = 'none';
-        }
+        let tb = document.getElementById('topBar');
+        if (tb) tb.style.display = (currentUser && screenId !== 'loginScreen') ? 'flex' : 'none';
+        
+        let btnTb = document.getElementById('btnToggleBuff');
+        if (btnTb) btnTb.style.display = (gameState === 'PLAYING' && screenId === null) ? 'block' : 'none';
+        
+        let btnAs = document.getElementById('btnAdminSkip');
+        if (btnAs) btnAs.style.display = (currentUser && currentUser.is_admin) ? 'block' : 'none';
         
         resetKeys(); 
     }
@@ -1080,7 +1107,8 @@
             </div>
         </div>`;
         
-        document.getElementById('inv-details').innerHTML = invHtml;
+        let invDets = document.getElementById('inv-details');
+        if(invDets) invDets.innerHTML = invHtml;
     }
 
     function syncStatsToUI() {
@@ -1088,10 +1116,10 @@
         let hpStr = `${Math.ceil(player.hp)} / ${player.maxHp}`;
         let defStr = `${player.def} (หลบหลีก ${dodgePerc}%)`;
         
-        document.getElementById('shop-hp-stat').innerText = hpStr;
-        document.getElementById('shop-atk-stat').innerText = player.atk;
-        document.getElementById('shop-def-stat').innerText = defStr;
-        document.getElementById('shop-spd-stat').innerText = player.spd;
+        let shp = document.getElementById('shop-hp-stat'); if(shp) shp.innerText = hpStr;
+        let satk = document.getElementById('shop-atk-stat'); if(satk) satk.innerText = player.atk;
+        let sdef = document.getElementById('shop-def-stat'); if(sdef) sdef.innerText = defStr;
+        let sspd = document.getElementById('shop-spd-stat'); if(sspd) sspd.innerText = player.spd;
 
         let statusHtml = ""; let hasStatus = false;
         for (let key in player.statuses) {
@@ -1100,30 +1128,35 @@
                 hasStatus = true; 
             }
         }
-        document.getElementById('shop-status-text').innerHTML = hasStatus ? statusHtml : '<span style="color:#00ff00;">✅ สุขภาพแข็งแรงดี! ไม่มีอาการเจ็บป่วย</span>';
+        let txtStat = document.getElementById('shop-status-text');
+        if(txtStat) txtStat.innerHTML = hasStatus ? statusHtml : '<span style="color:#00ff00;">✅ สุขภาพแข็งแรงดี! ไม่มีอาการเจ็บป่วย</span>';
     }
 
     function updateShopUI() {
-        document.getElementById('shop-phase-num').innerText = currentPhase; 
-        document.getElementById('shop-coins').innerText = coins; 
-        document.getElementById('shop-diamonds').innerText = currentUser.diamonds; 
-        document.getElementById('shop-reroll-cost').innerText = rerollCost; 
+        let pNum = document.getElementById('shop-phase-num'); if(pNum) pNum.innerText = currentPhase; 
+        let sCoins = document.getElementById('shop-coins'); if(sCoins) sCoins.innerText = coins; 
+        let sDia = document.getElementById('shop-diamonds'); if(sDia) sDia.innerText = currentUser.diamonds; 
+        let sRe = document.getElementById('shop-reroll-cost'); if(sRe) sRe.innerText = rerollCost; 
         
         let btnAirX = document.getElementById('btn-quick-airx');
         let btnRabit = document.getElementById('btn-quick-rabbit');
-        if (player.inv.air_x > 0) {
-            btnAirX.innerHTML = "🚀 Air-X <span style='color:#0f0; font-size: 14px;'>[✅ ACTIVATED]</span><br><small style='font-size:12px; color:#eee;'>ปืน 3 แฉก (ทำงานแล้ว)</small>";
-            btnAirX.style.backgroundColor = "#27ae60";
-        } else {
-            btnAirX.innerHTML = "🚀 ซื้อด่วน Air-X ($30)<br><small style='font-size:12px; color:#eee;'>ปืน 3 แฉก (1 เฟส)</small>";
-            btnAirX.style.backgroundColor = "#e67e22";
+        if (btnAirX) {
+            if (player.inv.air_x > 0) {
+                btnAirX.innerHTML = "🚀 Air-X <span style='color:#0f0; font-size: 14px;'>[✅ ACTIVATED]</span><br><small style='font-size:12px; color:#eee;'>ปืน 3 แฉก (ทำงานแล้ว)</small>";
+                btnAirX.style.backgroundColor = "#27ae60";
+            } else {
+                btnAirX.innerHTML = "🚀 ซื้อด่วน Air-X ($30)<br><small style='font-size:12px; color:#eee;'>ปืน 3 แฉก (1 เฟส)</small>";
+                btnAirX.style.backgroundColor = "#e67e22";
+            }
         }
-        if (player.inv.flying_rabit > 0) {
-            btnRabit.innerHTML = "🚀 Flying Rabit <span style='color:#0f0; font-size: 14px;'>[✅ ACTIVATED]</span><br><small style='font-size:12px; color:#eee;'>กระสุนทะลุ (ทำงานแล้ว)</small>";
-            btnRabit.style.backgroundColor = "#27ae60";
-        } else {
-            btnRabit.innerHTML = "🚀 ซื้อด่วน Flying Rabit ($30)<br><small style='font-size:12px; color:#eee;'>กระสุนทะลุศัตรู (1 เฟส)</small>";
-            btnRabit.style.backgroundColor = "#e67e22";
+        if (btnRabit) {
+            if (player.inv.flying_rabit > 0) {
+                btnRabit.innerHTML = "🚀 Flying Rabit <span style='color:#0f0; font-size: 14px;'>[✅ ACTIVATED]</span><br><small style='font-size:12px; color:#eee;'>กระสุนทะลุ (ทำงานแล้ว)</small>";
+                btnRabit.style.backgroundColor = "#27ae60";
+            } else {
+                btnRabit.innerHTML = "🚀 ซื้อด่วน Flying Rabit ($30)<br><small style='font-size:12px; color:#eee;'>กระสุนทะลุศัตรู (1 เฟส)</small>";
+                btnRabit.style.backgroundColor = "#e67e22";
+            }
         }
         
         syncStatsToUI();
@@ -1156,9 +1189,12 @@
     }
 
     function toggleFullShop(show) {
-        document.getElementById('fullShopModal').className = show ? 'active-modal' : '';
+        let m = document.getElementById('fullShopModal');
+        if(m) m.className = show ? 'active-modal' : '';
         if(show) {
             renderFullShop();
+            let fc = document.getElementById('full-shop-coins');
+            if(fc) fc.innerText = coins;
         }
     }
 
@@ -1182,11 +1218,11 @@
 
     function rollShopCards() { 
         currentDiscountItems = []; discountedBoughtCount = 0;
-        const container = document.getElementById('shopCards'); container.innerHTML = ''; 
+        const container = document.getElementById('shopCards'); 
+        if(container) container.innerHTML = ''; 
         
         for(let i=0; i<3; i++) { 
-            let randomIndex = Math.floor(Math.random() * weightedItems.length);
-            let item = weightedItems[randomIndex] || ITEMS_DB[0]; 
+            let item = getRandomShopItem();
             let discPrice = Math.ceil(item.cost * 0.3); 
             currentDiscountItems.push({ ...item, discPrice: discPrice, bought: false });
         }
@@ -1194,7 +1230,9 @@
     }
 
     function renderDiscountShop() {
-        const container = document.getElementById('shopCards'); container.innerHTML = ''; 
+        const container = document.getElementById('shopCards'); 
+        if(!container) return;
+        container.innerHTML = ''; 
         currentDiscountItems.forEach((item, index) => {
             if (item.bought) {
                 container.innerHTML += `<div class="shop-card sold"><h2>SOLD OUT</h2></div>`;
@@ -1216,8 +1254,8 @@
     }
 
     function renderFullShop() {
-        const cNormal = document.getElementById('fullShopNormal'); cNormal.innerHTML = '';
-        const cCombo = document.getElementById('fullShopCombo'); cCombo.innerHTML = '';
+        const cNormal = document.getElementById('fullShopNormal'); if(cNormal) cNormal.innerHTML = '';
+        const cCombo = document.getElementById('fullShopCombo'); if(cCombo) cCombo.innerHTML = '';
         
         ITEMS_DB.forEach(item => {
             let maxStr = item.maxStack === 99 ? "∞" : item.maxStack;
@@ -1243,8 +1281,8 @@
                     </div>
                 </div>`;
             
-            if (item.category === 'combo') { cCombo.innerHTML += htmlStr; } 
-            else { cNormal.innerHTML += htmlStr; }
+            if (item.category === 'combo' && cCombo) { cCombo.innerHTML += htmlStr; } 
+            else if (cNormal) { cNormal.innerHTML += htmlStr; }
         });
     }
 
@@ -1308,8 +1346,11 @@
                 renderDiscountShop();
             }
         } else {
-            if (document.getElementById('fullShopModal').classList.contains('active-modal')) {
+            let m = document.getElementById('fullShopModal');
+            if (m && m.classList.contains('active-modal')) {
                 renderFullShop();
+                let fc = document.getElementById('full-shop-coins');
+                if (fc) fc.innerText = coins;
             }
         }
 
@@ -1346,10 +1387,11 @@
 
     function gameOver() {
         gameState = 'GAMEOVER';
-        document.getElementById('btnToggleBuff').style.display = 'none';
+        let bb = document.getElementById('btnToggleBuff');
+        if(bb) bb.style.display = 'none';
         
-        document.getElementById('go-phase').innerText = `Phase Reached: ${currentPhase}`;
-        document.getElementById('go-score').innerText = `Score: ${score}`;
+        let gp = document.getElementById('go-phase'); if(gp) gp.innerText = `Phase Reached: ${currentPhase}`;
+        let gs = document.getElementById('go-score'); if(gs) gs.innerText = `Score: ${score}`;
         
         switchScreen('gameOverScreen');
 
@@ -1373,7 +1415,6 @@
             draw(); 
             reqId = requestAnimationFrame(gameLoop);
         } catch (err) {
-            // หากเกิด Crash จอจะไม่ดำ แต่จะโชว์ Error สีแดงให้รู้ทันที
             console.error("GameLoop Crash:", err);
             ctx.fillStyle = '#aa0000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
