@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V2.6A</title>
+    <title>First Aid Survivor V2.6B</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -38,14 +38,14 @@
         .max-badge { color: #ff5555; font-weight: bold; border: 1px solid #ff5555; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: rgba(255,0,0,0.1); margin-left: 5px; }
 
         .btn-action-group { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
-        .btn-quick-buy { background: #e67e22; font-size: 15px; padding: 12px; border-radius: 8px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px;}
-        .btn-quick-buy small { font-weight: normal; font-size: 12px; color: #eee; }
+        /* Lock Quick Buy height to prevent jumping */
+        .btn-quick-buy { background: #e67e22; font-size: 15px; padding: 12px; border-radius: 8px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; height: 75px; box-sizing: border-box;}
         .btn-next { background: #2196F3; font-size: 20px; padding: 15px; border-radius: 8px; }
         .btn-catalog { background: #9c27b0; font-size: 18px; padding: 12px; border-radius: 8px; }
         .btn-reroll { background: #f39c12; font-size: 16px; padding: 12px; border-radius: 8px; margin: 0 auto; display: block; width: 350px; }
         .btn-surrender { background: #e74c3c; font-size: 16px; padding: 12px; border-radius: 8px; }
         
-        /* Modal ซ้อนเฉพาะฝั่งขวา */
+        /* Modal */
         #fullShopModal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20,20,20,0.98); z-index: 40; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; border-radius: 0 12px 12px 0; }
         #fullShopModal.active-modal { display: flex; }
         .full-shop-list { width: 100%; max-height: 80%; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-top: 15px; padding-right: 15px; }
@@ -80,12 +80,11 @@
 
     <button id="btnToggleBuff" onclick="toggleBuffUI()">👁️ ซ่อน/แสดงบัฟ</button>
     
-    <!-- Toast Notification Element -->
     <div id="toastNotification"></div>
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6A)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6B)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -188,7 +187,6 @@
                     </div>
                 </div>
 
-                <!-- โซนสุ่มการ์ด -->
                 <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
                     <h3 style="text-align:center; margin: 10px 0; color:#4CAF50; font-size: 22px;">📦 สินค้าสุ่มลดราคาพิเศษ (70% Off)</h3>
                     <div class="shop-cards-wrapper" id="shopCards">
@@ -197,7 +195,6 @@
                     <button onclick="rerollShop()" id="btnReroll" class="btn-reroll">🔄 สุ่มกระดานใหม่ (ใช้ <span id="shop-reroll-cost">1</span> เหรียญ)</button>
                 </div>
 
-                <!-- โซนปุ่มกดด้านล่าง -->
                 <div class="btn-action-group">
                     <button onclick="toggleFullShop(true)" class="btn-catalog">🛒 เปิดแคตตาล็อกยาทั้งหมด (Full Shop)</button>
                     
@@ -210,10 +207,9 @@
                         <button onclick="surrenderGame()" class="btn-surrender" style="flex: 1;">🏳️ ยอมแพ้</button>
                         <button onclick="nextPhase()" class="btn-next" style="flex: 3;">➡️ ลุย Phase ถัดไป</button>
                     </div>
-                    <button id="btnAdminSkip" onclick="currentPhase = 9; nextPhase();" class="btn-reroll" style="display:none; background-color: #ff5722; margin-top: 5px;">👑 [Admin] ข้ามไป Phase 10</button>
                 </div>
                 
-                <!-- Modal แคตตาล็อกยาทั้งหมด (ซ้อนแค่ฝั่งขวา) -->
+                <!-- Modal แคตตาล็อกยาทั้งหมด -->
                 <div id="fullShopModal">
                     <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;">
                         <h2 style="margin: 0; color: #4CAF50; font-size: 24px;">🛒 แคตตาล็อกยาทั้งหมด</h2>
@@ -353,10 +349,26 @@
         if (!e.key) return; 
         let k = e.key.toLowerCase();
         keys[k] = true;
+        
+        // Admin Hotkeys
         if (currentUser && currentUser.is_admin && gameState === 'PLAYING') {
             if (k === 'g') adminGodMode = !adminGodMode;
             if (k === 'c') coins += 1000;
             if (k === 'v') currentUser.diamonds += 100;
+            
+            // Admin กดปุ่ม 1-0 เพื่อเสกดีบัฟ
+            const debuffKeys = {
+                '1': 'headache', '2': 'allergy', '3': 'stomach', '4': 'rash', '5': 'swelling',
+                '6': 'mouth_ulcer', '7': 'red_eye', '8': 'sore_throat', '9': 'fresh_wound', '0': 'scald'
+            };
+            if (debuffKeys[k]) {
+                let d = debuffKeys[k];
+                if (player.statuses[d] < 3) {
+                    player.statuses[d]++;
+                    showToast(`👑 [Admin] เสกอาการป่วย: ${STATUS_NAMES[d]} (${player.statuses[d]}/3)`, "#ff5555");
+                    player.applyPhaseModifiers();
+                }
+            }
         }
     });
     
@@ -527,6 +539,7 @@
             
             this.fireTimer = 0; this.magnetRange = 0;
             this.magnetActiveTime = 0; this.magnetMaxTime = 1.2; this.magnetBonusRange = 0;
+            this.invulnerableTimer = 0; // I-Frame
 
             this.isDead = false; 
             this.statuses = { headache: 0, allergy: 0, stomach: 0, rash: 0, swelling: 0, mouth_ulcer: 0, red_eye: 0, sore_throat: 0, fresh_wound: 0, scald: 0 }; 
@@ -587,12 +600,15 @@
             let baseCount = this.baseBullets - this.activeStatuses.headache;
             this.bulletCount = Math.max(1, baseCount + tyBullets);
             
-            // เนิร์ฟแม่เหล็กเหลือ 60px ต่อระดับ (เดิม 100)
             this.magnetRange = (this.inv.golden_cup * 60) + (this.magnetBonusRange || 0);
         }
 
         update(dt) {
             if (this.isDead) return;
+            
+            if (this.invulnerableTimer > 0) {
+                this.invulnerableTimer -= dt;
+            }
             
             if (this.magnetActiveTime > 0) {
                 this.magnetActiveTime -= dt;
@@ -619,10 +635,17 @@
                 this.fireTimer = this.fireRate; 
             }
         }
-        
 
         draw(ctx) {
             if (this.isDead) return;
+            
+            // เอฟเฟกต์กระพริบตอนอมตะ (I-Frames)
+            if (this.invulnerableTimer > 0) {
+                ctx.globalAlpha = (Math.floor(Date.now() / 100) % 2 === 0) ? 0.5 : 1.0;
+            } else {
+                ctx.globalAlpha = 1.0;
+            }
+            
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)'; ctx.lineWidth = 1; ctx.beginPath();
             ctx.arc(this.x, this.y, this.size + 15 + this.magnetRange, 0, Math.PI * 2); ctx.stroke();
 
@@ -635,6 +658,8 @@
 
             ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
             ctx.fillText(`${Math.ceil(this.hp)}/${this.maxHp}`, this.x, this.y - 42); ctx.textAlign = 'left';
+            
+            ctx.globalAlpha = 1.0; // Reset alpha
         }
         
         shootNearest() {
@@ -676,16 +701,17 @@
         }
         
         takeDamage(amt, statusList, isBoss = false) {
-            if (this.isDead) return;
-            if (currentUser.is_admin && adminGodMode) return; 
+            if (this.isDead) return false;
+            if (currentUser && currentUser.is_admin && adminGodMode) return false; 
+            if (this.invulnerableTimer > 0) return false; // I-Frames ป้องกันการโดนรัวๆ
 
             let dodgeChance = Math.min(0.7, (this.def / 100) * 0.7); 
-            if (Math.random() < dodgeChance) return; 
+            if (Math.random() < dodgeChance) return true; // ถ้าหลบสำเร็จ ให้คืนค่า true (เพื่อลบกระสุน/มอนสเตอร์ลูกกระจ๊อกทิ้ง)
             
             let extraDmg = [0, 2, 4, 6][this.activeStatuses.fresh_wound] || 0;
             this.hp -= (amt + extraDmg);
             
-            let debuffChance = isBoss ? 1.0 : 0.35; // เพิ่มเรตติดดีบัฟ (บอสการันตี 100% ถ้าหลบไม่พ้น)
+            let debuffChance = isBoss ? 1.0 : 0.35; 
             if (statusList && statusList.length > 0 && Math.random() < debuffChance) {
                 let randomStatus = statusList[Math.floor(Math.random() * statusList.length)];
                 if (this.statuses[randomStatus] < 3) {
@@ -693,9 +719,13 @@
                     showToast(`⚠️ ติดอาการป่วย: ${STATUS_NAMES[randomStatus]}!`, "#ff5555", 2500);
                 }
             }
+            
+            this.invulnerableTimer = 0.5; // อมตะ 0.5 วิ
+            
             if (this.hp <= 0) {
                 this.hp = 0; this.isDead = true; gameOver();
             }
+            return true;
         }
     }
 
@@ -788,8 +818,8 @@
             this.x += Math.cos(angle) * this.spd * 60 * dt; this.y += Math.sin(angle) * this.spd * 60 * dt;
             let dist = Math.hypot(player.x - this.x, player.y - this.y);
             if (dist < this.size + player.size) {
-                player.takeDamage(this.atk, this.statusList, this.isBoss);
-                if (!this.isBoss) this.hp = 0; 
+                let hitProcessed = player.takeDamage(this.atk, this.statusList, this.isBoss);
+                if (hitProcessed && !this.isBoss) this.hp = 0; // มอนสเตอร์ธรรมดาชนแล้วตายเลย ถ้าดาเมจเข้าหรือหลบพ้น (แต่ไม่นับรวมตอนอมตะ)
             }
             if (this.isRanged) {
                 this.shootTimer -= dt;
@@ -868,7 +898,7 @@
                         if (Math.random() > rashChance || Math.random() < scaldChance) dropCoin = false;
 
                         if (dropCoin) {
-                            if (drops.length > 200) drops.splice(0, drops.length - 200); // ลบอันเก่าทิ้งกันค้าง
+                            if (drops.length > 200) drops.splice(0, drops.length - 200); 
                             drops.push(new ItemDrop(e.x, e.y, 'coin'));
                             let silverChance = [0, 0.20, 0.35, 0.50][player.inv.silver_cream] || 0;
                             if (Math.random() < silverChance) {
@@ -905,7 +935,10 @@
             this.x += Math.cos(this.angle) * this.spd * 60 * dt; this.y += Math.sin(this.angle) * this.spd * 60 * dt;
             if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.active = false;
             let dist = Math.hypot(player.x - this.x, player.y - this.y);
-            if (dist < this.size + player.size) { player.takeDamage(this.atk, this.statusList); this.active = false; }
+            if (dist < this.size + player.size) { 
+                let hitProcessed = player.takeDamage(this.atk, this.statusList); 
+                if (hitProcessed) this.active = false; 
+            }
         }
         draw(ctx) { 
             drawSprite(ctx, ASSETS.enemyBullet, this.x, this.y, this.size, () => {
@@ -1042,7 +1075,7 @@
                 </div>
             </div>
             <div style="text-align: center; background: rgba(255, 215, 0, 0.15); padding: 10px; border-radius: 8px; border: 1px solid #FFD700; margin-top: 12px;">
-                <strong style="color: #FFD700; font-size: 16px;">🌟 FULL COMBO ${isFullSet ? '✅ ACTIVE' : '❌'} 🌟</strong><br>
+                <strong style="color: #FFD700; font-size: 16px;">🌟 FULL COMBO ${isFullSet ? '<span style="color:#0f0;">[✅ ACTIVATED]</span>' : '❌'} 🌟</strong><br>
                 <span style="font-size: 12px; color: #ccc;">สำเร็จคอมโบชุดที่ 1, 2, 3 รับโบนัสพิเศษ <span style="color:#0f0; font-weight:bold;">+20 Max HP!</span></span>
             </div>
         </div>`;
@@ -1079,17 +1112,17 @@
         let btnAirX = document.getElementById('btn-quick-airx');
         let btnRabit = document.getElementById('btn-quick-rabbit');
         if (player.inv.air_x > 0) {
-            btnAirX.innerHTML = "🚀 Air-X <span style='color:#0f0'>[✅ ACTIVATED]</span><br><small>ปืน 3 แฉก (ทำงานแล้ว)</small>";
+            btnAirX.innerHTML = "🚀 Air-X <span style='color:#0f0; font-size: 14px;'>[✅ ACTIVATED]</span><br><small style='font-size:12px; color:#eee;'>ปืน 3 แฉก (ทำงานแล้ว)</small>";
             btnAirX.style.backgroundColor = "#27ae60";
         } else {
-            btnAirX.innerHTML = "🚀 ซื้อด่วน Air-X ($30)<br><small>ปืน 3 แฉก (1 เฟส)</small>";
+            btnAirX.innerHTML = "🚀 ซื้อด่วน Air-X ($30)<br><small style='font-size:12px; color:#eee;'>ปืน 3 แฉก (1 เฟส)</small>";
             btnAirX.style.backgroundColor = "#e67e22";
         }
         if (player.inv.flying_rabit > 0) {
-            btnRabit.innerHTML = "🚀 Flying Rabit <span style='color:#0f0'>[✅ ACTIVATED]</span><br><small>กระสุนทะลุ (ทำงานแล้ว)</small>";
+            btnRabit.innerHTML = "🚀 Flying Rabit <span style='color:#0f0; font-size: 14px;'>[✅ ACTIVATED]</span><br><small style='font-size:12px; color:#eee;'>กระสุนทะลุ (ทำงานแล้ว)</small>";
             btnRabit.style.backgroundColor = "#27ae60";
         } else {
-            btnRabit.innerHTML = "🚀 ซื้อด่วน Flying Rabit ($30)<br><small>กระสุนทะลุศัตรู (1 เฟส)</small>";
+            btnRabit.innerHTML = "🚀 ซื้อด่วน Flying Rabit ($30)<br><small style='font-size:12px; color:#eee;'>กระสุนทะลุศัตรู (1 เฟส)</small>";
             btnRabit.style.backgroundColor = "#e67e22";
         }
         
@@ -1126,12 +1159,11 @@
         document.getElementById('fullShopModal').className = show ? 'active-modal' : '';
         if(show) {
             renderFullShop();
-            document.getElementById('full-shop-coins').innerText = coins;
         }
     }
 
     function getRandomShopItem() {
-        let hpWeight = player.hp < player.maxHp ? 1.5 : 0.05; 
+        let hpWeight = player.hp < player.maxHp ? 1.5 : 0.05; // เนิร์ฟยาฮีลตอนเลือดเต็มไม่ให้ออกมารกตา
         let totalWeight = 0;
         let weights = ITEMS_DB.map(item => {
             let w = item.cures === 'hp' ? hpWeight : 1;
@@ -1277,7 +1309,6 @@
         } else {
             if (document.getElementById('fullShopModal').classList.contains('active-modal')) {
                 renderFullShop();
-                document.getElementById('full-shop-coins').innerText = coins;
             }
         }
 
@@ -1308,7 +1339,7 @@
 
     function startLoop() {
         if (reqId) cancelAnimationFrame(reqId);
-        lastTime = 0; // รีเซ็ตเวลาเพื่อป้องกันบั๊กเฟรมกระโดด
+        lastTime = 0; 
         reqId = requestAnimationFrame(gameLoop);
     }
 
@@ -1332,7 +1363,7 @@
         if (!lastTime) { lastTime = timestamp; reqId = requestAnimationFrame(gameLoop); return; }
 
         let dt = (timestamp - lastTime) / 1000; 
-        if (dt > 0.05) dt = 0.05; // ล็อก dt ให้ไม่เกิน 50ms ป้องกันวัตถุวาร์ปข้ามกันจนค้าง
+        if (dt > 0.05) dt = 0.05; 
         if (dt < 0) dt = 0; 
         lastTime = timestamp;
 
