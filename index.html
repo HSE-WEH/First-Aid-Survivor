@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V2.7</title>
+    <title>First Aid Survivor V2.6E</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -82,7 +82,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.7)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6E)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -204,10 +204,10 @@
                         <button onclick="nextPhase()" class="btn-next" style="flex: 3;">➡️ ลุย Phase ถัดไป</button>
                     </div>
                     
-                    <!-- กู้คืนปุ่ม Admin สำหรับการใช้งาน V2.7 -->
                     <button id="btnAdminSkip" onclick="currentPhase = 9; nextPhase();" class="btn-reroll" style="display:none; background-color: #ff5722; margin-top: 5px;">👑 [Admin] ข้ามไป Phase 10</button>
                 </div>
                 
+                <!-- Modal แคตตาล็อกยาทั้งหมด -->
                 <div id="fullShopModal">
                     <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;">
                         <h2 style="margin: 0; color: #4CAF50; font-size: 24px;">🛒 แคตตาล็อกยาทั้งหมด</h2>
@@ -291,6 +291,12 @@
         headache: "ลดจำนวนกระสุน", allergy: "ลดภูมิคุ้มกัน (Dodge)", stomach: "ลดความเร็วเดิน", 
         rash: "ลดโอกาสเหรียญตก", swelling: "เพิ่มจำนวนมอนสเตอร์ตาหน้า", mouth_ulcer: "ลด Max HP", 
         red_eye: "ปืนขัดข้อง(ยิงว่าว)", sore_throat: "ลดความเร็วการยิง", fresh_wound: "รับดาเมจเพิ่มแรงขึ้น", scald: "เหรียญไม่ดรอปเลย" 
+    };
+
+    const STATUS_NAMES = { 
+        headache: "ปวดศีรษะ", allergy: "อาการแพ้", stomach: "ปวดท้อง", rash: "ผื่นแพ้", 
+        swelling: "ผื่นบวม", mouth_ulcer: "แผลในปาก", red_eye: "ตาแดง", sore_throat: "เจ็บคอ", 
+        fresh_wound: "แผลสด", scald: "น้ำร้อนลวก" 
     };
 
     const ITEMS_DB = [
@@ -1258,21 +1264,19 @@
         const cCombo = document.getElementById('fullShopCombo'); if(cCombo) cCombo.innerHTML = '';
         
         ITEMS_DB.forEach(item => {
-            let maxStr = item.maxStack === 99 ? "∞" : item.maxStack;
             let isMax = item.maxStack !== 99 && player.inv[item.id] >= item.maxStack;
             let maxBadge = isMax ? `<span class="max-badge">MAX</span>` : "";
+            let maxStr = item.maxStack === 99 ? "" : `[${player.inv[item.id]}/${item.maxStack}]`;
 
             let btnText = isMax ? 'ซื้อรักษาโรค' : 'ซื้อ';
             let btnColor = isMax ? '#555' : '#2196F3';
             let btnBorder = isMax ? '1px solid #ff5555' : 'none';
 
-            let displayMaxStr = item.maxStack === 99 ? "" : `[${player.inv[item.id]}/${maxStr}]`;
-
             let htmlStr = `
                 <div class="full-shop-item" style="${isMax ? 'border-color:#ff5555;' : ''}">
                     <div style="width: 100%; text-align: left;">
                         <strong style="color: #4CAF50; font-size:16px;">${item.name}</strong> ${maxBadge}
-                        <span style="font-size:12px; color:#aaa;">${displayMaxStr !== "" ? `มีอยู่: ${displayMaxStr}` : ""}</span><br>
+                        <span style="font-size:12px; color:#aaa;">${maxStr !== "" ? `มีอยู่: ${maxStr}` : ""}</span><br>
                         <span style="font-size:12px; color:#ddd; display: block; margin-top: 5px;">${item.desc}</span>
                     </div>
                     <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
