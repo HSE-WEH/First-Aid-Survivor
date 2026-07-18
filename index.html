@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V2.6K</title>
+    <title>First Aid Survivor V2.6 O</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
         #game-container { position: relative; width: 100vw; height: 100vh; background-color: #000; }
-        canvas { display: block; width: 100%; height: 100%; }
+        canvas { display: block; width: 100%; height: 100%; z-index: 1;}
         
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.9); z-index: 10; box-sizing: border-box; overflow-y: auto; }
         .active { display: flex; }
@@ -37,18 +37,16 @@
         .shop-card.sold { opacity: 0.4; pointer-events: none; border-color: #555; filter: grayscale(100%); }
         .max-badge { color: #ff5555; font-weight: bold; border: 1px solid #ff5555; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: rgba(255,0,0,0.1); margin-left: 5px; }
 
-        /* ระบบกระพริบแดงเตือนยารักษาโรคที่ตรงกับอาการ */
         .highlight-cure { border: 2px solid #ff5555 !important; box-shadow: 0 0 15px rgba(255, 85, 85, 0.8) !important; animation: pulse-red 1.5s infinite; }
         @keyframes pulse-red { 0% { box-shadow: 0 0 5px rgba(255,85,85,0.5); } 50% { box-shadow: 0 0 20px rgba(255,85,85,1); } 100% { box-shadow: 0 0 5px rgba(255,85,85,0.5); } }
 
-        /* ระบบกระพริบปุ่ม Activate คอมโบ */
         @keyframes blink-btn { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.03); filter: brightness(1.2); box-shadow: 0 0 15px rgba(33, 150, 243, 0.8); } 100% { transform: scale(1); filter: brightness(1); } }
         @keyframes blink-btn-gold { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.03); filter: brightness(1.2); box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); } 100% { transform: scale(1); filter: brightness(1); } }
         .btn-blink { animation: blink-btn 1.2s infinite ease-in-out; }
         .btn-blink-gold { animation: blink-btn-gold 1.2s infinite ease-in-out; }
 
         .btn-action-group { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
-        .btn-quick-buy { background: #e67e22; font-size: 15px; padding: 8px 12px; border-radius: 8px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; min-height: 75px; box-sizing: border-box;}
+        .btn-quick-buy { background: #e67e22; font-size: 14px; padding: 8px 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; min-height: 65px; box-sizing: border-box; width: 100%;}
         .btn-next { background: #2196F3; font-size: 20px; padding: 15px; border-radius: 8px; }
         .btn-catalog { background: #9c27b0; font-size: 18px; padding: 12px; border-radius: 8px; }
         .btn-reroll { background: #f39c12; font-size: 16px; padding: 12px; border-radius: 8px; margin: 0 auto; display: block; width: 350px; }
@@ -72,7 +70,6 @@
         
         #toastNotification { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.85); color: #fff; padding: 20px 40px; border-radius: 12px; border: 2px solid #ffeb3b; font-size: 24px; font-weight: bold; z-index: 1000; opacity: 0; pointer-events: none; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.6); display: none; }
 
-        /* CSS สำหรับรายการ Leaderboard */
         .lb-entry { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #555; }
         .lb-entry:last-child { border-bottom: none; }
     </style>
@@ -90,13 +87,11 @@
     </div>
 
     <button id="btnToggleBuff" onclick="toggleBuffUI()">👁️ ซ่อน/แสดงบัฟ</button>
-    
-    <!-- Toast Notification Element -->
     <div id="toastNotification"></div>
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6K)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6 O)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -146,6 +141,7 @@
             <div class="upg-row"><span style="font-size: 18px;">⚔️ <strong>Attack</strong> (+<span id="upg-lvl-atk">0</span>/10)</span><button id="btn-upg-atk" onclick="buyUpgrade('atk')">อัปเกรด</button></div>
             <div class="upg-row"><span style="font-size: 18px;">🛡️ <strong>ภูมิคุ้มกัน</strong> (+<span id="upg-lvl-def">0</span>/50)</span><button id="btn-upg-def" onclick="buyUpgrade('def')">อัปเกรด</button></div>
             <div class="upg-row"><span style="font-size: 18px;">👟 <strong>Speed</strong> (+<span id="upg-lvl-spd">0</span>/3)</span><button id="btn-upg-spd" onclick="buyUpgrade('spd')">อัปเกรด</button></div>
+            <div class="upg-row"><span style="font-size: 18px;">🎯 <strong>Critical</strong> (+<span id="upg-lvl-crit">0</span>/5)</span><button id="btn-upg-crit" onclick="buyUpgrade('crit')">อัปเกรด</button></div>
         </div>
         <button onclick="switchScreen('menuScreen')" style="margin-top: 30px; background-color: #777; padding: 15px 40px; font-size: 18px;">กลับสู่เมนูหลัก</button>
     </div>
@@ -176,6 +172,7 @@
                 <div class="stat-badge"><span style="color:#ff5555;">⚔️ Attack</span> <strong id="shop-atk-stat">0</strong></div>
                 <div class="stat-badge"><span style="color:#aaa;">🛡️ ภูมิคุ้มกัน</span> <strong id="shop-def-stat">0 (หลบ 0%)</strong></div>
                 <div class="stat-badge"><span style="color:#55ccff;">👟 Speed</span> <strong id="shop-spd-stat">0</strong></div>
+                <div class="stat-badge"><span style="color:#ff9800;">🎯 Critical</span> <strong id="shop-crit-stat">0% | x1.5</strong></div>
                 
                 <div class="status-box">
                     <strong style="color: #ffcc00;">🦠 อาการป่วยปัจจุบัน:</strong> 
@@ -208,9 +205,11 @@
                 <div class="btn-action-group">
                     <button onclick="toggleFullShop(true)" class="btn-catalog">🛒 เปิดแคตตาล็อกยาทั้งหมด (Full Shop)</button>
                     
-                    <div style="display: flex; gap: 10px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <button id="btn-quick-airx" onclick="buyQuickItem('air_x')" class="btn-quick-buy"></button>
                         <button id="btn-quick-rabbit" onclick="buyQuickItem('flying_rabit')" class="btn-quick-buy"></button>
+                        <button id="btn-quick-counterpain" onclick="buyQuickItem('counterpain')" class="btn-quick-buy"></button>
+                        <button id="btn-quick-dressing" onclick="buyQuickItem('dressing_set')" class="btn-quick-buy"></button>
                     </div>
 
                     <div style="display: flex; gap: 10px; margin-top: 5px;">
@@ -239,12 +238,10 @@
                         <div class="full-shop-grid" id="fullShopCombo"></div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- 🌟 Full Screen Canvas 🌟 -->
     <canvas id="gameCanvas"></canvas>
 </div>
 
@@ -257,6 +254,7 @@
     let coins = 0;
     let score = 0;
     let rerollCost = 1;
+    let shopBoardGenerations = 0; 
     let discountedBoughtCount = 0; 
     let currentDiscountItems = []; 
     let adminGodMode = false; 
@@ -264,7 +262,6 @@
     let reqId = null; 
     let toastTimeout = null; 
 
-    // ประกาศตัวแปรเกมให้อยู่ด้านบนสุดก่อนเรียกใช้ resizeCanvas()
     let player = null;
     let enemies = [];
     let bullets = [];
@@ -304,40 +301,67 @@
     const keys = {};
 
     const STATUS_DESC = { 
-        headache: "ลดจำนวนกระสุน", allergy: "ลดภูมิคุ้มกัน (Dodge)", stomach: "ลดความเร็วเดิน", 
-        rash: "ลดโอกาสเหรียญตก", swelling: "เพิ่มจำนวนมอนสเตอร์ตาหน้า", mouth_ulcer: "ลด Max HP", 
-        red_eye: "ปืนขัดข้อง(ยิงว่าว)", sore_throat: "ลดความเร็วการยิง", fresh_wound: "รับดาเมจเพิ่มแรงขึ้น", scald: "เหรียญไม่ดรอปเลย" 
+        headache: "ลดจำนวนกระสุน", 
+        allergy: "ลดภูมิคุ้มกัน 25/50/100", 
+        stomach: "ลดความเร็วเดิน 1/2/3", 
+        muscle_ache: "ลดความเร็วเดิน 1/2/3",
+        rash: "มอนสเตอร์ไม่ดรอปเหรียญ 30/50/70%", 
+        swelling: "สุ่มเกิดมอนสเตอร์ Elite", 
+        mouth_ulcer: "ลด Max HP 10/20/30", 
+        red_eye: "เกิดหมอกบดบังขอบจอ", 
+        sore_throat: "ลดความเร็วการยิง", 
+        fresh_wound: "รับดาเมจแรงขึ้น 20/30/50%", 
+        scald: "เสียเลือด 1/3/4 ทุก 6 วินาที" 
     };
 
     const STATUS_NAMES = { 
-        headache: "ปวดศีรษะ", allergy: "อาการแพ้", stomach: "ปวดท้อง", rash: "ผื่นแพ้", 
-        swelling: "ผื่นบวม", mouth_ulcer: "แผลในปาก", red_eye: "ตาแดง", sore_throat: "เจ็บคอ", 
-        fresh_wound: "แผลสด", scald: "น้ำร้อนลวก" 
+        headache: "ปวดศีรษะ", 
+        allergy: "อาการแพ้", 
+        stomach: "ปวดท้อง", 
+        muscle_ache: "ปวดกล้ามเนื้อ",
+        rash: "ผื่นแพ้", 
+        swelling: "ผื่นบวม", 
+        mouth_ulcer: "แผลในปาก", 
+        red_eye: "ตาแดง", 
+        sore_throat: "เจ็บคอ", 
+        fresh_wound: "แผลสด", 
+        scald: "น้ำร้อนลวก" 
     };
 
     const ITEMS_DB = [
-        { id: 'tylenol', category: 'normal', name: "Tylenol", cost: 15, cures: 'headache', maxStack: 6, desc: "แก้ปวดหัว | +กระสุน (ทุกๆ 2 Stack) & +ATK (3,5,10,13,15,20)" },
-        { id: 'cpm', category: 'normal', name: "CPM", cost: 15, cures: 'allergy', maxStack: 3, desc: "แก้ภูมิแพ้ | +ภูมิคุ้มกัน 10,20,30 (ง่วงนอน ลด Spd 1/สแต็ก)" },
-        { id: 'telfast', category: 'normal', name: "Telfast", cost: 15, cures: 'allergy', maxStack: 3, desc: "แก้ภูมิแพ้ | +ภูมิคุ้มกัน 10,15,20" },
+        { id: 'tylenol', category: 'normal', name: "Tylenol", cost: 15, cures: 'headache', maxStack: 6, desc: "แก้ปวดหัว | +ATK (1, 3, 5, 8, 12, 15)" },
+        { id: 'ponstan', category: 'normal', name: "Ponstan", cost: 30, cures: 'headache,muscle_ache', maxStack: 3, desc: "แก้ปวดหัว,ปวดกล้ามเนื้อ | +จำนวนกระสุน 1 นัด/สแต็ก" },
+        { id: 'cpm', category: 'normal', name: "CPM", cost: 20, cures: 'allergy', maxStack: 3, desc: "แก้ภูมิแพ้ | +DEF 15, 25, 35 (ติดง่วงนอน ลด Spd 1/สแต็ก)" },
+        { id: 'telfast', category: 'normal', name: "Telfast", cost: 15, cures: 'allergy', maxStack: 3, desc: "แก้ภูมิแพ้ | +DEF 5, 10, 15" },
         { id: 'carbon', category: 'normal', name: "Carbon", cost: 15, cures: 'stomach', maxStack: 3, desc: "แก้ปวดท้อง | +ความเร็วเดิน 1, 2, 3" },
-        { id: 'air_x', category: 'normal', name: "Air-X", cost: 30, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | ปืน 3 แฉก (มีผล 1 เฟส)" },
-        { id: 'flying_rabit', category: 'normal', name: "Flying Rabit", cost: 30, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | กระสุนทะลุศัตรู (มีผล 1 เฟส)" },
-        { id: 'gumgig', category: 'normal', name: "Gumgig pean", cost: 15, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ความเร็วปืนยิงไวขึ้น" },
-        { id: 'apache', category: 'normal', name: "Apache", cost: 15, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ความเร็วปืนยิงไวขึ้น" },
-        { id: 'cardamine', category: 'normal', name: "Cardamine", cost: 30, cures: 'rash', maxStack: 3, desc: "แก้ผื่นแพ้ | รับโบนัสเหรียญเมื่อเข้า Shop" },
+        { id: 'air_x', category: 'normal', name: "Air-X", cost: 20, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | ปืน 3 แฉก (มีผล 1 เฟส)" },
+        { id: 'flying_rabit', category: 'normal', name: "Flying Rabit", cost: 20, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | กระสุนทะลุศัตรู (มีผล 1 เฟส)" },
+        { id: 'counterpain', category: 'normal', name: "Counterpain Cool", cost: 20, cures: 'muscle_ache', maxStack: 3, desc: "แก้ปวดกล้ามเนื้อ | กางออร่าสโลว์ศัตรู -1 Spd (1 เฟส)" },
+        { id: 'gumgig', category: 'normal', name: "Gumgig pean", cost: 15, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ยิงไวขึ้น 5, 10, 15% & กระสุนชิ่ง 10, 15, 20%" },
+        { id: 'apache', category: 'normal', name: "Apache", cost: 15, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ยิงไวขึ้น 5, 10, 15% & กระสุนสตั้น 5, 10, 20%" },
+        { id: 'cardamine', category: 'normal', name: "Cardamine", cost: 30, cures: 'rash', maxStack: 3, desc: "แก้ผื่นแพ้ | รับโบนัสเหรียญจบด่าน +20, 30, 45" },
         { id: 'golden_cup', category: 'normal', name: "Golden Cup Blam", cost: 30, cures: 'swelling', maxStack: 3, desc: "แก้ผื่นบวม | ขยายระยะการดูดเหรียญ" },
-        { id: 'systral', category: 'normal', name: "Systral cream", cost: 30, cures: 'rash', maxStack: 3, desc: "แก้ผื่นแพ้ | รับโบนัสเหรียญเมื่อเข้า Shop" },
-        { id: 'silver_cream', category: 'normal', name: "Silver cream", cost: 45, cures: 'scald', maxStack: 3, desc: "แก้น้ำร้อนลวก | ตกเหรียญเพิ่ม 1-3 เหรียญ" },
-        { id: 'oral_paste', category: 'normal', name: "Oral paste", cost: 30, cures: 'mouth_ulcer', maxStack: 3, desc: "แก้แผลในปาก | ขยายกระสุน และ +ATK 1,3,5" },
-        { id: 'eye_lotion', category: 'normal', name: "Eye lotion", cost: 30, cures: 'red_eye', maxStack: 3, desc: "แก้ตาแดง | โอกาสติดคริติคอล (x2.5) 15%, 30%, 40%" },
-        { id: 'betadine', category: 'normal', name: "Betadine", cost: 15, cures: 'fresh_wound', maxStack: 3, desc: "แก้แผลสด | เพิ่ม Max HP (+5, +10, +15)" },
+        { id: 'systral', category: 'normal', name: "Systral cream", cost: 30, cures: 'rash', maxStack: 3, desc: "แก้ผื่นแพ้ | โอกาสดรอป 2 เหรียญ 5%, 10%, 20%" },
+        { id: 'silver_cream', category: 'normal', name: "Silver cream", cost: 45, cures: 'scald', maxStack: 3, desc: "แก้น้ำร้อนลวก | ฮีล 5%, 7%, 10% ของ MaxHP ทุก 6 วิ" },
+        { id: 'oral_paste', category: 'normal', name: "Oral paste", cost: 30, cures: 'mouth_ulcer', maxStack: 3, desc: "แก้แผลในปาก | +MaxHP 5, 10, 20 & ขยายกระสุน 4, 7, 10" },
+        { id: 'eye_lotion', category: 'normal', name: "Eye lotion", cost: 30, cures: 'red_eye', maxStack: 3, desc: "แก้ตาแดง | โอกาสคริติคอลเพิ่ม 10%, 20%, 30%" },
+        { id: 'eye_drop', category: 'normal', name: "Eye Drop", cost: 30, cures: 'red_eye', maxStack: 3, desc: "แก้ตาแดง | ความแรงคริติคอลเพิ่มเป็น x1.75, x2.0, x2.5" },
+        { id: 'betadine', category: 'normal', name: "Betadine", cost: 15, cures: 'fresh_wound', maxStack: 3, desc: "แก้แผลสด | เพิ่ม Max HP (+6, +12, +17)" },
         
-        { id: 'saline', category: 'combo', name: "Saline", cost: 7, cures: 'hp', maxStack: 99, desc: "Heal 2 | คู่กับ Plaster รับ +5 MaxHP ถาวร" },
-        { id: 'plaster', category: 'combo', name: "Plaster", cost: 7, cures: 'hp', maxStack: 99, desc: "Heal 2 | คู่กับ Saline รับ +5 MaxHP ถาวร" },
-        { id: 'alcohol', category: 'combo', name: "Alcohol", cost: 7, cures: 'hp', maxStack: 99, desc: "Heal 2 | คู่กับ Betadine รับ +5 MaxHP ถาวร" },
-        { id: 'gauze', category: 'combo', name: "Gauze", cost: 7, cures: 'hp', maxStack: 99, desc: "Heal 2 | คู่กับ Dressing Set รับ +5 MaxHP ถาวร" },
-        { id: 'dressing_set', category: 'combo', name: "Dressing set", cost: 14, cures: 'hp', maxStack: 99, desc: "Heal 5 | คู่กับ Gauze รับ +5 MaxHP ถาวร" }
+        { id: 'saline', category: 'combo', name: "Saline", cost: 15, cures: 'hp', maxStack: 99, desc: "Heal 3 | คู่กับ Plaster รับ +5 MaxHP" },
+        { id: 'plaster', category: 'combo', name: "Plaster", cost: 15, cures: 'hp', maxStack: 99, desc: "Heal 3 | คู่กับ Saline รับ +5 MaxHP" },
+        { id: 'alcohol', category: 'combo', name: "Alcohol", cost: 15, cures: 'hp', maxStack: 99, desc: "Heal 3 | คู่กับ Gauze รับ +5 MaxHP" },
+        { id: 'gauze', category: 'combo', name: "Gauze", cost: 15, cures: 'hp', maxStack: 99, desc: "Heal 3 | คู่กับ Alcohol รับ +5 MaxHP" },
+        { id: 'dressing_set', category: 'combo', name: "Dressing set", cost: 30, cures: 'hp', maxStack: 99, desc: "Heal 7 | คู่กับ Betadine รับ +5 MaxHP" }
     ];
+
+    function getDynamicCost(itemId, phase) {
+        if (['air_x', 'flying_rabit', 'counterpain'].includes(itemId)) {
+            return Math.floor(20 + (phase * 1.5));
+        }
+        let item = ITEMS_DB.find(i => i.id === itemId);
+        return item ? item.cost : 0;
+    }
 
     function showToast(message, color = "#ffeb3b", duration = 2500) {
         const toast = document.getElementById('toastNotification');
@@ -381,7 +405,8 @@
             
             const debuffKeys = {
                 '1': 'headache', '2': 'allergy', '3': 'stomach', '4': 'rash', '5': 'swelling',
-                '6': 'mouth_ulcer', '7': 'red_eye', '8': 'sore_throat', '9': 'fresh_wound', '0': 'scald'
+                '6': 'mouth_ulcer', '7': 'red_eye', '8': 'sore_throat', '9': 'fresh_wound', '0': 'scald',
+                '-': 'muscle_ache'
             };
             if (debuffKeys[k]) {
                 let d = debuffKeys[k];
@@ -454,6 +479,7 @@
                 document.getElementById('fullname').style.display = 'none';
                 if (existing.pin_code !== pinStr) { msgEl.innerText = "PIN ไม่ถูกต้อง"; btn.innerText = "Login / Register"; btn.disabled = false; return; }
                 currentUser = existing;
+                if (currentUser.upgraded_crit === undefined) currentUser.upgraded_crit = 0; 
             } else {
                 if (document.getElementById('fullname').style.display === 'none') {
                     document.getElementById('fullname').style.display = 'block'; 
@@ -463,9 +489,11 @@
                 
                 const { data: newP, error: insErr } = await supabaseClient.from('players').insert([{ 
                     username: userStr, pin_code: pinStr, full_name: fnameStr, diamonds: 0, daily_energy: 5, last_played_at: new Date().toISOString(),
-                    upgraded_hp: 0, upgraded_atk: 0, upgraded_def: 0, upgraded_spd: 0
+                    upgraded_hp: 0, upgraded_atk: 0, upgraded_def: 0, upgraded_spd: 0, upgraded_crit: 0
                 }]).select().single();
-                if (insErr) throw insErr; currentUser = newP;
+                if (insErr) throw insErr; 
+                currentUser = newP;
+                if (currentUser.upgraded_crit === undefined) currentUser.upgraded_crit = 0;
                 
                 try { await supabaseClient.from('leaderboards').insert([{ username: userStr, max_score: 0, max_phase: 1 }]); }catch(e){}
                 document.getElementById('fullname').style.display = 'none'; document.getElementById('fullname').value = '';
@@ -513,7 +541,9 @@
         if (stat === 'hp') return lvl < 20 ? 2 : 4; 
         if (stat === 'atk') return 4;
         if (stat === 'def') return lvl < 20 ? 2 : (lvl < 40 ? 4 : 6);
-        if (stat === 'spd') return 30; return Infinity;
+        if (stat === 'spd') return 30; 
+        if (stat === 'crit') return 20;
+        return Infinity;
     }
 
     function updateUpgradeUI() {
@@ -551,13 +581,21 @@
         if(btnSpd){
             if (spdLvl >= 3) { btnSpd.innerText = 'MAX'; btnSpd.disabled = true; } else { let cost = getUpgradeCost('spd', spdLvl); btnSpd.innerHTML = `อัปเกรด (💎 <span style="color:cyan;">${cost}</span>)`; btnSpd.disabled = (currentUser.diamonds < cost); }
         }
+
+        let critLvl = currentUser.upgraded_crit || 0; 
+        let lblCrit = document.getElementById('upg-lvl-crit');
+        if(lblCrit) lblCrit.innerText = critLvl;
+        let btnCrit = document.getElementById('btn-upg-crit');
+        if(btnCrit){
+            if (critLvl >= 5) { btnCrit.innerText = 'MAX'; btnCrit.disabled = true; } else { let cost = getUpgradeCost('crit', critLvl); btnCrit.innerHTML = `อัปเกรด (💎 <span style="color:cyan;">${cost}</span>)`; btnCrit.disabled = (currentUser.diamonds < cost); }
+        }
     }
 
     function showUpgrade() { updateUpgradeUI(); switchScreen('upgradeScreen'); }
 
     async function buyUpgrade(stat) {
         let currentLvl = currentUser[`upgraded_${stat}`] || 0;
-        let maxLvl = { hp: 40, atk: 10, def: 50, spd: 3 }[stat]; 
+        let maxLvl = { hp: 40, atk: 10, def: 50, spd: 3, crit: 5 }[stat]; 
         if (currentLvl >= maxLvl) return;
         let cost = getUpgradeCost(stat, currentLvl);
         if (currentUser.diamonds < cost) { showToast("เพชรไม่พอ!", "#ff5555", 2500); return; }
@@ -572,8 +610,8 @@
         
         if (comboId === 'full_set') {
             let has1 = player.appliedCombos.has('saline_plaster');
-            let has2 = player.appliedCombos.has('alc_bet');
-            let has3 = player.appliedCombos.has('gauze_dressing');
+            let has2 = player.appliedCombos.has('alc_gauze');
+            let has3 = player.appliedCombos.has('dress_bet');
             if (!has1 || !has2 || !has3) {
                 showToast("ต้องจ่ายเงินเปิดใช้งานชุด 1, 2 และ 3 ให้ครบก่อน!", "#ff5555", 3500);
                 return;
@@ -597,22 +635,30 @@
             this.x = canvas.width / 2; this.y = canvas.height / 2; 
             this.size = 25; 
             
-            let upgHp = currentUser.upgraded_hp || 0; let upgAtk = currentUser.upgraded_atk || 0; let upgDef = currentUser.upgraded_def || 0; let upgSpd = currentUser.upgraded_spd || 0;
+            let upgHp = currentUser.upgraded_hp || 0; 
+            let upgAtk = currentUser.upgraded_atk || 0; 
+            let upgDef = currentUser.upgraded_def || 0; 
+            let upgSpd = currentUser.upgraded_spd || 0;
+            let upgCrit = currentUser.upgraded_crit || 0;
 
             this.baseMaxHp = 10 + upgHp; this.bonusMaxHp = 0; 
             this.baseAtk = 1 + upgAtk; this.baseDef = 0 + upgDef; 
             this.baseSpd = 4 + upgSpd; 
             this.baseFireRate = 1.0; this.baseBullets = 1;
+            this.baseCritChance = 0.05 + (upgCrit * 0.01);
             
             this.hp = this.baseMaxHp; this.maxHp = this.baseMaxHp; this.atk = this.baseAtk; 
             this.def = this.baseDef; this.spd = this.baseSpd; this.fireRate = 1.0; this.bulletCount = 1;
-            
+            this.critChance = this.baseCritChance; this.critDamage = 1.5;
+
             this.fireTimer = 0; this.magnetRange = 0;
             this.magnetActiveTime = 0; this.magnetMaxTime = 1.5; this.magnetBonusRange = 0;
             this.invulnerableTimer = 0; 
+            this.scaldTimer = 6.0;
+            this.silverCreamTimer = 6.0;
 
             this.isDead = false; 
-            this.statuses = { headache: 0, allergy: 0, stomach: 0, rash: 0, swelling: 0, mouth_ulcer: 0, red_eye: 0, sore_throat: 0, fresh_wound: 0, scald: 0 }; 
+            this.statuses = { headache: 0, allergy: 0, stomach: 0, muscle_ache: 0, rash: 0, swelling: 0, mouth_ulcer: 0, red_eye: 0, sore_throat: 0, fresh_wound: 0, scald: 0 }; 
             this.activeStatuses = { ...this.statuses };
             
             this.inv = {}; ITEMS_DB.forEach(item => this.inv[item.id] = 0);
@@ -625,52 +671,57 @@
             this.activeStatuses = { ...this.statuses };
             
             let hpPenLv = Math.min(this.activeStatuses.mouth_ulcer, 3);
-            let hpPenalty = [0, 3, 6, 10][hpPenLv] || 0;
+            let hpPenalty = [0, 10, 20, 30][hpPenLv] || 0;
 
             let betLv = Math.min(this.inv.betadine, 3);
-            let betadineHp = [0, 5, 10, 15][betLv] || 0;
+            let betadineHp = [0, 6, 12, 17][betLv] || 0;
 
-            this.maxHp = Math.max(1, this.baseMaxHp + this.bonusMaxHp + betadineHp - hpPenalty);
+            let opLv = Math.min(this.inv.oral_paste, 3);
+            let opHp = [0, 5, 10, 20][opLv] || 0;
+
+            this.maxHp = Math.max(1, this.baseMaxHp + this.bonusMaxHp + betadineHp + opHp - hpPenalty);
             if (this.hp > this.maxHp) this.hp = this.maxHp;
 
             let defPenLv = Math.min(this.activeStatuses.allergy, 3);
-            let defPenalty = [0, 10, 30, 50][defPenLv] || 0;
+            let defPenalty = [0, 25, 50, 100][defPenLv] || 0;
 
             let cpmLv = Math.min(this.inv.cpm, 3);
-            let cpmDef = [0, 10, 20, 30][cpmLv] || 0;
+            let cpmDef = [0, 15, 25, 35][cpmLv] || 0;
 
             let telLv = Math.min(this.inv.telfast, 3);
-            let telDef = [0, 10, 15, 20][telLv] || 0;
+            let telDef = [0, 5, 10, 15][telLv] || 0;
             
             this.def = this.baseDef - defPenalty + cpmDef + telDef;
 
             let carbBonus = Math.min(this.inv.carbon, 3);
-            this.spd = Math.max(1, this.baseSpd - this.activeStatuses.stomach + carbBonus - this.activeCpmDebuff - this.cpmDebuffToApply);
+            this.spd = Math.max(1, this.baseSpd - this.activeStatuses.stomach - this.activeStatuses.muscle_ache + carbBonus - this.activeCpmDebuff - this.cpmDebuffToApply);
 
             let throatPenLv = Math.min(this.activeStatuses.sore_throat, 3);
             let throatPen = [0, 0.20, 0.35, 0.50][throatPenLv] || 0;
 
             let gumLv = Math.min(this.inv.gumgig, 3);
-            let gumBuff = [0, 0.20, 0.30, 0.50][gumLv] || 0;
+            let gumBuff = [0, 0.05, 0.10, 0.15][gumLv] || 0;
 
             let apaLv = Math.min(this.inv.apache, 3);
-            let apaBuff = [0, 0.20, 0.30, 0.50][apaLv] || 0;
+            let apaBuff = [0, 0.05, 0.10, 0.15][apaLv] || 0;
             
             this.fireRate = this.baseFireRate * (1 + throatPen) * (1 - gumBuff) * (1 - apaBuff);
             this.fireRate = Math.max(0.1, this.fireRate); 
 
             let tyLv = Math.min(this.inv.tylenol, 6);
-            let tyAtk = [0, 3, 5, 10, 13, 15, 20][tyLv] || 0;
-
-            let opLv = Math.min(this.inv.oral_paste, 3);
-            let opAtk = [0, 1, 3, 5][opLv] || 0;
+            let tyAtk = [0, 1, 3, 5, 8, 12, 15][tyLv] || 0;
+            this.atk = this.baseAtk + tyAtk;
             
-            this.atk = this.baseAtk + tyAtk + opAtk;
-            
-            let tyBullets = [0, 0, 1, 1, 2, 2, 3][tyLv] || 0;
+            let ponstanLv = Math.min(this.inv.ponstan, 3);
             let baseCount = this.baseBullets - this.activeStatuses.headache;
-            this.bulletCount = Math.max(1, baseCount + tyBullets);
+            this.bulletCount = Math.max(1, baseCount + ponstanLv);
             
+            let eyeLv = Math.min(this.inv.eye_lotion, 3);
+            this.critChance = this.baseCritChance + ([0, 0.10, 0.20, 0.30][eyeLv] || 0);
+
+            let eyeDropLv = Math.min(this.inv.eye_drop, 3);
+            this.critDamage = [1.5, 1.75, 2.0, 2.5][eyeDropLv] || 1.5;
+
             let cupLv = Math.min(this.inv.golden_cup, 3);
             this.magnetRange = (cupLv * 60) + (this.magnetBonusRange || 0);
         }
@@ -692,6 +743,39 @@
             }
             let cupLv = Math.min(this.inv.golden_cup, 3);
             this.magnetRange = (cupLv * 60) + (this.magnetBonusRange || 0); 
+            
+            // ระบบน้ำร้อนลวก (Scald DoT)
+            if (this.activeStatuses.scald > 0) {
+                this.scaldTimer -= dt;
+                if (this.scaldTimer <= 0) {
+                    this.scaldTimer = 6.0;
+                    let scaldLv = Math.min(this.activeStatuses.scald, 3);
+                    let dmg = [0, 1, 3, 4][scaldLv];
+                    if (this.hp > 1) {
+                        this.hp = Math.max(1, this.hp - dmg);
+                        showToast(`🔥 น้ำร้อนลวก! เสียเลือด ${dmg}`, "#ff5555", 1500);
+                    }
+                }
+            } else {
+                this.scaldTimer = 6.0;
+            }
+
+            // ระบบซิลเวอร์ครีม ฮีลอัตโนมัติ
+            if (this.inv.silver_cream > 0) {
+                this.silverCreamTimer -= dt;
+                if (this.silverCreamTimer <= 0) {
+                    this.silverCreamTimer = 6.0;
+                    let scLv = Math.min(this.inv.silver_cream, 3);
+                    let healPercent = [0, 0.05, 0.07, 0.10][scLv];
+                    let healAmt = this.maxHp * healPercent;
+                    if (this.hp < this.maxHp && healAmt > 0) {
+                        this.hp = Math.min(this.maxHp, this.hp + healAmt);
+                        showToast(`💚 Silver Cream ฮีลเลือด ${healAmt.toFixed(1)}`, "#0f0", 1500);
+                    }
+                }
+            } else {
+                this.silverCreamTimer = 6.0;
+            }
 
             let moveSpd = this.spd * 60 * dt;
             if (keys['w'] && this.y > this.size) this.y -= moveSpd;
@@ -711,6 +795,18 @@
 
         draw(ctx) {
             if (this.isDead) return;
+
+            // วาดออร่า Counterpain
+            let cpLv = Math.min(this.inv.counterpain, 3);
+            let cpRange = [0, 120, 150, 180][cpLv] || 0;
+            if (cpRange > 0) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, cpRange, 0, Math.PI*2);
+                ctx.fillStyle = 'rgba(173, 216, 230, 0.15)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(173, 216, 230, 0.5)';
+                ctx.stroke();
+            }
             
             if (this.invulnerableTimer > 0) {
                 ctx.globalAlpha = (Math.floor(Date.now() / 100) % 2 === 0) ? 0.5 : 1.0;
@@ -737,18 +833,21 @@
         shootNearest() {
             let nearest = null; let minDist = Infinity;
             for (let e of enemies) {
-                if (e.spawnDelay > 0) continue; 
+                if (e.spawnDelay > 0 || e.hp <= 0) continue; 
                 let dist = Math.hypot(e.x - this.x, e.y - this.y);
                 if (dist < minDist) { minDist = dist; nearest = e; }
             }
             if (nearest) {
                 let angle = Math.atan2(nearest.y - this.y, nearest.x - this.x);
                 let opLv = Math.min(this.inv.oral_paste, 3);
-                let bSize = 6 + (opLv * 3); 
+                let bSize = 6 + ([0, 4, 7, 10][opLv] || 0); 
                 let isPierce = (this.inv.flying_rabit > 0);
                 
-                let eyeLv = Math.min(this.inv.eye_lotion, 3);
-                let critChance = [0, 0.15, 0.30, 0.40][eyeLv] || 0;
+                let gumLv = Math.min(this.inv.gumgig, 3);
+                let bounceChance = [0, 0.10, 0.15, 0.20][gumLv] || 0;
+                
+                let apaLv = Math.min(this.inv.apache, 3);
+                let stunChance = [0, 0.05, 0.10, 0.20][apaLv] || 0;
                 
                 let fireBulletStream = (spreadAngle) => {
                     let actualAngle = angle + spreadAngle;
@@ -757,9 +856,9 @@
                         let bx = this.x + Math.cos(actualAngle) * offsetDist;
                         let by = this.y + Math.sin(actualAngle) * offsetDist;
                         
-                        let isCrit = Math.random() < critChance;
-                        let finalAtk = isCrit ? this.atk * 2.5 : this.atk;
-                        bullets.push(new Bullet(bx, by, actualAngle, finalAtk, bSize, isPierce, isCrit));
+                        let isCrit = Math.random() < this.critChance;
+                        let finalAtk = isCrit ? this.atk * this.critDamage : this.atk;
+                        bullets.push(new Bullet(bx, by, actualAngle, finalAtk, bSize, isPierce, isCrit, bounceChance, stunChance));
                     }
                 };
 
@@ -774,7 +873,7 @@
             }
         }
         
-        takeDamage(amt, statusList, isBoss = false) {
+        takeDamage(amt, ailments, isBoss = false) {
             if (this.isDead) return false;
             if (currentUser && currentUser.is_admin && adminGodMode) return false; 
             if (this.invulnerableTimer > 0) return false; 
@@ -783,20 +882,48 @@
             if (Math.random() < dodgeChance) return true; 
             
             let fwLv = Math.min(this.activeStatuses.fresh_wound, 3);
-            let extraDmg = [0, 2, 4, 6][fwLv] || 0;
-            this.hp -= (amt + extraDmg);
+            let fwMult = 1 + ([0, 0.20, 0.30, 0.50][fwLv] || 0);
             
-            let debuffChance = isBoss ? 1.0 : 0.35; 
-            if (statusList && statusList.length > 0 && Math.random() < debuffChance) {
-                let randomStatus = statusList[Math.floor(Math.random() * statusList.length)];
-                if (this.statuses[randomStatus] < 3) {
-                    this.statuses[randomStatus]++;
-                    showToast(`⚠️ ติดอาการป่วย: ${STATUS_NAMES[randomStatus]}!`, "#ff5555", 2500);
-                    this.applyPhaseModifiers();
+            this.hp -= (amt * fwMult);
+            
+            let appliedAny = false;
+            let appliedDebuffs = [];
+            let triggered = [];
+
+            if (isBoss) {
+                const allDebuffs = ['headache', 'allergy', 'stomach', 'muscle_ache', 'rash', 'swelling', 'mouth_ulcer', 'red_eye', 'sore_throat', 'fresh_wound', 'scald'];
+                let shuffled = allDebuffs.sort(() => 0.5 - Math.random());
+                triggered.push(shuffled[0]);
+                triggered.push(shuffled[1]);
+            } else if (ailments && ailments.length > 0) {
+                ailments.forEach(a => {
+                    if (Math.random() < a.chance) {
+                        triggered.push(a.id);
+                    }
+                });
+            }
+
+            if (triggered.length > 2) {
+                triggered = triggered.sort(() => 0.5 - Math.random()).slice(0, 2);
+            }
+
+            triggered.forEach(id => {
+                if (this.statuses[id] < 3) {
+                    this.statuses[id]++;
+                    appliedDebuffs.push(STATUS_NAMES[id]);
+                    appliedAny = true;
                 }
+            });
+
+            if (appliedDebuffs.length > 0) {
+                showToast(`⚠️ ติดอาการป่วย:<br>${appliedDebuffs.join(', ')}`, "#ff5555", 2500);
             }
             
-            this.invulnerableTimer = 0.5; 
+            if (appliedAny) {
+                this.applyPhaseModifiers();
+            }
+            
+            this.invulnerableTimer = 0.3; 
             
             if (this.hp <= 0) {
                 this.hp = 0; this.isDead = true; gameOver();
@@ -808,9 +935,11 @@
     class Enemy {
         constructor(type, phase) {
             this.type = type; this.phase = phase; this.isBoss = (type === 5);
+            this.isElite = false;
             this.x = 0; this.y = 0; 
             this.shootTimer = 0; this.bossPattern = 0; 
             this.spawnDelay = 0.3; 
+            this.stunTimer = 0;
             
             let loop = phase >= 10 ? phase - 10 : 0;
             
@@ -829,8 +958,26 @@
                 this.atk = 1 + atkAdd;
 
                 this.spd = 2.5; this.size = 20; 
-                this.statusList = type === 1 ? ['headache', 'allergy'] : ['stomach', 'scald'];
-                this.isRanged = type === 2; this.shootTimer = 2.0;
+                
+                if (type === 1) {
+                    this.meleeAilments = [
+                        {id: 'headache', chance: 0.4}, {id: 'allergy', chance: 0.4}, 
+                        {id: 'muscle_ache', chance: 0.4}, {id: 'fresh_wound', chance: 0.4}, 
+                        {id: 'sore_throat', chance: 0.4}, {id: 'mouth_ulcer', chance: 0.4}
+                    ];
+                    this.rangedAilments = [];
+                    this.isRanged = false;
+                } else {
+                    this.meleeAilments = [
+                        {id: 'headache', chance: 0.4}, {id: 'allergy', chance: 0.4}, 
+                        {id: 'muscle_ache', chance: 0.4}, {id: 'fresh_wound', chance: 0.4}
+                    ];
+                    this.rangedAilments = [
+                        {id: 'stomach', chance: 0.7}, {id: 'swelling', chance: 0.7}, 
+                        {id: 'scald', chance: 0.7}, {id: 'rash', chance: 0.7}
+                    ];
+                    this.isRanged = true; this.shootTimer = 2.0;
+                }
             } 
             else if (type === 3) { 
                 let hp = 1;
@@ -849,7 +996,13 @@
                 this.spd = spd;
 
                 this.size = 18; 
-                this.statusList = ['rash', 'swelling', 'fresh_wound']; this.isRanged = false; 
+                this.meleeAilments = [
+                    {id: 'muscle_ache', chance: 0.7}, {id: 'fresh_wound', chance: 0.7}, 
+                    {id: 'scald', chance: 0.7}, {id: 'headache', chance: 0.7}, 
+                    {id: 'allergy', chance: 0.7}, {id: 'red_eye', chance: 1.0}
+                ];
+                this.rangedAilments = [];
+                this.isRanged = false; 
             } 
             else if (type === 4) { 
                 let hp = 5;
@@ -865,12 +1018,21 @@
                 this.rangedAtk = 3 + atkAdd;
                 
                 this.spd = 2.5; this.size = 25; 
-                this.statusList = ['mouth_ulcer', 'red_eye', 'sore_throat']; this.isRanged = true; this.shootTimer = 2.5; 
+                this.meleeAilments = [
+                    {id: 'headache', chance: 0.4}, {id: 'allergy', chance: 0.4}, 
+                    {id: 'muscle_ache', chance: 0.4}, {id: 'fresh_wound', chance: 0.4}
+                ];
+                this.rangedAilments = [
+                    {id: 'mouth_ulcer', chance: 1.0}, {id: 'red_eye', chance: 1.0}, 
+                    {id: 'scald', chance: 1.0}, {id: 'sore_throat', chance: 1.0}
+                ];
+                this.isRanged = true; this.shootTimer = 2.5; 
             } 
             else if (type === 5) {
                 this.size = 55; 
                 this.isRanged = true;
-                this.statusList = ['headache', 'allergy', 'stomach', 'scald', 'rash', 'swelling', 'fresh_wound', 'mouth_ulcer', 'red_eye', 'sore_throat'];
+                this.meleeAilments = [];
+                this.rangedAilments = [];
                 if (phase === 3) { this.hp = 80; this.atk = 3; this.spd = 2.5; this.fireRateBase = 2.0; }
                 else if (phase === 5) { this.hp = 300; this.atk = 5; this.spd = 2.5; this.fireRateBase = 2.0; }
                 else if (phase === 7) { this.hp = 800; this.atk = 6; this.spd = 3.5; this.fireRateBase = 2.0; }
@@ -890,13 +1052,32 @@
             
             if (this.spawnDelay > 0) { this.spawnDelay -= dt; return; }
 
+            // ระบบสตั้น (Apache)
+            if (this.stunTimer > 0) {
+                this.stunTimer -= dt;
+                return; 
+            }
+
+            let currentSpd = this.spd;
+            let cpLv = Math.min(player.inv.counterpain, 3);
+            let cpRange = [0, 120, 150, 180][cpLv] || 0;
+            if (cpRange > 0) {
+                let pDist = Math.hypot(player.x - this.x, player.y - this.y);
+                if (pDist < cpRange + this.size) {
+                    currentSpd = Math.max(0.5, currentSpd - 1);
+                }
+            }
+
             let angle = Math.atan2(player.y - this.y, player.x - this.x);
-            this.x += Math.cos(angle) * this.spd * 60 * dt; this.y += Math.sin(angle) * this.spd * 60 * dt;
+            this.x += Math.cos(angle) * currentSpd * 60 * dt; 
+            this.y += Math.sin(angle) * currentSpd * 60 * dt;
             let dist = Math.hypot(player.x - this.x, player.y - this.y);
+            
             if (dist < this.size + player.size) {
-                let hitProcessed = player.takeDamage(this.atk, this.statusList, this.isBoss);
+                let hitProcessed = player.takeDamage(this.atk, this.meleeAilments, this.isBoss);
                 if (hitProcessed && !this.isBoss) this.hp = 0; 
             }
+            
             if (this.isRanged) {
                 this.shootTimer -= dt;
                 if (this.shootTimer <= 0) {
@@ -910,7 +1091,7 @@
                             if (this.bossPattern === 0) { this.fireCircle(pAtk, 16); this.bossPattern = 1; }
                             else { this.fireCone(angle, pAtk, 7); this.bossPattern = 0; }
                         }
-                    } else enemyBullets.push(new EnemyBullet(this.x, this.y, angle, pAtk, this.statusList));
+                    } else enemyBullets.push(new EnemyBullet(this.x, this.y, angle, pAtk, this.rangedAilments, this.isBoss));
                 }
             }
         }
@@ -924,26 +1105,40 @@
             else if (this.type === 3) imgAsset = ASSETS.enemy3;
             else if (this.type === 4) imgAsset = ASSETS.enemy4;
 
+            if (this.isElite) {
+                ctx.save();
+                ctx.shadowColor = 'rgba(255, 50, 50, 0.8)';
+                ctx.shadowBlur = 20;
+            }
+
             drawSprite(ctx, imgAsset, this.x, this.y, this.size, () => {
                 ctx.fillStyle = this.isBoss ? '#ff5555' : 'red'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
             });
+
+            if (this.isElite) {
+                ctx.restore();
+            }
+
             ctx.globalAlpha = 1.0;
         }
         fireCone(baseAngle, atk, count) {
             let spread = Math.PI / 4; let startAngle = baseAngle - (spread / 2); let step = count > 1 ? spread / (count - 1) : 0;
-            for (let i = 0; i < count; i++) enemyBullets.push(new EnemyBullet(this.x, this.y, startAngle + (step * i), atk, this.statusList));
+            for (let i = 0; i < count; i++) enemyBullets.push(new EnemyBullet(this.x, this.y, startAngle + (step * i), atk, this.rangedAilments, this.isBoss));
         }
         fireCircle(atk, count) {
             let step = (Math.PI * 2) / count;
-            for (let i = 0; i < count; i++) enemyBullets.push(new EnemyBullet(this.x, this.y, step * i, atk, this.statusList));
+            for (let i = 0; i < count; i++) enemyBullets.push(new EnemyBullet(this.x, this.y, step * i, atk, this.rangedAilments, this.isBoss));
         }
     }
 
     class Bullet {
-        constructor(x, y, angle, atk, size, pierce, isCrit) {
+        constructor(x, y, angle, atk, size, pierce, isCrit, bounceChance, stunChance) {
             this.x = x; this.y = y; this.angle = angle; this.atk = atk; 
             this.spd = 12; this.size = size; this.pierce = pierce; 
             this.active = true; this.hitList = []; this.isCrit = isCrit;
+            this.bounceChance = bounceChance;
+            this.stunChance = stunChance;
+            this.bounces = 1;
         }
         update(dt) {
             this.x += Math.cos(this.angle) * this.spd * 60 * dt; this.y += Math.sin(this.angle) * this.spd * 60 * dt;
@@ -957,10 +1152,13 @@
                 if (dist < this.size + e.size) {
                     e.hp -= this.atk; 
                     this.hitList.push(e);
-                    if (!this.pierce) this.active = false;
+                    
+                    if (this.stunChance > 0 && Math.random() < this.stunChance) {
+                        e.stunTimer = 0.3;
+                    }
                     
                     if (e.hp <= 0) {
-                        score += (e.isBoss ? 100 : 10);
+                        score += (e.isBoss ? 100 : (e.isElite ? 30 : 10));
                         let dropCoin = true;
                         
                         let dropRate = 1.0;
@@ -970,15 +1168,18 @@
                         if (Math.random() > dropRate) dropCoin = false;
 
                         let rashLv = Math.min(player.activeStatuses.rash, 3);
-                        let rashChance = [1.0, 0.9, 0.7, 0.5][rashLv] || 1.0;
-                        let scaldLv = Math.min(player.activeStatuses.scald, 3);
-                        let scaldChance = [0, 0.3, 0.5, 0.8][scaldLv] || 0;
-                        
-                        if (Math.random() > rashChance || Math.random() < scaldChance) dropCoin = false;
+                        let rashChance = [0, 0.3, 0.5, 0.7][rashLv];
+                        if (Math.random() < rashChance) dropCoin = false;
 
                         if (dropCoin) {
-                            if (drops.length > 200) drops.splice(0, drops.length - 200); 
-                            drops.push(new ItemDrop(e.x, e.y, 'coin'));
+                            let sysLv = Math.min(player.inv.systral, 3);
+                            let sysChance = [0, 0.05, 0.10, 0.20][sysLv];
+                            let numCoins = Math.random() < sysChance ? 2 : 1;
+                            
+                            for (let c=0; c<numCoins; c++) {
+                                if (drops.length > 200) drops.splice(0, drops.length - 200); 
+                                drops.push(new ItemDrop(e.x + (Math.random()*10-5), e.y + (Math.random()*10-5), 'coin'));
+                            }
                             
                             let silvLv = Math.min(player.inv.silver_cream, 3);
                             let silverChance = [0, 0.20, 0.35, 0.50][silvLv] || 0;
@@ -993,7 +1194,23 @@
                             if(Math.random() < 0.05) drops.push(new ItemDrop(e.x - 10, e.y - 10, 'magnet')); 
                         }
                     }
-                    if (!this.pierce) break;
+
+                    if (this.bounces > 0 && Math.random() < this.bounceChance) {
+                        let nearest = null; let minDist = Infinity;
+                        for (let other of enemies) {
+                            if (other === e || other.hp <= 0 || other.spawnDelay > 0) continue;
+                            let d = Math.hypot(other.x - this.x, other.y - this.y);
+                            if (d < minDist) { minDist = d; nearest = other; }
+                        }
+                        if (nearest) {
+                            this.angle = Math.atan2(nearest.y - this.y, nearest.x - this.x);
+                            this.bounces--;
+                            this.active = true;
+                            break; 
+                        }
+                    }
+
+                    if (!this.pierce) { this.active = false; break; }
                 }
             }
         }
@@ -1008,8 +1225,8 @@
     }
 
     class EnemyBullet {
-        constructor(x, y, angle, atk, statusList) {
-            this.x = x; this.y = y; this.angle = angle; this.atk = atk; this.statusList = statusList;
+        constructor(x, y, angle, atk, ailments, isBoss) {
+            this.x = x; this.y = y; this.angle = angle; this.atk = atk; this.ailments = ailments; this.isBoss = isBoss;
             this.spd = 5; this.size = 8; this.active = true;
         }
         update(dt) {
@@ -1017,7 +1234,7 @@
             if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.active = false;
             let dist = Math.hypot(player.x - this.x, player.y - this.y);
             if (dist < this.size + player.size) { 
-                let hitProcessed = player.takeDamage(this.atk, this.statusList); 
+                let hitProcessed = player.takeDamage(this.atk, this.ailments, this.isBoss); 
                 if (hitProcessed) this.active = false; 
             }
         }
@@ -1139,18 +1356,18 @@
         invHtml += `</div>`;
         
         let isSet1 = player.inv.saline > 0 && player.inv.plaster > 0;
-        let isSet2 = player.inv.alcohol > 0 && player.inv.betadine > 0;
-        let isSet3 = player.inv.gauze > 0 && player.inv.dressing_set > 0;
+        let isSet2 = player.inv.alcohol > 0 && player.inv.gauze > 0;
+        let isSet3 = player.inv.dressing_set > 0 && player.inv.betadine > 0;
         
         let hasSet1 = player.appliedCombos.has('saline_plaster');
-        let hasSet2 = player.appliedCombos.has('alc_bet');
-        let hasSet3 = player.appliedCombos.has('gauze_dressing');
+        let hasSet2 = player.appliedCombos.has('alc_gauze');
+        let hasSet3 = player.appliedCombos.has('dress_bet');
         let canActivateFull = hasSet1 && hasSet2 && hasSet3;
 
         let statusSet1 = hasSet1 ? '<span style="color:#0f0">[✅ ACTIVATED]</span>' : (isSet1 ? `<button class="btn-blink" onclick="activateCombo('saline_plaster', 15, 5)" style="padding: 2px 10px; font-size:11px; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;">เปิดใช้ ($15)</button>` : '');
-        let statusSet2 = hasSet2 ? '<span style="color:#0f0">[✅ ACTIVATED]</span>' : (isSet2 ? `<button class="btn-blink" onclick="activateCombo('alc_bet', 15, 5)" style="padding: 2px 10px; font-size:11px; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;">เปิดใช้ ($15)</button>` : '');
-        let statusSet3 = hasSet3 ? '<span style="color:#0f0">[✅ ACTIVATED]</span>' : (isSet3 ? `<button class="btn-blink" onclick="activateCombo('gauze_dressing', 15, 5)" style="padding: 2px 10px; font-size:11px; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;">เปิดใช้ ($15)</button>` : '');
-        let statusFullSet = player.appliedCombos.has('full_set') ? '<span style="color:#0f0;">[✅ ACTIVATED]</span>' : (canActivateFull ? `<button class="btn-blink-gold" onclick="activateCombo('full_set', 45, 20)" style="padding: 5px 15px; font-weight:bold; background:#FFD700; color:black; border:none; border-radius:4px; cursor:pointer;">⭐ เปิดใช้ Full Combo ($45) ⭐</button>` : '❌');
+        let statusSet2 = hasSet2 ? '<span style="color:#0f0">[✅ ACTIVATED]</span>' : (isSet2 ? `<button class="btn-blink" onclick="activateCombo('alc_gauze', 15, 5)" style="padding: 2px 10px; font-size:11px; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;">เปิดใช้ ($15)</button>` : '');
+        let statusSet3 = hasSet3 ? '<span style="color:#0f0">[✅ ACTIVATED]</span>' : (isSet3 ? `<button class="btn-blink" onclick="activateCombo('dress_bet', 15, 5)" style="padding: 2px 10px; font-size:11px; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;">เปิดใช้ ($15)</button>` : '');
+        let statusFullSet = player.appliedCombos.has('full_set') ? '<span style="color:#0f0;">[✅ ACTIVATED]</span>' : (canActivateFull ? `<button class="btn-blink-gold" onclick="activateCombo('full_set', 45, 15)" style="padding: 5px 15px; font-weight:bold; background:#FFD700; color:black; border:none; border-radius:4px; cursor:pointer;">⭐ เปิดใช้ Full Combo ($45) ⭐</button>` : '❌');
 
         invHtml += `
         <div style="padding-top: 10px; border-top: 1px dashed #555;">
@@ -1160,17 +1377,17 @@
                     <div>${statusSet1}</div>
                 </div>
                 <div style="background: rgba(129, 199, 132, 0.1); border-left: 4px solid #81C784; padding: 8px; border-radius: 0 4px 4px 0; display:flex; justify-content:space-between;">
-                    <div><span style="color: #81C784; font-weight: bold;">🧪 ชุดที่ 2 (+5 HP)</span><br>Alcohol &nbsp;|&nbsp; Betadine</div>
+                    <div><span style="color: #81C784; font-weight: bold;">🧪 ชุดที่ 2 (+5 HP)</span><br>Alcohol &nbsp;|&nbsp; Gauze</div>
                     <div>${statusSet2}</div>
                 </div>
                 <div style="background: rgba(229, 115, 115, 0.1); border-left: 4px solid #E57373; padding: 8px; border-radius: 0 4px 4px 0; display:flex; justify-content:space-between;">
-                    <div><span style="color: #E57373; font-weight: bold;">🩹 ชุดที่ 3 (+5 HP)</span><br>Gauze &nbsp;|&nbsp; Dressing</div>
+                    <div><span style="color: #E57373; font-weight: bold;">🩹 ชุดที่ 3 (+5 HP)</span><br>Dressing &nbsp;|&nbsp; Betadine</div>
                     <div>${statusSet3}</div>
                 </div>
             </div>
             <div style="text-align: center; background: rgba(255, 215, 0, 0.15); padding: 10px; border-radius: 8px; border: 1px solid #FFD700; margin-top: 12px;">
                 <strong style="color: #FFD700; font-size: 16px;">🌟 FULL COMBO ${statusFullSet} 🌟</strong><br>
-                <span style="font-size: 12px; color: #ccc;">สำเร็จคอมโบชุดที่ 1, 2, 3 รับโบนัสพิเศษ <span style="color:#0f0; font-weight:bold;">+20 Max HP!</span></span>
+                <span style="font-size: 12px; color: #ccc;">สำเร็จคอมโบชุดที่ 1, 2, 3 รับโบนัสพิเศษ <span style="color:#0f0; font-weight:bold;">+15 Max HP!</span></span>
             </div>
         </div>`;
         
@@ -1187,6 +1404,9 @@
         let satk = document.getElementById('shop-atk-stat'); if(satk) satk.innerText = player.atk;
         let sdef = document.getElementById('shop-def-stat'); if(sdef) sdef.innerText = defStr;
         let sspd = document.getElementById('shop-spd-stat'); if(sspd) sspd.innerText = player.spd;
+
+        let scrit = document.getElementById('shop-crit-stat');
+        if(scrit) scrit.innerHTML = `${Math.floor(player.critChance * 100)}% <span style="color:#777;">|</span> x${player.critDamage.toFixed(2)}`;
 
         let statusHtml = ""; let hasStatus = false;
         for (let key in player.statuses) {
@@ -1207,12 +1427,20 @@
         
         let btnAirX = document.getElementById('btn-quick-airx');
         let btnRabit = document.getElementById('btn-quick-rabbit');
+        let btnCounter = document.getElementById('btn-quick-counterpain');
+        let btnDress = document.getElementById('btn-quick-dressing');
+
+        let priceAx = getDynamicCost('air_x', currentPhase);
+        let priceFr = getDynamicCost('flying_rabit', currentPhase);
+        let priceCp = getDynamicCost('counterpain', currentPhase);
+        let priceDs = getDynamicCost('dressing_set', currentPhase);
+
         if (btnAirX) {
             if (player.inv.air_x > 0) {
                 btnAirX.innerHTML = `<span style="font-weight:bold;">🚀 Air-X <span style="color:#0f0;">[✅ ACTIVATED]</span></span><span style="font-size:12px; color:#eee; margin-top:2px;">ปืน 3 แฉก (ทำงานแล้ว)</span>`;
                 btnAirX.style.backgroundColor = "#27ae60";
             } else {
-                btnAirX.innerHTML = `<span style="font-weight:bold;">🚀 ซื้อด่วน Air-X ($30)</span><span style="font-size:12px; color:#eee; margin-top:2px;">ปืน 3 แฉก (1 เฟส)</span>`;
+                btnAirX.innerHTML = `<span style="font-weight:bold;">🚀 ซื้อด่วน Air-X ($${priceAx})</span><span style="font-size:12px; color:#eee; margin-top:2px;">ปืน 3 แฉก (1 เฟส)</span>`;
                 btnAirX.style.backgroundColor = "#e67e22";
             }
         }
@@ -1221,9 +1449,22 @@
                 btnRabit.innerHTML = `<span style="font-weight:bold;">🚀 Flying Rabit <span style="color:#0f0;">[✅ ACTIVATED]</span></span><span style="font-size:12px; color:#eee; margin-top:2px;">กระสุนทะลุ (ทำงานแล้ว)</span>`;
                 btnRabit.style.backgroundColor = "#27ae60";
             } else {
-                btnRabit.innerHTML = `<span style="font-weight:bold;">🚀 ซื้อด่วน Flying Rabit ($30)</span><span style="font-size:12px; color:#eee; margin-top:2px;">กระสุนทะลุศัตรู (1 เฟส)</span>`;
+                btnRabit.innerHTML = `<span style="font-weight:bold;">🚀 ซื้อด่วน Flying Rabit ($${priceFr})</span><span style="font-size:12px; color:#eee; margin-top:2px;">กระสุนทะลุศัตรู (1 เฟส)</span>`;
                 btnRabit.style.backgroundColor = "#e67e22";
             }
+        }
+        if (btnCounter) {
+            if (player.inv.counterpain > 0) {
+                btnCounter.innerHTML = `<span style="font-weight:bold;">❄️ Counterpain <span style="color:#0f0;">[✅ ACTIVATED]</span></span><span style="font-size:12px; color:#eee; margin-top:2px;">ออร่าสโลว์ (ทำงานแล้ว)</span>`;
+                btnCounter.style.backgroundColor = "#27ae60";
+            } else {
+                btnCounter.innerHTML = `<span style="font-weight:bold;">❄️ ซื้อด่วน Counterpain ($${priceCp})</span><span style="font-size:12px; color:#eee; margin-top:2px;">ออร่าสโลว์ (1 เฟส)</span>`;
+                btnCounter.style.backgroundColor = "#e67e22";
+            }
+        }
+        if (btnDress) {
+            btnDress.innerHTML = `<span style="font-weight:bold;">🩹 ซื้อด่วน Dressing Set ($${priceDs})</span><span style="font-size:12px; color:#eee; margin-top:2px;">Heal 7 HP</span>`;
+            btnDress.style.backgroundColor = "#e67e22";
         }
         
         let btnAs = document.getElementById('btnAdminSkip');
@@ -1249,21 +1490,22 @@
         
         let cardLv = Math.min(player.inv.cardamine, 3);
         let sysLv = Math.min(player.inv.systral, 3);
-        let cardBonus = [0, 10, 20, 30][cardLv] || 0;
-        let sysBonus = [0, 10, 20, 30][sysLv] || 0;
-        if (cardBonus + sysBonus > 0) {
-            coins += (cardBonus + sysBonus);
-            showToast(`ได้รับโบนัสเหรียญจบด่าน: +${cardBonus + sysBonus}`, "#FFD700", 2500);
+        let cardBonus = [0, 20, 30, 45][cardLv] || 0;
+        if (cardBonus > 0) {
+            coins += cardBonus;
+            showToast(`ได้รับโบนัสเหรียญจบด่าน: +${cardBonus}`, "#FFD700", 2500);
         }
 
         try { supabaseClient.from('players').update({ diamonds: currentUser.diamonds }).eq('username', currentUser.username).then().catch(()=>{}); } catch(e){}
 
-        rerollCost = currentPhase; discountedBoughtCount = 0;
+        rerollCost = currentPhase; 
+        discountedBoughtCount = 0;
+        shopBoardGenerations = 0; 
         
         if(player) {
             player.inv.air_x = 0;
             player.inv.flying_rabit = 0;
-            player.activeCpmDebuff = 0; 
+            player.inv.counterpain = 0;
             player.applyPhaseModifiers();
         }
 
@@ -1282,10 +1524,12 @@
     }
 
     function getRandomShopItem() {
-        let hpWeight = player.hp < player.maxHp ? 1.5 : 0.05; 
+        let isHealingBoosted = (player.hp < player.maxHp * 0.6) && (shopBoardGenerations <= 3);
+        let hpWeight = isHealingBoosted ? 1.5 : 1.0; 
+
         let totalWeight = 0;
         let weights = ITEMS_DB.map(item => {
-            let w = item.cures === 'hp' ? hpWeight : 1;
+            let w = item.cures === 'hp' ? hpWeight : 1.0;
             totalWeight += w;
             return w;
         });
@@ -1300,14 +1544,16 @@
     }
 
     function rollShopCards() { 
+        shopBoardGenerations++; 
         currentDiscountItems = []; discountedBoughtCount = 0;
         const container = document.getElementById('shopCards'); 
         if(container) container.innerHTML = ''; 
         
         for(let i=0; i<3; i++) { 
             let item = getRandomShopItem();
-            let discPrice = Math.ceil(item.cost * 0.3); 
-            currentDiscountItems.push({ ...item, discPrice: discPrice, bought: false });
+            let baseCst = getDynamicCost(item.id, currentPhase);
+            let discPrice = Math.ceil(baseCst * 0.3); 
+            currentDiscountItems.push({ ...item, baseCst: baseCst, discPrice: discPrice, bought: false });
         }
         renderDiscountShop();
     }
@@ -1324,14 +1570,18 @@
                 let maxBadge = isMax ? `<span class="max-badge">MAX</span>` : "";
                 let maxStr = item.maxStack === 99 ? "" : `[${player.inv[item.id]}/${item.maxStack}]`;
 
-                let isCureNeeded = item.cures !== 'hp' && player.statuses[item.cures] > 0;
+                let curesArr = item.cures.split(',');
+                let isCureNeeded = false;
+                if(item.cures !== 'hp') {
+                    isCureNeeded = curesArr.some(cure => player.statuses[cure] > 0);
+                }
                 let highlightClass = isCureNeeded ? "highlight-cure" : "";
 
                 container.innerHTML += `
                     <div class="shop-card ${highlightClass}" onclick="buyItem('${item.id}', ${item.discPrice}, true, ${index})">
                         <h3 style="margin:5px 0; color: #4CAF50; font-size: 20px;">${item.name} ${maxBadge}</h3>
                         <p style="font-size:13px; margin:10px 0; color: #ddd; height: 35px;">${item.desc}</p>
-                        <p style="color:yellow; font-weight:bold; margin:5px 0; text-decoration: line-through; color:gray;">$${item.cost}</p>
+                        <p style="color:yellow; font-weight:bold; margin:5px 0; text-decoration: line-through; color:gray;">$${item.baseCst}</p>
                         <p style="color:yellow; font-weight:bold; margin:5px 0; font-size:24px;">$${item.discPrice}</p>
                         <p style="font-size:11px; color:#aaa; margin-top:10px;">${maxStr ? `มีอยู่: ${maxStr}` : ""}</p>
                     </div>`;
@@ -1353,9 +1603,15 @@
             let btnBorder = isMax ? '1px solid #ff5555' : 'none';
 
             let displayMaxStr = item.maxStack === 99 ? "" : `[${player.inv[item.id]}/${maxStr}]`;
-
-            let isCureNeeded = item.cures !== 'hp' && player.statuses[item.cures] > 0;
+            
+            let curesArr = item.cures.split(',');
+            let isCureNeeded = false;
+            if(item.cures !== 'hp') {
+                isCureNeeded = curesArr.some(cure => player.statuses[cure] > 0);
+            }
             let highlightClass = isCureNeeded ? "highlight-cure" : "";
+            
+            let dCost = getDynamicCost(item.id, currentPhase);
 
             let htmlStr = `
                 <div class="full-shop-item ${highlightClass}" style="${isMax ? 'border-color:#ff5555;' : ''}">
@@ -1365,8 +1621,8 @@
                         <span style="font-size:12px; color:#ddd; display: block; margin-top: 5px;">${item.desc}</span>
                     </div>
                     <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
-                        <strong style="color:yellow; font-size: 18px;">$${item.cost}</strong>
-                        <button onclick="buyItem('${item.id}', ${item.cost}, false, -1)" style="padding: 8px 20px; font-size: 14px; background-color: ${btnColor}; border: ${btnBorder};">${btnText}</button>
+                        <strong style="color:yellow; font-size: 18px;">$${dCost}</strong>
+                        <button onclick="buyItem('${item.id}', ${dCost}, false, -1)" style="padding: 8px 20px; font-size: 14px; background-color: ${btnColor}; border: ${btnBorder};">${btnText}</button>
                     </div>
                 </div>`;
             
@@ -1384,14 +1640,19 @@
 
     function buyQuickItem(itemId) {
         let itemDef = ITEMS_DB.find(i => i.id === itemId);
-        if (coins < itemDef.cost) { showToast("เหรียญไม่พอ!", "#ff5555", 2500); return; }
-        if (player.inv[itemId] >= itemDef.maxStack) { showToast("คุณเปิดใช้บัฟนี้ไปแล้วในตานี้!", "#ff5555", 2500); return; }
-        buyItem(itemId, itemDef.cost, false, -1);
+        let dynamicPrice = getDynamicCost(itemId, currentPhase);
+        if (coins < dynamicPrice) { showToast("เหรียญไม่พอ!", "#ff5555", 2500); return; }
+        if (player.inv[itemId] >= itemDef.maxStack && itemDef.cures !== 'hp') { showToast("คุณมีไอเทมนี้เต็มแล้ว!", "#ff5555", 2500); return; }
+        buyItem(itemId, dynamicPrice, false, -1);
     }
 
     function buyItem(itemId, price, isDiscounted, index) { 
         let itemDef = ITEMS_DB.find(i => i.id === itemId);
-        let hasAilment = (itemDef.cures !== 'hp' && player.statuses[itemDef.cures] > 0);
+        let curesArr = itemDef.cures.split(',');
+        let hasAilment = false;
+        if(itemDef.cures !== 'hp') {
+            hasAilment = curesArr.some(cure => player.statuses[cure] > 0);
+        }
 
         if (coins < price) { showToast("เหรียญไม่พอ!", "#ff5555", 2500); return; }
         
@@ -1408,24 +1669,30 @@
         if (player.inv[itemId] < itemDef.maxStack || itemDef.cures === 'hp') {
             player.inv[itemId]++;
         }
+        
         if (hasAilment) {
-            player.statuses[itemDef.cures]--;
+            curesArr.forEach(cure => {
+                if (player.statuses[cure] > 0) player.statuses[cure]--;
+            });
         }
 
         if (itemId === 'betadine') { 
             let oldLv = Math.min(oldInv, 3);
             let newLv = Math.min(player.inv[itemId], 3);
-            let diff = [0, 5, 10, 15][newLv] - [0, 5, 10, 15][oldLv];
+            let diff = [0, 6, 12, 17][newLv] - [0, 6, 12, 17][oldLv];
             player.hp += diff; 
         }
 
-        if (itemId === 'saline') { player.hp += 2; }
-        if (itemId === 'alcohol') { player.hp += 2; }
-        if (itemId === 'plaster') { player.hp += 2; }
-        if (itemId === 'gauze') { player.hp += 2; }
-        if (itemId === 'dressing_set') { player.hp += 5; }
+        if (['saline', 'alcohol', 'plaster', 'gauze'].includes(itemId)) { 
+            player.hp = Math.min(player.maxHp, player.hp + 3); 
+            showToast(`💚 ฟื้นฟูเลือด 3 หน่วย`, "#0f0", 1500);
+        }
+        if (itemId === 'dressing_set') { 
+            player.hp = Math.min(player.maxHp, player.hp + 7); 
+            showToast(`💚 ฟื้นฟูเลือด 7 หน่วย`, "#0f0", 1500);
+        }
         
-        if (itemId === 'cpm') { player.cpmDebuffToApply++; }
+        if (itemId === 'cpm') { player.activeCpmDebuff++; }
 
         if (isDiscounted && index !== -1) {
             currentDiscountItems[index].bought = true;
@@ -1449,9 +1716,7 @@
         currentPhase++; phaseTimer = 30; bossSpawnedThisPhase = false;
         enemies.length = 0; bullets.length = 0; enemyBullets.length = 0; drops.length = 0;
         
-        player.activeCpmDebuff = player.cpmDebuffToApply;
-        player.cpmDebuffToApply = 0;
-
+        player.activeCpmDebuff = 0;
         player.applyPhaseModifiers();
         
         resetKeys();
@@ -1565,10 +1830,6 @@
             let maxSpawn = Math.max(minSpawn, Math.min(15, 3 + Math.floor(currentPhase / 1.2))); 
             let groupSize = Math.floor(Math.random() * (maxSpawn - minSpawn + 1)) + minSpawn;
             if (currentPhase >= 5) groupSize += Math.floor(currentPhase / 2); 
-            
-            let swellLv = Math.min(player.activeStatuses.swelling, 3);
-            let extraEnemies = [0, 10, 20, 30][swellLv] || 0;
-            if (extraEnemies > 0 && Math.random() < 0.3) groupSize += 2; 
 
             let isInside = Math.random() < 0.5;
             let offset = isInside ? 30 : -20;
@@ -1587,16 +1848,43 @@
                     if (currentPhase < 4) {
                         type = (rand < 0.7) ? 1 : 2;
                     } else {
-                        if (rand < 0.2) type = 1; 
-                        else if (rand < 0.5) type = 2; 
-                        else if (rand < 0.8) type = 3; 
-                        else type = 4; 
+                        if (rand < 0.30) {
+                            type = 1;
+                        } else if (rand < 0.45) { 
+                            type = 4;
+                        } else {
+                            type = Math.random() < 0.5 ? 2 : 3;
+                        }
                     }
                     
                     let e = new Enemy(type, currentPhase);
                     e.x = baseX + (Math.random() * 60 - 30);
                     e.y = baseY + (Math.random() * 60 - 30);
                     enemies.push(e);
+                }
+            }
+
+            let elites = enemies.filter(e => e.isElite);
+            let swellLv = Math.min(player.activeStatuses.swelling, 3);
+            if (swellLv > 0 && elites.length < 5) {
+                let eliteChance = [0, 0.15, 0.30, 0.50][swellLv];
+                if (Math.random() < eliteChance) {
+                    let types = [1, 2, 4];
+                    let type = types[Math.floor(Math.random() * types.length)];
+                    let elite = new Enemy(type, currentPhase);
+                    elite.isElite = true;
+                    elite.hp *= 2; elite.maxHp *= 2;
+                    elite.atk *= 2;
+                    if(elite.rangedAtk) elite.rangedAtk *= 2;
+                    elite.size *= 1.2; 
+                    
+                    let eEdge = Math.floor(Math.random() * 4);
+                    if (eEdge === 0) { elite.x = Math.random() * canvas.width; elite.y = -30; }
+                    else if (eEdge === 1) { elite.x = canvas.width + 30; elite.y = Math.random() * canvas.height; }
+                    else if (eEdge === 2) { elite.x = Math.random() * canvas.width; elite.y = canvas.height + 30; }
+                    else { elite.x = -30; elite.y = Math.random() * canvas.height; }
+                    
+                    enemies.push(elite);
                 }
             }
 
@@ -1675,6 +1963,23 @@
         bullets.forEach(b => b.draw(ctx));
         enemyBullets.forEach(b => b.draw(ctx));
         enemies.forEach(e => e.draw(ctx));
+
+        let redEyeLv = Math.min(player.activeStatuses.red_eye, 3);
+        if (redEyeLv > 0) {
+            let fogCoverage = [0, 0.20, 0.35, 0.50][redEyeLv];
+            let innerRadius = (Math.min(canvas.width, canvas.height) / 2) * (1 - fogCoverage);
+            let outerRadius = Math.max(canvas.width, canvas.height) / 2;
+            
+            let gradient = ctx.createRadialGradient(
+                canvas.width/2, canvas.height/2, innerRadius,
+                canvas.width/2, canvas.height/2, outerRadius
+            );
+            gradient.addColorStop(0, 'rgba(0,0,0,0)');
+            gradient.addColorStop(1, 'rgba(0,0,0,0.95)');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
 
         ctx.fillStyle = 'white'; ctx.font = 'bold 20px Arial';
         ctx.fillText(`Phase: ${currentPhase}`, 10, 70);
