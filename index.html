@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V2.6H</title>
+    <title>First Aid Survivor V2.6 I</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -92,7 +92,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6H)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V2.6 I)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -214,7 +214,6 @@
                         <button onclick="nextPhase()" class="btn-next" style="flex: 3;">➡️ ลุย Phase ถัดไป</button>
                     </div>
                     
-                    <!-- ปุ่มแอดมินวาร์ป -->
                     <button id="btnAdminSkip" onclick="adminSkipPhase()" class="btn-reroll" style="display:none; background-color: #ff5722; margin-top: 5px;">👑 [Admin] วาร์ปข้าม Phase</button>
                 </div>
                 
@@ -365,14 +364,14 @@
     });
 
     window.addEventListener('keydown', e => {
-        if (gameState !== 'PLAYING') return; 
+        if (gameState !== 'PLAYING' && gameState !== 'SHOP') return; 
         let k = e.key.toLowerCase();
         keys[k] = true;
         
         if (currentUser && currentUser.is_admin) {
             if (k === 'g') adminGodMode = !adminGodMode;
-            if (k === 'c') coins += 1000;
-            if (k === 'v') currentUser.diamonds += 100;
+            if (k === 'c') { coins += 1000; if(gameState === 'SHOP') updateShopUI(); }
+            if (k === 'v') { currentUser.diamonds += 100; if(gameState === 'SHOP') updateShopUI(); }
             
             const debuffKeys = {
                 '1': 'headache', '2': 'allergy', '3': 'stomach', '4': 'rash', '5': 'swelling',
@@ -384,6 +383,7 @@
                     player.statuses[d]++;
                     showToast(`👑 [Admin] เสกอาการป่วย: ${STATUS_NAMES[d]} (${player.statuses[d]}/3)`, "#ff5555", 2500);
                     player.applyPhaseModifiers();
+                    if (gameState === 'SHOP') updateShopUI(); 
                 }
             }
         }
@@ -618,35 +618,55 @@
         applyPhaseModifiers() {
             this.activeStatuses = { ...this.statuses };
             
-            let hpPenalty = [0, 3, 6, 10][this.activeStatuses.mouth_ulcer] || 0;
-            let betadineHp = [0, 5, 10, 15][this.inv.betadine] || 0;
+            let hpPenLv = Math.min(this.activeStatuses.mouth_ulcer, 3);
+            let hpPenalty = [0, 3, 6, 10][hpPenLv] || 0;
+
+            let betLv = Math.min(this.inv.betadine, 3);
+            let betadineHp = [0, 5, 10, 15][betLv] || 0;
 
             this.maxHp = Math.max(1, this.baseMaxHp + this.bonusMaxHp + betadineHp - hpPenalty);
             if (this.hp > this.maxHp) this.hp = this.maxHp;
 
-            let defPenalty = [0, 10, 30, 50][this.activeStatuses.allergy] || 0;
-            let cpmDef = [0, 10, 20, 30][this.inv.cpm] || 0;
-            let telDef = [0, 10, 15, 20][this.inv.telfast] || 0;
+            let defPenLv = Math.min(this.activeStatuses.allergy, 3);
+            let defPenalty = [0, 10, 30, 50][defPenLv] || 0;
+
+            let cpmLv = Math.min(this.inv.cpm, 3);
+            let cpmDef = [0, 10, 20, 30][cpmLv] || 0;
+
+            let telLv = Math.min(this.inv.telfast, 3);
+            let telDef = [0, 10, 15, 20][telLv] || 0;
+            
             this.def = this.baseDef - defPenalty + cpmDef + telDef;
 
-            this.spd = Math.max(1, this.baseSpd - this.activeStatuses.stomach + this.inv.carbon - this.activeCpmDebuff - this.cpmDebuffToApply);
+            let carbBonus = Math.min(this.inv.carbon, 3);
+            this.spd = Math.max(1, this.baseSpd - this.activeStatuses.stomach + carbBonus - this.activeCpmDebuff - this.cpmDebuffToApply);
 
-            let throatPen = [0, 0.20, 0.35, 0.50][this.activeStatuses.sore_throat] || 0;
-            let gumBuff = [0, 0.20, 0.30, 0.50][this.inv.gumgig] || 0;
-            let apaBuff = [0, 0.20, 0.30, 0.50][this.inv.apache] || 0;
+            let throatPenLv = Math.min(this.activeStatuses.sore_throat, 3);
+            let throatPen = [0, 0.20, 0.35, 0.50][throatPenLv] || 0;
+
+            let gumLv = Math.min(this.inv.gumgig, 3);
+            let gumBuff = [0, 0.20, 0.30, 0.50][gumLv] || 0;
+
+            let apaLv = Math.min(this.inv.apache, 3);
+            let apaBuff = [0, 0.20, 0.30, 0.50][apaLv] || 0;
+            
             this.fireRate = this.baseFireRate * (1 + throatPen) * (1 - gumBuff) * (1 - apaBuff);
             this.fireRate = Math.max(0.1, this.fireRate); 
 
-            let tyAtk = [0, 3, 5, 10, 13, 15, 20][this.inv.tylenol] || 0;
-            let opAtk = [0, 1, 3, 5][this.inv.oral_paste] || 0;
+            let tyLv = Math.min(this.inv.tylenol, 6);
+            let tyAtk = [0, 3, 5, 10, 13, 15, 20][tyLv] || 0;
+
+            let opLv = Math.min(this.inv.oral_paste, 3);
+            let opAtk = [0, 1, 3, 5][opLv] || 0;
             
             this.atk = this.baseAtk + tyAtk + opAtk;
             
-            let tyBullets = [0, 0, 1, 1, 2, 2, 3][this.inv.tylenol] || 0;
+            let tyBullets = [0, 0, 1, 1, 2, 2, 3][tyLv] || 0;
             let baseCount = this.baseBullets - this.activeStatuses.headache;
             this.bulletCount = Math.max(1, baseCount + tyBullets);
             
-            this.magnetRange = (this.inv.golden_cup * 60) + (this.magnetBonusRange || 0);
+            let cupLv = Math.min(this.inv.golden_cup, 3);
+            this.magnetRange = (cupLv * 60) + (this.magnetBonusRange || 0);
         }
 
         update(dt) {
@@ -664,7 +684,8 @@
                     this.magnetBonusRange = 0;
                 }
             }
-            this.magnetRange = (this.inv.golden_cup * 60) + (this.magnetBonusRange || 0); 
+            let cupLv = Math.min(this.inv.golden_cup, 3);
+            this.magnetRange = (cupLv * 60) + (this.magnetBonusRange || 0); 
 
             let moveSpd = this.spd * 60 * dt;
             if (keys['w'] && this.y > this.size) this.y -= moveSpd;
@@ -716,10 +737,12 @@
             }
             if (nearest) {
                 let angle = Math.atan2(nearest.y - this.y, nearest.x - this.x);
-                let bSize = 6 + (this.inv.oral_paste * 3); 
+                let opLv = Math.min(this.inv.oral_paste, 3);
+                let bSize = 6 + (opLv * 3); 
                 let isPierce = (this.inv.flying_rabit > 0);
                 
-                let critChance = [0, 0.15, 0.30, 0.40][this.inv.eye_lotion] || 0;
+                let eyeLv = Math.min(this.inv.eye_lotion, 3);
+                let critChance = [0, 0.15, 0.30, 0.40][eyeLv] || 0;
                 
                 let fireBulletStream = (spreadAngle) => {
                     let actualAngle = angle + spreadAngle;
@@ -753,7 +776,8 @@
             let dodgeChance = Math.min(0.7, (this.def / 100) * 0.7); 
             if (Math.random() < dodgeChance) return true; 
             
-            let extraDmg = [0, 2, 4, 6][this.activeStatuses.fresh_wound] || 0;
+            let fwLv = Math.min(this.activeStatuses.fresh_wound, 3);
+            let extraDmg = [0, 2, 4, 6][fwLv] || 0;
             this.hp -= (amt + extraDmg);
             
             let debuffChance = isBoss ? 1.0 : 0.35; 
@@ -939,14 +963,19 @@
                         
                         if (Math.random() > dropRate) dropCoin = false;
 
-                        let rashChance = [1.0, 0.9, 0.7, 0.5][player.activeStatuses.rash] || 1.0;
-                        let scaldChance = [0, 0.3, 0.5, 0.8][player.activeStatuses.scald] || 0;
+                        let rashLv = Math.min(player.activeStatuses.rash, 3);
+                        let rashChance = [1.0, 0.9, 0.7, 0.5][rashLv] || 1.0;
+                        let scaldLv = Math.min(player.activeStatuses.scald, 3);
+                        let scaldChance = [0, 0.3, 0.5, 0.8][scaldLv] || 0;
+                        
                         if (Math.random() > rashChance || Math.random() < scaldChance) dropCoin = false;
 
                         if (dropCoin) {
                             if (drops.length > 200) drops.splice(0, drops.length - 200); 
                             drops.push(new ItemDrop(e.x, e.y, 'coin'));
-                            let silverChance = [0, 0.20, 0.35, 0.50][player.inv.silver_cream] || 0;
+                            
+                            let silvLv = Math.min(player.inv.silver_cream, 3);
+                            let silverChance = [0, 0.20, 0.35, 0.50][silvLv] || 0;
                             if (Math.random() < silverChance) {
                                 let extra = 1 + Math.floor(Math.random() * 2); 
                                 for(let j=0; j<extra; j++) {
@@ -1174,19 +1203,19 @@
         let btnRabit = document.getElementById('btn-quick-rabbit');
         if (btnAirX) {
             if (player.inv.air_x > 0) {
-                btnAirX.innerHTML = `<div style="font-weight:bold;">🚀 Air-X <span style="color:#0f0;">[✅ ACTIVATED]</span></div><small style="font-size:12px; color:#eee; margin-top:2px;">ปืน 3 แฉก (ทำงานแล้ว)</small>`;
+                btnAirX.innerHTML = `<span style="font-weight:bold;">🚀 Air-X <span style="color:#0f0;">[✅ ACTIVATED]</span></span><span style="font-size:12px; color:#eee; margin-top:2px;">ปืน 3 แฉก (ทำงานแล้ว)</span>`;
                 btnAirX.style.backgroundColor = "#27ae60";
             } else {
-                btnAirX.innerHTML = `<div style="font-weight:bold;">🚀 ซื้อด่วน Air-X ($30)</div><small style="font-size:12px; color:#eee; margin-top:2px;">ปืน 3 แฉก (1 เฟส)</small>`;
+                btnAirX.innerHTML = `<span style="font-weight:bold;">🚀 ซื้อด่วน Air-X ($30)</span><span style="font-size:12px; color:#eee; margin-top:2px;">ปืน 3 แฉก (1 เฟส)</span>`;
                 btnAirX.style.backgroundColor = "#e67e22";
             }
         }
         if (btnRabit) {
             if (player.inv.flying_rabit > 0) {
-                btnRabit.innerHTML = `<div style="font-weight:bold;">🚀 Flying Rabit <span style="color:#0f0;">[✅ ACTIVATED]</span></div><small style="font-size:12px; color:#eee; margin-top:2px;">กระสุนทะลุ (ทำงานแล้ว)</small>`;
+                btnRabit.innerHTML = `<span style="font-weight:bold;">🚀 Flying Rabit <span style="color:#0f0;">[✅ ACTIVATED]</span></span><span style="font-size:12px; color:#eee; margin-top:2px;">กระสุนทะลุ (ทำงานแล้ว)</span>`;
                 btnRabit.style.backgroundColor = "#27ae60";
             } else {
-                btnRabit.innerHTML = `<div style="font-weight:bold;">🚀 ซื้อด่วน Flying Rabit ($30)</div><small style="font-size:12px; color:#eee; margin-top:2px;">กระสุนทะลุศัตรู (1 เฟส)</small>`;
+                btnRabit.innerHTML = `<span style="font-weight:bold;">🚀 ซื้อด่วน Flying Rabit ($30)</span><span style="font-size:12px; color:#eee; margin-top:2px;">กระสุนทะลุศัตรู (1 เฟส)</span>`;
                 btnRabit.style.backgroundColor = "#e67e22";
             }
         }
@@ -1196,14 +1225,26 @@
 
         syncStatsToUI();
         syncInventoryUI();
+
+        if (currentDiscountItems && currentDiscountItems.length > 0) {
+            renderDiscountShop();
+        }
+        let m = document.getElementById('fullShopModal');
+        if (m && m.classList.contains('active-modal')) {
+            renderFullShop();
+            let fc = document.getElementById('full-shop-coins');
+            if (fc) fc.innerText = coins;
+        }
     }
 
     function enterShopPhase() { 
         gameState = 'SHOP'; switchScreen('shopScreen'); 
         resetKeys();
         
-        let cardBonus = [0, 10, 20, 30][player.inv.cardamine] || 0;
-        let sysBonus = [0, 10, 20, 30][player.inv.systral] || 0;
+        let cardLv = Math.min(player.inv.cardamine, 3);
+        let sysLv = Math.min(player.inv.systral, 3);
+        let cardBonus = [0, 10, 20, 30][cardLv] || 0;
+        let sysBonus = [0, 10, 20, 30][sysLv] || 0;
         if (cardBonus + sysBonus > 0) {
             coins += (cardBonus + sysBonus);
             showToast(`ได้รับโบนัสเหรียญจบด่าน: +${cardBonus + sysBonus}`, "#FFD700", 2500);
@@ -1220,7 +1261,8 @@
             player.applyPhaseModifiers();
         }
 
-        updateShopUI(); rollShopCards(); 
+        rollShopCards(); 
+        updateShopUI();
     }
 
     function toggleFullShop(show) {
@@ -1365,7 +1407,9 @@
         }
 
         if (itemId === 'betadine') { 
-            let diff = [0, 5, 10, 15][player.inv[itemId]] - [0, 5, 10, 15][oldInv];
+            let oldLv = Math.min(oldInv, 3);
+            let newLv = Math.min(player.inv[itemId], 3);
+            let diff = [0, 5, 10, 15][newLv] - [0, 5, 10, 15][oldLv];
             player.hp += diff; 
         }
 
@@ -1377,26 +1421,17 @@
         
         if (itemId === 'cpm') { player.cpmDebuffToApply++; }
 
-        player.checkCombos(); 
-
         if (isDiscounted && index !== -1) {
             currentDiscountItems[index].bought = true;
             discountedBoughtCount++;
             if (discountedBoughtCount >= 3) {
                 showToast("🎉 Secret Gimmick!<br>เหมาครบ 3 ชิ้น สุ่มกระดานฟรี 1 ครั้ง!", "#FFD700", 3000);
                 rollShopCards();
-            } else {
-                renderDiscountShop();
-            }
-        } else {
-            let m = document.getElementById('fullShopModal');
-            if (m && m.classList.contains('active-modal')) {
-                renderFullShop();
-                let fc = document.getElementById('full-shop-coins');
-                if (fc) fc.innerText = coins;
+                updateShopUI();
+                return;
             }
         }
-
+        
         player.applyPhaseModifiers(); 
         updateShopUI();
     }
@@ -1525,7 +1560,8 @@
             let groupSize = Math.floor(Math.random() * (maxSpawn - minSpawn + 1)) + minSpawn;
             if (currentPhase >= 5) groupSize += Math.floor(currentPhase / 2); 
             
-            let extraEnemies = [0, 10, 20, 30][player.activeStatuses.swelling] || 0;
+            let swellLv = Math.min(player.activeStatuses.swelling, 3);
+            let extraEnemies = [0, 10, 20, 30][swellLv] || 0;
             if (extraEnemies > 0 && Math.random() < 0.3) groupSize += 2; 
 
             let isInside = Math.random() < 0.5;
