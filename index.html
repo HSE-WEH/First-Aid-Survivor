@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V3.1.1 (Hotfix)</title>
+    <title>First Aid Survivor V3.1.2</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -36,11 +36,6 @@
         .shop-card:hover { transform: translateY(-5px) scale(1.03); background: #383838; box-shadow: 0 8px 20px rgba(255, 215, 0, 0.2); }
         .shop-card.sold { opacity: 0.4; pointer-events: none; border-color: #555; filter: grayscale(100%); }
         .max-badge { color: #ff5555; font-weight: bold; border: 1px solid #ff5555; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: rgba(255,0,0,0.1); margin-left: 5px; }
-        
-        .tier-badge { position: absolute; top: -5px; right: -5px; padding: 5px 10px; font-weight: bold; font-size: 12px; border-bottom-left-radius: 10px; }
-        .tier-s { background-color: #FFD700; color: #000; }
-        .tier-a { background-color: #e0e0e0; color: #000; }
-        .tier-b { background-color: #cd7f32; color: #fff; }
 
         .highlight-cure { border: 2px solid #ff5555 !important; box-shadow: 0 0 15px rgba(255, 85, 85, 0.8) !important; animation: pulse-red 1.5s infinite; }
         @keyframes pulse-red { 0% { box-shadow: 0 0 5px rgba(255,85,85,0.5); } 50% { box-shadow: 0 0 20px rgba(255,85,85,1); } 100% { box-shadow: 0 0 5px rgba(255,85,85,0.5); } }
@@ -103,7 +98,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V3.1.1)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V3.1.2)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -244,16 +239,11 @@
                     </div>
                     
                     <div class="full-shop-list">
-                        <h3 style="color: #2196F3; border-bottom: 2px solid #555; padding-bottom: 5px; margin-top: 5px;">⚔️ หมวดโจมตี (Attack)</h3>
-                        <div class="full-shop-grid" id="fullShopAttack"></div>
-
-                        <h3 style="color: #4CAF50; border-bottom: 2px solid #555; padding-bottom: 5px; margin-top: 10px;">🛡️ หมวดป้องกัน (Defense)</h3>
-                        <div class="full-shop-grid" id="fullShopDefense"></div>
-
-                        <h3 style="color: #FFD700; border-bottom: 2px solid #555; padding-bottom: 5px; margin-top: 10px;">💰 หมวดหาเงิน (Economy)</h3>
-                        <div class="full-shop-grid" id="fullShopEconomy"></div>
+                        <!-- ไม่แยกประเภทให้ผู้เล่นเห็น แบ่งเป็นแค่ ยาทั่วไป กับ อุปกรณ์ทำแผล -->
+                        <h3 style="color: #2196F3; border-bottom: 2px solid #555; padding-bottom: 5px; margin-top: 5px;">💊 หมวดหมู่ยาและบัฟทั่วไป</h3>
+                        <div class="full-shop-grid" id="fullShopNormal"></div>
                         
-                        <h3 style="color: #ff5555; border-bottom: 2px solid #555; padding-bottom: 5px; margin-top: 10px;">🩹 หมวดฟื้นฟู & อุปกรณ์ทำแผล (Heal)</h3>
+                        <h3 style="color: #ff5555; border-bottom: 2px solid #555; padding-bottom: 5px; margin-top: 10px;">🩹 หมวดหมู่อุปกรณ์ทำแผล (รักษา HP & บัฟถาวร)</h3>
                         <div class="full-shop-grid" id="fullShopCombo"></div>
                     </div>
                 </div>
@@ -361,6 +351,8 @@
         scald: "น้ำร้อนลวก" 
     };
 
+    // หมวดหมู่ภายในยังคงใช้ 'attack', 'defense', 'economy', 'heal' เพื่อการสุ่มเรท RNG ในร้านค้า
+    // แต่ในการแสดงผลให้ผู้เล่นเห็น จะถูกรวมหมวดหมู่เข้าด้วยกัน
     const ITEMS_DB = [
         { id: 'tylenol', category: 'attack', tier: 'S', name: "Tylenol", cost: 30, cures: 'headache', maxStack: 6, desc: "แก้ปวดหัว | +ATK (2, 4, 6, 8, 10, 12)" },
         { id: 'ponstan', category: 'attack', tier: 'A', name: "Ponstan", cost: 30, cures: 'headache,muscle_ache', maxStack: 3, desc: "แก้ปวดหัว, ปวดกล้ามเนื้อ | +กระสุน 1 นัด & +ATK 1 แต้ม /สแต็ก" },
@@ -377,7 +369,7 @@
         { id: 'counterpain', category: 'defense', tier: 'S', name: "Counterpain Cool", cost: 20, cures: 'muscle_ache', maxStack: 3, desc: "แก้ปวดกล้ามเนื้อ | กางออร่าสโลว์ -1, -1.5, -2 Spd & ทำดาเมจ 1.5, 2.5, 3.5 ทุก 0.5 วิ (ทำงาน 1 เฟส)" },
         { id: 'silver_cream', category: 'defense', tier: 'S', name: "Silver cream", cost: 30, cures: 'scald', maxStack: 3, desc: "แก้น้ำร้อนลวก | ฮีล 5%, 7%, 10% ของ MaxHP ทุก 4 วิ" },
         { id: 'betadine', category: 'defense', tier: 'A', name: "Betadine", cost: 30, cures: 'fresh_wound', maxStack: 3, desc: "แก้แผลสด | เพิ่ม Max HP (+10, +16, +21)" },
-        { id: 'oral_paste', category: 'defense', tier: 'S', name: "Oral paste", cost: 30, cures: 'mouth_ulcer', maxStack: 3, desc: "แก้แผลในปาก | กระสุนระเบิด 6, 14, 25 px & +MaxHP 5, 8, 15" },
+        { id: 'oral_paste', category: 'defense', tier: 'S', name: "Oral paste", cost: 30, cures: 'mouth_ulcer', maxStack: 3, desc: "แก้แผลในปาก | กระสุนระเบิดกว้าง 6, 14, 25 px & +MaxHP 5, 8, 15" },
 
         { id: 'cardamine', category: 'economy', tier: 'A', name: "Cardamine", cost: 30, cures: 'rash', maxStack: 3, desc: "แก้ผื่นแพ้ | รับโบนัสเหรียญจบด่าน +20, 30, 45" },
         { id: 'golden_cup', category: 'economy', tier: 'A', name: "Golden Cup Blam", cost: 30, cures: 'swelling', maxStack: 3, desc: "แก้ผื่นบวม | ขยายระยะการดูดเหรียญ & แม่เหล็กตกเพิ่ม 5, 5, 10%" },
@@ -948,6 +940,7 @@
                     });
                 }
 
+                // ⚠️ จำกัดการติดโรคสูงสุดแค่ 1 โรค ต่อ 1 ฮิต
                 if (triggered.length > 1) {
                     triggered = triggered.sort(() => 0.5 - Math.random()).slice(0, 1);
                 }
@@ -962,7 +955,7 @@
 
                 if (appliedDebuffs.length > 0) {
                     showToast(`⚠️ ป่วย: ${appliedDebuffs.join(', ')}`, "#ff5555");
-                    this.debuffCooldownTimer = 1.0; 
+                    this.debuffCooldownTimer = 1.0; // 🛡️ ดีเลย์ป้องกันโรค 1 วิ
                 }
                 
                 if (appliedAny) {
@@ -970,7 +963,7 @@
                 }
             }
             
-            this.invulnerableTimer = 0.3; 
+            this.invulnerableTimer = 0.3; // 🛡️ ไอเฟรมกันดาเมจ 0.3 วิ
             
             if (this.hp <= 0) {
                 this.hp = 0; this.isDead = true; gameOver();
@@ -989,10 +982,6 @@
             this.stunTimer = 0;
             this.cpDamageTimer = 0.5;
             this.deadProcessed = false;
-            
-            const hpMap12 = [1, 1, 2, 2, 3, 4, 5, 8, 9, 10]; 
-            const hpMap3  = [0, 0, 0, 1, 2, 2, 3, 4, 6, 8];
-            const hpMap4  = [0, 0, 0, 5, 6, 7, 9, 9, 10, 13];
             
             let loop = phase >= 10 ? phase - 10 : 0;
             
@@ -1093,6 +1082,7 @@
             
             if (this.spawnDelay > 0) { this.spawnDelay -= dt; return; }
 
+            // ระบบสตั้น (Apache)
             if (this.stunTimer > 0) {
                 this.stunTimer -= dt;
                 return; 
@@ -1208,6 +1198,7 @@
                         e.stunTimer = 0.4;
                     }
 
+                    // 💥 เอฟเฟกต์กระสุนระเบิดทำดาเมจหมู่วงกว้าง (Oral Paste)
                     if (this.explodeRadius > 0) {
                         explosions.push({x: this.x, y: this.y, radius: this.explodeRadius, life: 0.15, maxLife: 0.15});
                         for (let other of enemies) {
@@ -1674,12 +1665,9 @@
                     isCureNeeded = curesArr.some(cure => player.statuses[cure] > 0);
                 }
                 let highlightClass = isCureNeeded ? "highlight-cure" : "";
-                
-                let tierClass = item.tier === 'S' ? 'tier-s' : (item.tier === 'A' ? 'tier-a' : 'tier-b');
 
                 container.innerHTML += `
                     <div class="shop-card ${highlightClass}" onclick="buyItem('${item.id}', ${item.discPrice}, true, ${index})">
-                        <div class="tier-badge ${tierClass}">${item.tier}</div>
                         <h3 style="margin:5px 0; color: #4CAF50; font-size: 20px;">${item.name} ${maxBadge}</h3>
                         <p style="font-size:13px; margin:10px 0; color: #ddd; height: 35px;">${item.desc}</p>
                         <p style="color:yellow; font-weight:bold; margin:5px 0; text-decoration: line-through; color:gray;">$${item.baseCst}</p>
@@ -1691,10 +1679,8 @@
     }
 
     function renderFullShop() {
-        const cAtk = document.getElementById('fullShopAttack'); if(cAtk) cAtk.innerHTML = '';
-        const cDef = document.getElementById('fullShopDefense'); if(cDef) cDef.innerHTML = '';
-        const cEco = document.getElementById('fullShopEconomy'); if(cEco) cEco.innerHTML = '';
-        const cHeal = document.getElementById('fullShopCombo'); if(cHeal) cHeal.innerHTML = '';
+        const cNormal = document.getElementById('fullShopNormal'); if(cNormal) cNormal.innerHTML = '';
+        const cCombo = document.getElementById('fullShopCombo'); if(cCombo) cCombo.innerHTML = '';
         
         ITEMS_DB.forEach(item => {
             let maxStr = item.maxStack === 99 ? "∞" : item.maxStack;
@@ -1715,11 +1701,9 @@
             let highlightClass = isCureNeeded ? "highlight-cure" : "";
             
             let dCost = getDynamicCost(item.id, currentPhase);
-            let tierClass = item.tier === 'S' ? 'tier-s' : (item.tier === 'A' ? 'tier-a' : 'tier-b');
 
             let htmlStr = `
                 <div class="full-shop-item ${highlightClass}" style="${isMax ? 'border-color:#ff5555;' : ''}">
-                    <div class="tier-badge ${tierClass}">${item.tier}</div>
                     <div style="width: 100%; text-align: left;">
                         <strong style="color: #4CAF50; font-size:16px;">${item.name}</strong> ${maxBadge}
                         <span style="font-size:12px; color:#aaa;">${displayMaxStr !== "" ? `มีอยู่: ${displayMaxStr}` : ""}</span><br>
@@ -1731,10 +1715,12 @@
                     </div>
                 </div>`;
             
-            if (item.category === 'attack' && cAtk) { cAtk.innerHTML += htmlStr; } 
-            else if (item.category === 'defense' && cDef) { cDef.innerHTML += htmlStr; }
-            else if (item.category === 'economy' && cEco) { cEco.innerHTML += htmlStr; }
-            else if (item.category === 'heal' && cHeal) { cHeal.innerHTML += htmlStr; }
+            if (['attack', 'defense', 'economy'].includes(item.category) && cNormal) { 
+                cNormal.innerHTML += htmlStr; 
+            } 
+            else if (item.category === 'heal' && cCombo) { 
+                cCombo.innerHTML += htmlStr; 
+            }
         });
     }
 
