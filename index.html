@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V3.4+upgrade UX/UI</title>
+    <title>First Aid Survivor V3.4</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -113,6 +113,126 @@
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #777; }
+
+        /* ======================================================================
+           PIXEL OFFICE / GERM THEME — applies to UI chrome (login, menu, shop,
+           upgrade, leaderboard, how-to-play, game over) only.
+           #game-container / canvas#gameCanvas are left untouched on purpose so
+           the battlefield stays plain black and bullets stay readable.
+           ====================================================================== */
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        :root{
+            --pw-panel:#2B2118; --pw-panelLight:#4A3826; --pw-panelDark:#1A130D;
+            --pw-gold:#FFD866; --pw-mint:#7FE8C6; --pw-mintDark:#3FA184;
+            --pw-coral:#FF6F5E; --pw-parch:#EFE3C8; --pw-sub:#B7A98C;
+        }
+
+        .screen {
+            background:
+                repeating-conic-gradient(#33271a 0% 25%, #2c2116 0% 50%) 0 0/44px 44px,
+                rgba(8,6,4,0.93) !important;
+            color: var(--pw-parch) !important;
+        }
+
+        .screen h1, .screen h2, .screen h3 {
+            font-family: 'Press Start 2P', monospace !important;
+            color: var(--pw-gold) !important;
+            text-shadow: 3px 3px 0 #000 !important;
+            letter-spacing: 1px;
+            line-height: 1.6;
+        }
+
+        input, button { font-family: 'Segoe UI', Tahoma, sans-serif !important; }
+
+        input {
+            background: var(--pw-panelDark) !important;
+            border: 3px solid #000 !important;
+            box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5) !important;
+            color: var(--pw-parch) !important;
+            border-radius: 4px !important;
+        }
+        input::placeholder{ color: var(--pw-sub) !important; }
+
+        button {
+            background: var(--pw-mintDark) !important;
+            color: #0c1310 !important;
+            border: 3px solid #000 !important;
+            box-shadow: inset 2px 2px 0 rgba(255,255,255,0.25), inset -2px -2px 0 rgba(0,0,0,0.35) !important;
+            border-radius: 4px !important;
+            font-weight: 800 !important;
+        }
+        button:hover { filter: brightness(1.15) !important; }
+        button:active { filter: brightness(0.9) !important; }
+        button:disabled { background:#4a4a4a !important; color:#999 !important; box-shadow:none !important; }
+        /* keep semantic button colors readable by matching their existing inline hints */
+        button[style*="2196F3"] { background: #5B8DEF !important; color:#fff !important; }
+        button[style*="9c27b0"] { background: #B98AE0 !important; color:#241a30 !important; }
+        button[style*="e74c3c"], button[style*="f44336"] { background: var(--pw-coral) !important; color:#2b0f0a !important; }
+        button[style*="f39c12"] { background: var(--pw-gold) !important; color:#2b2118 !important; }
+        button[style*="777"] { background: #6b5236 !important; color: var(--pw-parch) !important; }
+
+        /* recolor common inline text colors to the new palette */
+        [style*="color: #4CAF50"], [style*="color:#4CAF50"] { color: var(--pw-mint) !important; }
+        [style*="color: #ff5555"], [style*="color:#ff5555"] { color: var(--pw-coral) !important; }
+        [style*="color: yellow"], [style*="color:yellow"] { color: var(--pw-gold) !important; }
+        [style*="color: cyan"], [style*="color:cyan"] { color: var(--pw-mint) !important; }
+        [style*="color: #2196F3"] { color: #8FBFFF !important; }
+        [style*="color: #9c27b0"] { color: #D6A8F0 !important; }
+        [style*="color: #ff9800"] { color: var(--pw-gold) !important; }
+        [style*="color: white"], [style*="color:white"], [style*="color: #fff"] { color: var(--pw-parch) !important; }
+
+        .shop-layout { background: var(--pw-panel) !important; border: 4px solid #000 !important; box-shadow: inset 0 0 0 2px #6b5236, 0 10px 30px rgba(0,0,0,0.6) !important; border-radius: 6px !important; }
+        .shop-left { background: rgba(0,0,0,0.35) !important; border-right: 3px solid #000 !important; }
+        .shop-right { background: rgba(255,255,255,0.03) !important; }
+        .shop-right-header { border-bottom: 3px solid var(--pw-panelLight) !important; }
+
+        .stat-badge, .status-box, .combo-box, .hud-box, .info-panel, .tooltip-text, #leaderboardList, .htp-content {
+            background: var(--pw-panelDark) !important;
+            border: 2px solid #000 !important;
+            box-shadow: inset 2px 2px 0 #4a3826, inset -2px -2px 0 #000 !important;
+            border-radius: 4px !important;
+        }
+        #leaderboardList, .info-panel { border: 3px solid var(--pw-gold) !important; box-shadow: inset 0 0 0 2px #4a3826 !important; }
+
+        .shop-card {
+            background: var(--pw-panel) !important;
+            border: 3px solid var(--pw-gold) !important;
+            box-shadow: inset 2px 2px 0 rgba(255,255,255,0.08), 0 6px 14px rgba(0,0,0,0.5) !important;
+            border-radius: 6px !important;
+        }
+        .shop-card:hover { background: var(--pw-panelLight) !important; transform: translateY(-4px) !important; }
+        .shop-card.sold { filter: grayscale(100%) brightness(0.55) !important; }
+        .max-badge { background: rgba(255,111,94,0.15) !important; border-color: var(--pw-coral) !important; color: var(--pw-coral) !important; }
+        .highlight-cure { border-color: var(--pw-gold) !important; box-shadow: 0 0 15px rgba(255,216,102,0.85) !important; }
+        .tier-s { background-color: var(--pw-gold) !important; } .tier-a { background-color: #d9d0bd !important; } .tier-b { background-color: #b5793f !important; }
+
+        .catalog-row { background: var(--pw-panelDark) !important; border-left: 6px solid var(--pw-mintDark) !important; border-radius: 4px !important; }
+        .catalog-row:hover { background: #241b12 !important; border-left-color: var(--pw-gold) !important; }
+        .cat-tag.attack { background: rgba(255,111,94,0.18) !important; color: var(--pw-coral) !important; border-color: var(--pw-coral) !important; }
+        .cat-tag.defense { background: rgba(127,232,198,0.18) !important; color: var(--pw-mint) !important; border-color: var(--pw-mint) !important; }
+        .cat-tag.economy { background: rgba(255,216,102,0.18) !important; color: var(--pw-gold) !important; border-color: var(--pw-gold) !important; }
+        .cat-tag.heal { background: rgba(127,232,198,0.18) !important; color: var(--pw-mintDark) !important; border-color: var(--pw-mintDark) !important; }
+        .pip { background:#4a3826 !important; border:1px solid #000 !important; }
+        .pip.active { background: var(--pw-mintDark) !important; box-shadow:0 0 6px var(--pw-mint) !important; }
+        .pip.max { background: var(--pw-coral) !important; box-shadow: 0 0 6px var(--pw-coral) !important; }
+
+        .upg-row { border-bottom: 2px dashed var(--pw-panelLight) !important; }
+        .lb-entry { border-bottom: 2px dashed var(--pw-panelLight) !important; }
+
+        .tab-btn { background: var(--pw-panelLight) !important; border-radius: 4px 4px 0 0 !important; border: 2px solid #000 !important; color: var(--pw-parch) !important; }
+        .tab-btn.active-tab { background: var(--pw-mintDark) !important; color: #0c1310 !important; }
+
+        #fullShopModal, #nextPhaseModal, .hud-tab-menu { background: rgba(8,6,4,0.97) !important; }
+
+        /* ---- explicitly protect gameplay visuals: keep pure black, no theme ---- */
+        #game-container { background-color:#000 !important; }
+        #gameCanvas { background:#000 !important; }
+        .top-bar { background: rgba(0,0,0,0.85) !important; border-bottom: 3px solid var(--pw-mintDark) !important; }
+
+        ::-webkit-scrollbar-thumb { background: var(--pw-mintDark) !important; }
+
+        #gameLogoCanvas{ image-rendering:pixelated; image-rendering:crisp-edges; margin-bottom:4px; }
     </style>
 </head>
 <body>
@@ -131,7 +251,8 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor</h1>
+        <canvas id="gameLogoCanvas" width="192" height="150"></canvas>
+        <h1 style="font-size: 30px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -347,260 +468,6 @@
     function drawSprite(ctx, img, x, y, size, fallbackDraw) {
         if (img && img.complete && img.naturalWidth > 0) { ctx.drawImage(img, x - size, y - size, size * 2, size * 2); } 
         else { fallbackDraw(); }
-    }
-
-    // ==================================================================
-    // 🎨 PIXEL-ART RENDER ENGINE — "Office Survivor" (Ragnarok-cozy palette)
-    // Procedural top-down sprites drawn straight on the game canvas.
-    // ==================================================================
-
-    // ---------- Office floor tile pattern (baked once, tiled every frame) ----------
-    let officeFloorPattern = null;
-    function getOfficeFloorPattern(ctx) {
-        if (officeFloorPattern) return officeFloorPattern;
-        const tile = 64;
-        const pc = document.createElement('canvas'); pc.width = tile; pc.height = tile;
-        const pctx = pc.getContext('2d');
-        pctx.fillStyle = '#DCCEB0'; pctx.fillRect(0, 0, tile, tile);
-        pctx.fillStyle = '#D1C29E';
-        pctx.fillRect(0, 0, tile / 2, tile / 2);
-        pctx.fillRect(tile / 2, tile / 2, tile / 2, tile / 2);
-        pctx.strokeStyle = 'rgba(120,95,60,0.30)'; pctx.lineWidth = 2;
-        pctx.strokeRect(1, 1, tile - 2, tile - 2);
-        pctx.beginPath(); pctx.moveTo(tile / 2, 0); pctx.lineTo(tile / 2, tile);
-        pctx.moveTo(0, tile / 2); pctx.lineTo(tile, tile / 2); pctx.stroke();
-        pctx.fillStyle = 'rgba(120,95,60,0.10)';
-        for (let i = 0; i < 50; i++) pctx.fillRect(Math.random() * tile, Math.random() * tile, 1, 1);
-        officeFloorPattern = ctx.createPattern(pc, 'repeat');
-        return officeFloorPattern;
-    }
-
-    function drawOfficePlant(ctx, x, y, size) {
-        ctx.fillStyle = 'rgba(0,0,0,0.22)';
-        ctx.beginPath(); ctx.ellipse(x, y + size * 0.55, size * 0.55, size * 0.16, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#8B5A3C'; ctx.fillRect(x - size * 0.26, y + size * 0.05, size * 0.52, size * 0.4);
-        ctx.fillStyle = '#6E8C79'; ctx.beginPath(); ctx.arc(x, y - size * 0.22, size * 0.48, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#7FA890';
-        ctx.beginPath(); ctx.arc(x - size * 0.2, y - size * 0.4, size * 0.3, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(x + size * 0.24, y - size * 0.46, size * 0.26, 0, Math.PI * 2); ctx.fill();
-    }
-
-    function drawOfficeDeskStrip(ctx, x, y, w) {
-        ctx.fillStyle = 'rgba(0,0,0,0.16)'; ctx.fillRect(x - w / 2, y + 8, w, 6);
-        ctx.fillStyle = '#3F3226'; ctx.fillRect(x - w / 2, y - 9, w, 16);
-        ctx.fillStyle = '#7FD1AE'; ctx.fillRect(x - w / 2 + 4, y - 7, w - 8, 9);
-        ctx.fillStyle = '#3FA184'; ctx.fillRect(x - w / 2 + 4, y, w - 8, 2);
-    }
-
-    function drawOfficeBackground(ctx, w, h) {
-        ctx.fillStyle = getOfficeFloorPattern(ctx);
-        ctx.fillRect(0, 0, w, h);
-
-        // soft cool glow at the center (comfy arena anchor)
-        let center = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.05, w / 2, h / 2, Math.max(w, h) * 0.6);
-        center.addColorStop(0, 'rgba(127,232,198,0.07)');
-        center.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = center; ctx.fillRect(0, 0, w, h);
-
-        // gentle vignette for depth (keeps mid-screen bright & readable)
-        let vg = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.38, w / 2, h / 2, Math.max(w, h) * 0.78);
-        vg.addColorStop(0, 'rgba(0,0,0,0)');
-        vg.addColorStop(1, 'rgba(20,15,10,0.42)');
-        ctx.fillStyle = vg; ctx.fillRect(0, 0, w, h);
-
-        // office set-dressing kept to the edges, out of the play zone
-        drawOfficePlant(ctx, w * 0.035, h * 0.09, 26);
-        drawOfficePlant(ctx, w * 0.965, h * 0.09, 26);
-        drawOfficePlant(ctx, w * 0.035, h * 0.93, 26);
-        drawOfficePlant(ctx, w * 0.965, h * 0.93, 26);
-        drawOfficeDeskStrip(ctx, w * 0.5, h * 0.045, Math.min(220, w * 0.16));
-    }
-
-    // ---------- Player sprite: medic / office-worker top-down chibi ----------
-    function drawPixelPlayer(ctx, cx, cy, size) {
-        ctx.fillStyle = 'rgba(0,0,0,0.28)';
-        ctx.beginPath(); ctx.ellipse(cx, cy + size * 0.78, size * 0.85, size * 0.28, 0, 0, Math.PI * 2); ctx.fill();
-
-        ctx.fillStyle = '#F4EFE1';
-        ctx.beginPath(); ctx.arc(cx, cy, size * 0.95, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = 'rgba(0,0,0,0.09)';
-        ctx.beginPath(); ctx.arc(cx, cy, size * 0.95, Math.PI * 0.55, Math.PI * 1.05); ctx.fill();
-
-        ctx.fillStyle = '#3FA184';
-        ctx.fillRect(cx - size * 0.09, cy - size * 0.9, size * 0.18, size * 1.8);
-
-        ctx.fillStyle = '#F1C7A3';
-        ctx.beginPath(); ctx.arc(cx, cy - size * 0.02, size * 0.46, 0, Math.PI * 2); ctx.fill();
-
-        ctx.fillStyle = '#4A2C17';
-        ctx.beginPath(); ctx.arc(cx, cy - size * 0.1, size * 0.48, Math.PI * 0.95, Math.PI * 2.15); ctx.fill();
-
-        ctx.fillStyle = '#1A130D';
-        ctx.beginPath(); ctx.arc(cx - size * 0.14, cy - size * 0.02, size * 0.06, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + size * 0.14, cy - size * 0.02, size * 0.06, 0, Math.PI * 2); ctx.fill();
-
-        ctx.fillStyle = '#63C7A6'; ctx.fillRect(cx + size * 0.55, cy + size * 0.08, size * 0.32, size * 0.22);
-        ctx.fillStyle = '#2F6D63'; ctx.fillRect(cx + size * 0.87, cy + size * 0.12, size * 0.12, size * 0.14);
-    }
-
-    // ---------- Enemy sprites: germs roaming the office ----------
-    function roundRectPath(ctx, x, y, w, h, r) {
-        ctx.beginPath();
-        ctx.moveTo(x + r, y);
-        ctx.arcTo(x + w, y, x + w, y + h, r);
-        ctx.arcTo(x + w, y + h, x, y + h, r);
-        ctx.arcTo(x, y + h, x, y, r);
-        ctx.arcTo(x, y, x + w, y, r);
-        ctx.closePath();
-    }
-
-    function drawVirusShape(ctx, cx, cy, size, mainColor, darkColor) {
-        ctx.fillStyle = mainColor;
-        ctx.beginPath(); ctx.arc(cx, cy, size * 0.85, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = darkColor;
-        const spikes = 8;
-        for (let i = 0; i < spikes; i++) {
-            const a = (Math.PI * 2 / spikes) * i;
-            const sx = cx + Math.cos(a) * size * 0.85, sy = cy + Math.sin(a) * size * 0.85;
-            const s2x = cx + Math.cos(a + 0.18) * size * 0.85, s2y = cy + Math.sin(a + 0.18) * size * 0.85;
-            const ex = cx + Math.cos(a + 0.09) * size * 1.25, ey = cy + Math.sin(a + 0.09) * size * 1.25;
-            ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(s2x, s2y); ctx.lineTo(ex, ey); ctx.closePath(); ctx.fill();
-        }
-        ctx.fillStyle = '#FFF';
-        ctx.beginPath(); ctx.arc(cx - size * 0.25, cy, size * 0.18, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + size * 0.25, cy, size * 0.18, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#1A130D';
-        ctx.beginPath(); ctx.arc(cx - size * 0.25, cy + size * 0.02, size * 0.08, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + size * 0.25, cy + size * 0.02, size * 0.08, 0, Math.PI * 2); ctx.fill();
-    }
-
-    function drawAmoebaShape(ctx, cx, cy, size) {
-        ctx.fillStyle = '#8BC34A';
-        ctx.beginPath(); ctx.ellipse(cx, cy, size * 0.95, size * 0.8, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx - size * 0.62, cy - size * 0.28, size * 0.34, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + size * 0.65, cy + size * 0.25, size * 0.3, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx - size * 0.15, cy + size * 0.62, size * 0.3, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#5E8C2A';
-        ctx.beginPath(); ctx.arc(cx - size * 0.15, cy - size * 0.1, size * 0.12, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + size * 0.3, cy - size * 0.22, size * 0.1, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#1A130D';
-        ctx.beginPath(); ctx.arc(cx - size * 0.15, cy - size * 0.12, size * 0.06, 0, Math.PI * 2); ctx.fill();
-    }
-
-    function drawBacteriaShape(ctx, cx, cy, size) {
-        ctx.save(); ctx.translate(cx, cy);
-        ctx.fillStyle = '#9B6BFF';
-        roundRectPath(ctx, -size * 0.9, -size * 0.5, size * 1.8, size * 1.0, size * 0.5); ctx.fill();
-        ctx.fillStyle = '#6E42C4';
-        ctx.beginPath(); ctx.arc(-size * 0.75, 0, size * 0.5, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(size * 0.75, 0, size * 0.5, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#6E42C4'; ctx.lineWidth = Math.max(1, size * 0.08);
-        for (let i = -1; i <= 1; i++) {
-            ctx.beginPath(); ctx.moveTo(size * 0.9, i * size * 0.25); ctx.lineTo(size * 1.3, i * size * 0.4); ctx.stroke();
-        }
-        ctx.fillStyle = '#FFF'; ctx.beginPath(); ctx.arc(0, 0, size * 0.28, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#1A130D'; ctx.beginPath(); ctx.arc(0, 0, size * 0.12, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
-    }
-
-    function drawMoldShape(ctx, cx, cy, size) {
-        ctx.fillStyle = '#4A9B8E';
-        ctx.beginPath(); ctx.ellipse(cx, cy, size * 0.85, size * 0.7, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#6BB8AB';
-        const bumps = 6;
-        for (let i = 0; i < bumps; i++) {
-            const a = (Math.PI * 2 / bumps) * i;
-            ctx.beginPath(); ctx.arc(cx + Math.cos(a) * size * 0.7, cy + Math.sin(a) * size * 0.55, size * 0.22, 0, Math.PI * 2); ctx.fill();
-        }
-        ctx.fillStyle = '#1A130D';
-        ctx.beginPath(); ctx.arc(cx - size * 0.2, cy - size * 0.1, size * 0.09, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + size * 0.22, cy - size * 0.1, size * 0.09, 0, Math.PI * 2); ctx.fill();
-    }
-
-    function drawBossShape(ctx, cx, cy, size) {
-        ctx.fillStyle = 'rgba(255,50,50,0.22)';
-        ctx.beginPath(); ctx.arc(cx, cy, size * 1.15, 0, Math.PI * 2); ctx.fill();
-        drawVirusShape(ctx, cx, cy, size * 1.05, '#8B1E3F', '#C22B4E');
-        ctx.fillStyle = '#FFD866';
-        ctx.beginPath(); ctx.arc(cx - size * 0.3, cy, size * 0.2, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + size * 0.3, cy, size * 0.2, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#1A130D';
-        ctx.beginPath(); ctx.arc(cx - size * 0.3, cy + size * 0.02, size * 0.09, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + size * 0.3, cy + size * 0.02, size * 0.09, 0, Math.PI * 2); ctx.fill();
-    }
-
-    function drawPixelEnemy(ctx, cx, cy, size, type, isBoss, isElite) {
-        ctx.fillStyle = 'rgba(0,0,0,0.22)';
-        ctx.beginPath(); ctx.ellipse(cx, cy + size * 0.7, size * 0.75, size * 0.22, 0, 0, Math.PI * 2); ctx.fill();
-
-        if (isBoss) drawBossShape(ctx, cx, cy, size);
-        else if (type === 1) drawVirusShape(ctx, cx, cy, size, '#FF6B9D', '#D9447C');
-        else if (type === 2) drawAmoebaShape(ctx, cx, cy, size);
-        else if (type === 3) drawBacteriaShape(ctx, cx, cy, size);
-        else if (type === 4) drawMoldShape(ctx, cx, cy, size);
-        else { ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(cx, cy, size, 0, Math.PI * 2); ctx.fill(); }
-
-        if (isElite && !isBoss) {
-            ctx.strokeStyle = 'rgba(255,60,60,0.75)'; ctx.lineWidth = Math.max(1.5, size * 0.08);
-            ctx.beginPath(); ctx.arc(cx, cy, size * 1.05, 0, Math.PI * 2); ctx.stroke();
-        }
-    }
-
-    // ---------- Bullet sprites: pills & meds ----------
-    function drawPixelBullet(ctx, cx, cy, size, isCrit) {
-        if (isCrit) {
-            ctx.fillStyle = 'rgba(255,179,71,0.35)';
-            ctx.beginPath(); ctx.arc(cx, cy, size * 1.6, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#FFB347';
-            ctx.beginPath(); ctx.arc(cx, cy, size * 1.1, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#FFF3D6';
-            ctx.beginPath(); ctx.arc(cx - size * 0.3, cy - size * 0.3, size * 0.4, 0, Math.PI * 2); ctx.fill();
-        } else {
-            ctx.fillStyle = '#4FBE96';
-            ctx.beginPath(); ctx.ellipse(cx, cy, size * 1.1, size * 0.75, 0, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#7FE8C6';
-            ctx.beginPath(); ctx.ellipse(cx - size * 0.15, cy - size * 0.15, size * 0.8, size * 0.5, 0, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#FFFFFF';
-            ctx.beginPath(); ctx.ellipse(cx - size * 0.35, cy - size * 0.3, size * 0.3, size * 0.15, 0, 0, Math.PI * 2); ctx.fill();
-        }
-    }
-
-    function drawPixelEnemyBullet(ctx, cx, cy, size) {
-        ctx.fillStyle = '#FF6B6B';
-        ctx.beginPath();
-        ctx.moveTo(cx, cy - size * 1.2);
-        ctx.quadraticCurveTo(cx + size * 1.1, cy + size * 0.2, cx, cy + size * 1.1);
-        ctx.quadraticCurveTo(cx - size * 1.1, cy + size * 0.2, cx, cy - size * 1.2);
-        ctx.fill();
-        ctx.fillStyle = '#FFCFCF';
-        ctx.beginPath(); ctx.arc(cx - size * 0.25, cy - size * 0.1, size * 0.3, 0, Math.PI * 2); ctx.fill();
-    }
-
-    // ---------- Item drop sprites ----------
-    function drawPixelItem(ctx, cx, cy, size, type) {
-        if (type === 'coin') {
-            ctx.fillStyle = '#FFD866';
-            ctx.beginPath(); ctx.arc(cx, cy, size, 0, Math.PI * 2); ctx.fill();
-            ctx.strokeStyle = '#C98A2A'; ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.arc(cx, cy, size, 0, Math.PI * 2); ctx.stroke();
-            ctx.fillStyle = '#C98A2A'; ctx.font = `bold ${Math.max(8, size * 1.1)}px Arial`;
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('$', cx, cy + 1);
-        } else if (type === 'diamond') {
-            ctx.fillStyle = '#8FD6FF';
-            ctx.beginPath();
-            ctx.moveTo(cx, cy - size * 1.2); ctx.lineTo(cx + size, cy - size * 0.2);
-            ctx.lineTo(cx, cy + size * 1.2); ctx.lineTo(cx - size, cy - size * 0.2);
-            ctx.closePath(); ctx.fill();
-            ctx.fillStyle = '#FFFFFF';
-            ctx.beginPath(); ctx.moveTo(cx, cy - size * 1.2); ctx.lineTo(cx + size * 0.4, cy - size * 0.3);
-            ctx.lineTo(cx, cy - size * 0.1); ctx.closePath(); ctx.fill();
-        } else {
-            ctx.strokeStyle = '#FF6B6B'; ctx.lineWidth = Math.max(1.5, size * 0.4);
-            ctx.beginPath(); ctx.arc(cx, cy, size * 0.7, Math.PI * 0.15, Math.PI * 0.85, false); ctx.stroke();
-            ctx.fillStyle = '#EFEFEF';
-            ctx.fillRect(cx - size * 0.9, cy + size * 0.1, size * 0.35, size * 0.5);
-            ctx.fillRect(cx + size * 0.55, cy + size * 0.1, size * 0.35, size * 0.5);
-        }
     }
 
     const SUPABASE_URL = 'https://budgugzxmgmptxycfyeb.supabase.co';
@@ -1191,7 +1058,7 @@
             ctx.arc(this.x, this.y, this.size + 15 + this.magnetRange, 0, Math.PI * 2); ctx.stroke();
 
             drawSprite(ctx, ASSETS.player, this.x, this.y, this.size, () => {
-                drawPixelPlayer(ctx, this.x, this.y, this.size);
+                ctx.fillStyle = '#00ff00'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
             });
 
             ctx.fillStyle = 'red'; ctx.fillRect(this.x - 20, this.y - 35, 40, 6);
@@ -1491,7 +1358,7 @@
             }
 
             drawSprite(ctx, imgAsset, this.x, this.y, this.size, () => {
-                drawPixelEnemy(ctx, this.x, this.y, this.size, this.type, this.isBoss, this.isElite);
+                ctx.fillStyle = this.isBoss ? '#ff5555' : 'red'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
             });
 
             if (this.isElite) {
@@ -1574,7 +1441,10 @@
         }
         draw(ctx) { 
             drawSprite(ctx, ASSETS.bullet, this.x, this.y, this.size, () => {
-                drawPixelBullet(ctx, this.x, this.y, this.size, this.isCrit);
+                ctx.fillStyle = this.isCrit ? '#ff5500' : 'yellow'; 
+                ctx.beginPath(); 
+                ctx.arc(this.x, this.y, this.isCrit ? this.size * 1.3 : this.size, 0, Math.PI*2); 
+                ctx.fill(); 
             });
         }
     }
@@ -1595,7 +1465,7 @@
         }
         draw(ctx) { 
             drawSprite(ctx, ASSETS.enemyBullet, this.x, this.y, this.size, () => {
-                drawPixelEnemyBullet(ctx, this.x, this.y, this.size);
+                ctx.fillStyle = '#ff9900'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill(); 
             });
         }
     }
@@ -1620,7 +1490,14 @@
         draw(ctx) {
             let imgAsset = this.type === 'coin' ? ASSETS.coin : (this.type === 'diamond' ? ASSETS.diamond : ASSETS.magnet);
             drawSprite(ctx, imgAsset, this.x, this.y, this.size, () => {
-                drawPixelItem(ctx, this.x, this.y, this.size, this.type);
+                if (this.type === 'coin') {
+                    ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
+                } else if (this.type === 'diamond') {
+                    ctx.fillStyle = 'cyan'; ctx.beginPath(); ctx.rect(this.x - this.size/2, this.y - this.size/2, this.size, this.size); ctx.fill();
+                } else if (this.type === 'magnet') {
+                    ctx.fillStyle = '#ff5555'; ctx.beginPath(); ctx.rect(this.x - this.size, this.y - this.size, this.size*2, this.size*2); ctx.fill();
+                    ctx.fillStyle = 'white'; ctx.beginPath(); ctx.rect(this.x - this.size/2, this.y - this.size/2, this.size, this.size); ctx.fill();
+                }
             });
         }
     }
@@ -2549,7 +2426,7 @@
     }
 
     function draw() {
-        drawOfficeBackground(ctx, canvas.width, canvas.height);
+        ctx.fillStyle = '#111'; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         if (phaseTimer <= 5 && phaseTimer > 0) {
             ctx.save();
@@ -2624,6 +2501,80 @@
             ctx.textAlign = 'left'; 
         });
     }
+</script>
+
+<script>
+/* ---- Cute pixel mascot logo for the login screen (self-contained, does not touch game logic) ---- */
+(function drawGameLogo(){
+    function run(){
+        try{
+            const canvas = document.getElementById('gameLogoCanvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+
+            // draw at low internal resolution then blow up crisp (pixel-art technique)
+            const lowW = 24, lowH = 24, scale = 8;
+            const off = document.createElement('canvas');
+            off.width = lowW; off.height = lowH;
+            const o = off.getContext('2d');
+            o.imageSmoothingEnabled = false;
+
+            // soft ground shadow
+            o.fillStyle = 'rgba(0,0,0,0.25)';
+            o.beginPath(); o.ellipse(12,22,7,2,0,0,Math.PI*2); o.fill();
+
+            // capsule body (mint top half / cream bottom half, like a medicine pill)
+            o.fillStyle = '#7FE8C6';
+            o.beginPath(); o.arc(12,10,8,Math.PI,0); o.fill();
+            o.fillRect(4,10,16,6);
+            o.fillStyle = '#FFF6E4';
+            o.beginPath(); o.arc(12,16,8,0,Math.PI); o.fill();
+            o.fillRect(4,10,16,1);
+            // outline
+            o.strokeStyle = '#1A130D'; o.lineWidth = 1;
+            o.beginPath(); o.arc(12,10,8,Math.PI,0); o.moveTo(4,10); o.lineTo(4,16);
+            o.arc(12,16,8,0,Math.PI); o.moveTo(20,10); o.lineTo(20,16); o.stroke();
+
+            // shading dither
+            o.fillStyle = '#4FBE96';
+            [[6,6],[18,6],[7,9],[17,9]].forEach(p=>o.fillRect(p[0],p[1],1,1));
+
+            // cross badge on chest
+            o.fillStyle = '#FF6F5E';
+            o.fillRect(10,12,4,1); o.fillRect(11,11,2,3);
+
+            // little arms
+            o.fillStyle = '#7FE8C6';
+            o.fillRect(2,11,3,3); o.fillRect(19,11,3,3);
+            o.strokeStyle = '#1A130D'; o.strokeRect(2,11,3,3); o.strokeRect(19,11,3,3);
+
+            // little feet
+            o.fillStyle = '#4FBE96';
+            o.fillRect(7,21,4,2); o.fillRect(13,21,4,2);
+
+            // face: big cute eyes + blush + smile
+            o.fillStyle = '#1A130D';
+            o.fillRect(8,9,2,3); o.fillRect(14,9,2,3);
+            o.fillStyle = '#FFFFFF';
+            o.fillRect(8,9,1,1); o.fillRect(14,9,1,1);
+            o.fillStyle = 'rgba(255,111,94,0.45)';
+            o.fillRect(6,13,2,1); o.fillRect(16,13,2,1);
+            o.strokeStyle = '#1A130D'; o.lineWidth = 1;
+            o.beginPath(); o.moveTo(9,15); o.quadraticCurveTo(12,17,15,15); o.stroke();
+
+            // nurse-cap sparkle on top
+            o.fillStyle = '#FFD866';
+            o.fillRect(11,1,2,2);
+
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.drawImage(off,0,0,lowW,lowH,(canvas.width-lowW*scale)/2,4,lowW*scale,lowH*scale);
+        }catch(e){ /* fail silently — logo is decorative only */ }
+    }
+    if(document.readyState === 'loading'){
+        document.addEventListener('DOMContentLoaded', run);
+    } else { run(); }
+})();
 </script>
 
 </body>
