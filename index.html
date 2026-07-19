@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor - End Game Rebalance</title>
+    <title>First Aid Survivor V3.3 (UI Overhaul)</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -40,11 +40,6 @@
         .highlight-cure { border: 2px solid #ff5555 !important; box-shadow: 0 0 15px rgba(255, 85, 85, 0.8) !important; animation: pulse-red 1.5s infinite; }
         @keyframes pulse-red { 0% { box-shadow: 0 0 5px rgba(255,85,85,0.5); } 50% { box-shadow: 0 0 20px rgba(255,85,85,1); } 100% { box-shadow: 0 0 5px rgba(255,85,85,0.5); } }
 
-        @keyframes blink-btn { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.03); filter: brightness(1.2); box-shadow: 0 0 15px rgba(33, 150, 243, 0.8); } 100% { transform: scale(1); filter: brightness(1); } }
-        @keyframes blink-btn-gold { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.03); filter: brightness(1.2); box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); } 100% { transform: scale(1); filter: brightness(1); } }
-        .btn-blink { animation: blink-btn 1.2s infinite ease-in-out; }
-        .btn-blink-gold { animation: blink-btn-gold 1.2s infinite ease-in-out; }
-
         .btn-action-group { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
         .btn-quick-buy { background: #e67e22; font-size: 14px; padding: 8px 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; min-height: 65px; box-sizing: border-box; width: 100%;}
         .btn-next { background: #2196F3; font-size: 18px; padding: 15px; border-radius: 8px; }
@@ -56,9 +51,39 @@
         #fullShopModal.active-modal, #nextPhaseModal.active-modal { display: flex; }
         
         .full-shop-list { width: 100%; max-height: 80%; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-top: 15px; padding-right: 15px; }
-        .full-shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-        .full-shop-item { background: #333; padding: 15px; border-radius: 8px; font-size: 14px; border: 1px solid #555; display: flex; flex-direction: column; justify-content: space-between; text-align: center; position: relative; overflow: hidden;}
-        .full-shop-item:hover { border-color: #4CAF50; background: #444; }
+        
+        /* ---------------- Catalog Row & List Style ---------------- */
+        .catalog-row { display: flex; justify-content: space-between; align-items: center; background: #222; margin-bottom: 8px; padding: 12px 20px; border-radius: 8px; border-left: 6px solid #555; transition: 0.2s; }
+        .catalog-row:hover { background: #2a2a2a; border-left-color: #4CAF50; transform: scale(1.01); }
+        .cat-left { display: flex; align-items: center; gap: 15px; flex: 2; }
+        .cat-fav-btn { font-size: 24px; cursor: pointer; color: #555; user-select: none; transition: 0.2s; }
+        .cat-fav-btn.is-fav { color: #ff5252; }
+        .cat-fav-btn:hover { transform: scale(1.2); }
+        .cat-info { display: flex; flex-direction: column; text-align: left; }
+        .cat-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: bold; width: fit-content; margin-bottom: 4px; }
+        .cat-tag.attack { background: rgba(255, 82, 82, 0.2); color: #ff5252; border: 1px solid #ff5252; }
+        .cat-tag.defense { background: rgba(68, 138, 255, 0.2); color: #448AFF; border: 1px solid #448AFF; }
+        .cat-tag.economy { background: rgba(255, 215, 0, 0.2); color: #FFD700; border: 1px solid #FFD700; }
+        .cat-tag.heal { background: rgba(76, 175, 80, 0.2); color: #4CAF50; border: 1px solid #4CAF50; }
+        .cat-right { display: flex; align-items: center; gap: 15px; flex: 1; justify-content: flex-end; }
+        .cat-price { color: #FFD700; font-weight: bold; font-size: 18px; }
+        
+        /* Pips */
+        .pips-container { display: flex; gap: 4px; margin-top: 6px; }
+        .pip { width: 14px; height: 6px; background: #444; border-radius: 2px; }
+        .pip.active { background: #4CAF50; box-shadow: 0 0 5px #4CAF50; }
+        .pip.max { background: #ff5252; box-shadow: 0 0 5px #ff5252; }
+
+        /* Tooltips */
+        .has-tooltip { position: relative; cursor: help; display: inline-block; margin-left: 8px; color: #2196F3; font-weight: bold; background: rgba(33, 150, 243, 0.2); border-radius: 50%; width: 22px; height: 22px; text-align: center; line-height: 22px; font-size: 14px;}
+        .tooltip-text { visibility: hidden; width: max-content; max-width: 300px; background-color: rgba(20,20,20,0.98); color: #fff; text-align: left; border-radius: 6px; padding: 12px; position: absolute; z-index: 100; bottom: 135%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.2s; border: 1px solid #2196F3; box-shadow: 0 4px 20px rgba(0,0,0,0.8); font-size: 13px; font-weight: normal; line-height: 1.5; pointer-events: none;}
+        .has-tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
+
+        /* HUD TAB MENU */
+        .hud-tab-menu { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 40px; box-sizing: border-box; backdrop-filter: blur(5px); }
+        .hud-tab-menu.active { display: flex; }
+        .hud-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 80%; max-width: 1000px; }
+        .hud-box { background: rgba(30,30,30,0.9); border: 1px solid #555; border-radius: 8px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
         .upg-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding: 15px 0; }
         .upg-row:last-child { border-bottom: none; }
@@ -67,16 +92,14 @@
         .htp-content { display: none; background: #333; padding: 25px; border-radius: 0 8px 8px 8px; text-align: left; width: 600px; height: 400px; overflow-y: auto; line-height: 1.6; margin-bottom: 15px; }
         .htp-content.active-content { display: block; }
         
-        #btnToggleBuff { position: absolute; top: 50px; right: 20px; z-index: 15; background: rgba(0,0,0,0.6); padding: 8px 15px; font-size: 14px; border: 1px solid #aaa; color: white; border-radius: 5px; cursor: pointer; display: none; }
+        #btnToggleBuff { display: none; } /* ซ่อนปุ่มเดิมเพราะเรามี HUD ใหม่อันนี้แล้ว */
         
-        /* 📣 Left Side Notification List */
         #notificationList { position: absolute; top: 220px; left: 10px; z-index: 1000; display: flex; flex-direction: column; gap: 5px; pointer-events: none; }
         .toast-item { background: rgba(0,0,0,0.8); color: #fff; padding: 8px 15px; border-left: 4px solid #ffeb3b; border-radius: 4px; font-size: 14px; font-weight: bold; opacity: 1; transition: opacity 0.5s ease-out; animation: slideIn 0.2s ease-out; }
         @keyframes slideIn { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
         .lb-entry { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #555; }
         .lb-entry:last-child { border-bottom: none; }
-        
         .info-panel { background: #222; border: 2px solid #00bcd4; border-radius: 12px; width: 80%; max-width: 1000px; padding: 20px; max-height: 90%; overflow-y: auto; text-align: left; margin: auto; }
     </style>
 </head>
@@ -91,8 +114,6 @@
         </span>
         <button onclick="logout()" style="padding: 5px 15px; font-size: 12px; background-color: #f44336;">Logout</button>
     </div>
-
-    <button id="btnToggleBuff" onclick="toggleBuffUI()">👁️ ซ่อน/แสดงบัฟ</button>
     
     <div id="notificationList"></div>
 
@@ -130,12 +151,12 @@
                 <li>ใช้ปุ่ม <strong>W, A, S, D</strong> เพื่อบังคับทิศทางตัวละคร</li>
                 <li>ตัวละครจะโจมตีอัตโนมัติใส่ศัตรูที่อยู่ใกล้ที่สุด</li>
                 <li>เป้าหมายคือต้อง <strong>เอาชีวิตรอดให้ครบ 30 วินาที</strong> เพื่อผ่านด่าน (Phase)</li>
-                <li>เดินเก็บ <strong>เหรียญ (สีเหลือง)</strong> ไว้ใช้ซื้อของ และ <strong>เพชร (สีฟ้า)</strong> ใช้อัปเกรดถาวร</li>
+                <li>กด <strong>TAB</strong> เพื่อดูสถานะไอเทมและอาการป่วยระหว่างเล่น</li>
             </ul>
         </div>
-        <div id="tab-enemy" class="htp-content"><p>สเกลความยากทวีคูณ เฟสหลังๆ อัตราเหรียญดรอปจะลดลง และมีมินิบอสบีบพื้นที่</p></div>
-        <div id="tab-shop" class="htp-content"><p>ร้านค้ารูปแบบใหม่! แบ่งหมวดหมู่ชัดเจน จัดหน้าต่างคอมโบให้เข้าใจง่าย</p></div>
-        <div id="tab-upg" class="htp-content"><p>เก็บเพชรเพื่อพัฒนาตัวละครถาวร สามารถปลด Max HP ได้สูงสุดถึง 40 ครั้ง!</p></div>
+        <div id="tab-enemy" class="htp-content"><p>สเกลความยากทวีคูณ เฟส 12+ จะเริ่มมีมินิบอสโผล่มากวนใจ</p></div>
+        <div id="tab-shop" class="htp-content"><p>ร้านค้ารูปแบบใหม่! ไอเทมถูกจัดเป็นหมวดหมู่ (โจมตี, ป้องกัน, หาเงิน, ฟื้นฟู) สามารถกด ❤️ เพื่อจัดเก็บเป็นรายการโปรดได้</p></div>
+        <div id="tab-upg" class="htp-content"><p>เก็บเพชรเพื่อพัฒนาตัวละครถาวร สามารถปลด Max HP, ATK, DEF, SPD และคริติคอลได้!</p></div>
         <button onclick="switchScreen('menuScreen')" style="background-color: #777; padding: 15px 40px; font-size: 18px;">กลับสู่เมนูหลัก</button>
     </div>
 
@@ -174,7 +195,6 @@
             
             <div class="shop-left">
                 <h3 style="margin: 0; color: #4CAF50; border-bottom: 2px solid #555; padding-bottom: 10px;">📊 Player Status</h3>
-                
                 <div class="stat-badge"><span style="color:#0f0;">❤️ Max HP</span> <strong id="shop-hp-stat">0/0</strong></div>
                 <div class="stat-badge"><span style="color:#ff5555;">⚔️ Attack</span> <strong id="shop-atk-stat">0</strong></div>
                 <div class="stat-badge"><span style="color:#aaa;">🛡️ ภูมิคุ้มกัน</span> <strong id="shop-def-stat">0 (หลบ 0%)</strong></div>
@@ -228,25 +248,21 @@
                     <button id="btnAdminSkip" onclick="adminSkipPhase()" class="btn-reroll" style="display:none; background-color: #ff5722; margin-top: 5px;">👑 [Admin] วาร์ปข้าม Phase</button>
                 </div>
                 
-                <!-- Modal แคตตาล็อกยาทั้งหมด (แบบรวมหมวด และมีช่องค้นหา) -->
+                <!-- Modal แคตตาล็อกยาทั้งหมด (แบบ List นวนอน) -->
                 <div id="fullShopModal">
                     <div style="width: 100%; display: flex; flex-direction: column; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; margin-bottom: 15px; gap: 15px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h2 style="margin: 0; color: #4CAF50; font-size: 24px;">🛒 แคตตาล็อกยาทั้งหมด</h2>
+                            <h2 style="margin: 0; color: #4CAF50; font-size: 24px;">🛒 แคตตาล็อกยาทั้งหมด (Shop)</h2>
                             <div style="display: flex; align-items: center; gap: 20px;">
                                 <h3 style="margin:0; color: yellow;">เงิน: 💰 <span id="full-shop-coins">0</span></h3>
                                 <button onclick="toggleFullShop(false)" style="background-color: #f44336; padding: 8px 20px; font-size: 14px;">ปิด (X)</button>
                             </div>
                         </div>
-                        <input type="text" id="shopSearchInput" oninput="renderFullShop(this.value)" placeholder="🔍 ค้นหาชื่อยา, อาการป่วย หรือสรรพคุณ..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #4CAF50; background: #222; color: #fff; outline: none; font-size: 16px;">
+                        <input type="text" id="shopSearchInput" oninput="renderFullShop(this.value)" placeholder="🔍 ค้นหาชื่อยา, อาการป่วย หรือหมวดหมู่..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #4CAF50; background: #222; color: #fff; outline: none; font-size: 16px;">
                     </div>
                     
-                    <div class="full-shop-list">
-                        <h3 style="color: #2196F3; border-bottom: 2px solid #555; padding-bottom: 5px; margin-top: 5px;">💊 หมวดหมู่ยาทั่วไป</h3>
-                        <div class="full-shop-grid" id="fullShopNormal"></div>
-                        
-                        <h3 style="color: #ff5555; border-bottom: 2px solid #555; padding-bottom: 5px; margin-top: 10px;">🩹 หมวดหมู่อุปกรณ์ทำแผล (รักษา HP & บัฟถาวร)</h3>
-                        <div class="full-shop-grid" id="fullShopCombo"></div>
+                    <div class="full-shop-list" id="fullShopList">
+                        <!-- รายการ List แบบแนวนอนจะถูก Inject ตรงนี้ -->
                     </div>
                 </div>
 
@@ -267,6 +283,17 @@
         </div>
     </div>
 
+    <!-- HUD กด TAB เมนูสถานะโปร่งใส -->
+    <div id="hudTabMenu" class="hud-tab-menu">
+        <h2 style="color:#00bcd4; margin-bottom:30px; font-size:36px; border-bottom:2px solid #00bcd4; padding-bottom:10px;">📋 ข้อมูลสถานะผู้เล่น (Player Status)</h2>
+        <div class="hud-grid">
+            <div class="hud-box" id="hudTabStats"></div>
+            <div class="hud-box" id="hudTabDebuff"></div>
+            <div class="hud-box" id="hudTabBuff" style="grid-column: span 2; display:grid; grid-template-columns: 1fr 1fr; gap:10px;"></div>
+        </div>
+        <p style="color:#ccc; margin-top:30px;">ปล่อยปุ่ม TAB เพื่อกลับสู่เกม</p>
+    </div>
+
     <canvas id="gameCanvas"></canvas>
 </div>
 
@@ -282,8 +309,9 @@
     let shopBoardGenerations = 0; 
     let discountedBoughtCount = 0; 
     let currentDiscountItems = []; 
+    let favoriteItems = []; 
     let adminGodMode = false; 
-    let showBuffsUI = true;
+    let showTabMenu = false; // สำหรับเปิด HUD
     let reqId = null; 
 
     let player = null;
@@ -353,35 +381,42 @@
         scald: "น้ำร้อนลวก" 
     };
 
-    // หมวดหมู่ภายในยังคงใช้ 'attack', 'defense', 'economy', 'heal' เพื่อการสุ่มเรท RNG ในร้านค้า
+    // 📋 โครงสร้างตารางไอเทมใหม่ (แยก short_desc สำหรับหน้าการ์ด และ desc สำหรับ Tooltip)
     const ITEMS_DB = [
-        { id: 'tylenol', category: 'attack', tier: 'S', name: "Tylenol", cost: 30, cures: 'headache', maxStack: 6, desc: "แก้ปวดหัว | +ATK (2, 4, 6, 8, 10, 12)" },
-        { id: 'ponstan', category: 'attack', tier: 'A', name: "Ponstan", cost: 30, cures: 'headache,muscle_ache', maxStack: 3, desc: "แก้ปวดหัว, ปวดกล้ามเนื้อ | +กระสุน 1 นัด & +ATK 1 แต้ม /สแต็ก" },
-        { id: 'air_x', category: 'attack', tier: 'S', name: "Air-X", cost: 20, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | ปืน 3 แฉก (มีผล 1 เฟส)" },
-        { id: 'flying_rabit', category: 'attack', tier: 'S', name: "Flying Rabit", cost: 20, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | กระสุนทะลุศัตรู (มีผล 1 เฟส)" },
-        { id: 'gumgig', category: 'attack', tier: 'A', name: "Gumgig pean", cost: 30, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ยิงไว 10, 15, 30% / ชิ่ง 20, 25, 30% (ออก 1, 2, 3 นัด) / +ATK 1, 2, 3" },
-        { id: 'eye_lotion', category: 'attack', tier: 'A', name: "Eye lotion", cost: 30, cures: 'red_eye', maxStack: 3, desc: "แก้ตาแดง | โอกาสคริติคอลเพิ่ม 10%, 20%, 30%" },
-        { id: 'apache', category: 'attack', tier: 'A', name: "Apache", cost: 30, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ยิงไว 10, 15, 30% / สตั้น 5, 10, 20% / +ATK 1, 2, 3" },
-        { id: 'eye_drop', category: 'attack', tier: 'A', name: "Eye Drop", cost: 30, cures: 'red_eye', maxStack: 3, desc: "แก้ตาแดง | ความแรงคริติคอลเพิ่มเป็น x1.75, x2.0, x2.5" },
+        { id: 'tylenol', category: 'attack', name: "Tylenol", cost: 30, cures: 'headache', maxStack: 6, short_desc: "รักษาปวดหัว | +ATK", desc: "+ATK 2, 4, 6, 8, 10, 12 ตามลำดับ" },
+        { id: 'ponstan', category: 'attack', name: "Ponstan", cost: 30, cures: 'headache,muscle_ache', maxStack: 3, short_desc: "รักษาปวดหัว,ปวดกล้ามเนื้อ | +นัดกระสุน, +ATK", desc: "เพิ่มกระสุน 1 นัด และบวก ATK 1 แต้ม (ต่อ 1 สแต็ก)" },
+        { id: 'air_x', category: 'attack', name: "Air-X", cost: 20, cures: 'stomach', maxStack: 1, short_desc: "รักษาปวดท้อง | กระสุน 3 แฉก", desc: "กางกระสุนออกเป็น 3 ทิศทาง<br>มีผลใช้งาน 1 เฟส" },
+        { id: 'flying_rabit', category: 'attack', name: "Flying Rabit", cost: 20, cures: 'stomach', maxStack: 1, short_desc: "รักษาปวดท้อง | กระสุนทะลุ", desc: "กระสุนพุ่งทะลุศัตรูไม่จำกัดจำนวน<br>มีผลใช้งาน 1 เฟส" },
+        { id: 'gumgig', category: 'attack', name: "Gumgig pean", cost: 30, cures: 'sore_throat', maxStack: 3, short_desc: "รักษาเจ็บคอ | ยิงไว, กระสุนชิ่ง, +ATK", desc: "ยิงไวขึ้น 10, 15, 30%<br>โอกาสชิ่ง 20, 25, 30% (กระสุนแตกออก 1, 2, 3 นัด)<br>บวกโบนัส +ATK 1, 2, 3" },
+        { id: 'eye_lotion', category: 'attack', name: "Eye lotion", cost: 30, cures: 'red_eye', maxStack: 3, short_desc: "รักษาตาแดง | เพิ่มโอกาสคริติคอล", desc: "โอกาสโจมตีติดคริติคอลเพิ่มขึ้น 10%, 20%, 30%" },
+        { id: 'apache', category: 'attack', name: "Apache", cost: 30, cures: 'sore_throat', maxStack: 3, short_desc: "รักษาเจ็บคอ | ยิงไว, สตั้น, +ATK", desc: "ยิงไวขึ้น 10, 15, 30%<br>โอกาสทำให้ศัตรูชะงัก 5, 10, 20%<br>บวกโบนัส +ATK 1, 2, 3" },
+        { id: 'eye_drop', category: 'attack', name: "Eye Drop", cost: 30, cures: 'red_eye', maxStack: 3, short_desc: "รักษาตาแดง | เพิ่มความแรงคริติคอล", desc: "เพิ่มความรุนแรงคริติคอลเป็น x1.75, x2.0, x2.5" },
 
-        { id: 'cpm', category: 'defense', tier: 'A', name: "CPM", cost: 20, cures: 'allergy', maxStack: 3, desc: "แก้ภูมิแพ้ | +DEF 15, 25, 35 (ติดง่วงนอน ลด Spd 1/สแต็ก)" },
-        { id: 'telfast', category: 'defense', tier: 'A', name: "Telfast", cost: 15, cures: 'allergy', maxStack: 3, desc: "แก้ภูมิแพ้ | +DEF 5, 10, 15" },
-        { id: 'carbon', category: 'defense', tier: 'A', name: "Carbon", cost: 15, cures: 'stomach', maxStack: 3, desc: "แก้ปวดท้อง | +ความเร็วเดิน 1, 2, 3" },
-        { id: 'counterpain', category: 'defense', tier: 'S', name: "Counterpain Cool", cost: 20, cures: 'muscle_ache', maxStack: 3, desc: "แก้ปวดกล้ามเนื้อ | กางออร่าสโลว์ -1, -1.5, -2 Spd & ทำดาเมจ 1.5, 2.5, 3.5 ทุก 0.5 วิ (ทำงาน 1 เฟส)" },
-        { id: 'silver_cream', category: 'defense', tier: 'S', name: "Silver cream", cost: 30, cures: 'scald', maxStack: 3, desc: "แก้น้ำร้อนลวก | ฮีล 5%, 7%, 10% ของ MaxHP ทุก 4 วิ" },
-        { id: 'betadine', category: 'defense', tier: 'A', name: "Betadine", cost: 30, cures: 'fresh_wound', maxStack: 3, desc: "แก้แผลสด | เพิ่ม Max HP (+10, +16, +21)" },
-        { id: 'oral_paste', category: 'defense', tier: 'S', name: "Oral paste", cost: 30, cures: 'mouth_ulcer', maxStack: 3, desc: "แก้แผลในปาก | กระสุนระเบิด 6, 14, 25 px & +MaxHP 5, 8, 15" },
+        { id: 'cpm', category: 'defense', name: "CPM", cost: 20, cures: 'allergy', maxStack: 3, short_desc: "รักษาภูมิแพ้ | +DEF, -SPD", desc: "เพิ่มพลังป้องกัน 15, 25, 35<br><span style='color:#ff5555'>ผลข้างเคียง: ติดดีบัฟง่วงนอน (ลด Spd 1 ต่อสแต็ก)</span>" },
+        { id: 'telfast', category: 'defense', name: "Telfast", cost: 15, cures: 'allergy', maxStack: 3, short_desc: "รักษาภูมิแพ้ | +DEF", desc: "เพิ่มพลังป้องกัน 5, 10, 15" },
+        { id: 'carbon', category: 'defense', name: "Carbon", cost: 15, cures: 'stomach', maxStack: 3, short_desc: "รักษาปวดท้อง | +ความเร็วเดิน", desc: "เพิ่มความเร็วการเดิน 1, 2, 3 หน่วย" },
+        { id: 'counterpain', category: 'defense', name: "Counterpain Cool", cost: 20, cures: 'muscle_ache', maxStack: 3, short_desc: "รักษาปวดกล้ามเนื้อ | ออร่าสโลว์ & ทำดาเมจ", desc: "กางออร่าลดความเร็วศัตรู -1, -1.5, -2 หน่วย<br>และทำดาเมจ 1.5, 2.5, 3.5 ทุก 0.5 วินาที<br>(กดใช้งานมีผล 1 เฟส สแต็กยังคงอยู่)" },
+        { id: 'silver_cream', category: 'defense', name: "Silver cream", cost: 30, cures: 'scald', maxStack: 3, short_desc: "รักษาน้ำร้อนลวก | ฮีลอัตโนมัติ", desc: "ฟื้นฟู HP 5%, 7%, 10% ของ Max HP<br>ทุกๆ 4 วินาทีอัตโนมัติ" },
+        { id: 'betadine', category: 'defense', name: "Betadine", cost: 30, cures: 'fresh_wound', maxStack: 3, short_desc: "รักษาแผลสด | +Max HP", desc: "เพิ่มขีดจำกัด HP สูงสุด +10, +16, +21 หน่วย" },
+        { id: 'oral_paste', category: 'defense', name: "Oral paste", cost: 30, cures: 'mouth_ulcer', maxStack: 3, short_desc: "รักษาแผลในปาก | กระสุนระเบิดหมู่, +Max HP", desc: "กระสุนระเบิดทำดาเมจหมู่วงกว้าง 6, 14, 25 พิกเซล<br>เพิ่ม Max HP +5, +8, +15 หน่วย" },
 
-        { id: 'cardamine', category: 'economy', tier: 'A', name: "Cardamine", cost: 30, cures: 'rash', maxStack: 3, desc: "แก้ผื่นแพ้ | รับโบนัสเหรียญจบด่าน +20, 30, 45" },
-        { id: 'golden_cup', category: 'economy', tier: 'A', name: "Golden Cup Blam", cost: 30, cures: 'swelling', maxStack: 3, desc: "แก้ผื่นบวม | ขยายระยะการดูดเหรียญ & แม่เหล็กตกเพิ่ม 5, 5, 10%" },
-        { id: 'systral', category: 'economy', tier: 'A', name: "Systral cream", cost: 30, cures: 'rash', maxStack: 3, desc: "แก้ผื่นแพ้ | โอกาสตกเหรียญพิเศษ (1-4 เหรียญ) +5%, 10%, 20%" },
+        { id: 'cardamine', category: 'economy', name: "Cardamine", cost: 30, cures: 'rash', maxStack: 3, short_desc: "รักษาผื่นแพ้ | โบนัสเหรียญจบด่าน", desc: "รับโบนัสเหรียญฟรีก่อนเข้าร้านค้า +20, +30, +45 เหรียญ" },
+        { id: 'golden_cup', category: 'economy', name: "Golden Cup Blam", cost: 30, cures: 'swelling', maxStack: 3, short_desc: "รักษาผื่นบวม | ดูดเหรียญ, +แม่เหล็ก", desc: "ขยายรัศมีการดูดเหรียญให้กว้างขึ้น<br>และเพิ่มโอกาสดรอปแม่เหล็ก +5%, +5%, +10%" },
+        { id: 'systral', category: 'economy', name: "Systral cream", cost: 30, cures: 'rash', maxStack: 3, short_desc: "รักษาผื่นแพ้ | โอกาสดรอปเหรียญเบิ้ล", desc: "เพิ่มโอกาส 5%, 10%, 20% ที่มอนสเตอร์<br>จะดรอปทีเดียว 2-3 เหรียญ" },
 
-        { id: 'saline', category: 'heal', tier: 'B', name: "Saline", cost: 15, cures: 'hp', maxStack: 99, desc: "Heal 3 | คู่กับ Plaster รับ +5 MaxHP" },
-        { id: 'plaster', category: 'heal', tier: 'B', name: "Plaster", cost: 15, cures: 'hp', maxStack: 99, desc: "Heal 3 | คู่กับ Saline รับ +5 MaxHP" },
-        { id: 'alcohol', category: 'heal', tier: 'B', name: "Alcohol", cost: 15, cures: 'hp', maxStack: 99, desc: "Heal 3 | คู่กับ Gauze รับ +5 MaxHP" },
-        { id: 'gauze', category: 'heal', tier: 'B', name: "Gauze", cost: 15, cures: 'hp', maxStack: 99, desc: "Heal 3 | คู่กับ Alcohol รับ +5 MaxHP" },
-        { id: 'dressing_set', category: 'heal', tier: 'B', name: "Dressing set", cost: 30, cures: 'hp', maxStack: 99, desc: "Heal 7 | คู่กับ Betadine รับ +5 MaxHP" }
+        { id: 'saline', category: 'heal', name: "Saline", cost: 15, cures: 'hp', maxStack: 99, short_desc: "ฟื้นฟู | ฮีล 3 หน่วย", desc: "ฟื้นฟู HP ทันที 3 หน่วย<br><span style='color:#FFD700'>(คอมโบ: คู่กับ Plaster รับ +5 Max HP ถาวร)</span>" },
+        { id: 'plaster', category: 'heal', name: "Plaster", cost: 15, cures: 'hp', maxStack: 99, short_desc: "ฟื้นฟู | ฮีล 3 หน่วย", desc: "ฟื้นฟู HP ทันที 3 หน่วย<br><span style='color:#FFD700'>(คอมโบ: คู่กับ Saline รับ +5 Max HP ถาวร)</span>" },
+        { id: 'alcohol', category: 'heal', name: "Alcohol", cost: 15, cures: 'hp', maxStack: 99, short_desc: "ฟื้นฟู | ฮีล 3 หน่วย", desc: "ฟื้นฟู HP ทันที 3 หน่วย<br><span style='color:#FFD700'>(คอมโบ: คู่กับ Gauze รับ +5 Max HP ถาวร)</span>" },
+        { id: 'gauze', category: 'heal', name: "Gauze", cost: 15, cures: 'hp', maxStack: 99, short_desc: "ฟื้นฟู | ฮีล 3 หน่วย", desc: "ฟื้นฟู HP ทันที 3 หน่วย<br><span style='color:#FFD700'>(คอมโบ: คู่กับ Alcohol รับ +5 Max HP ถาวร)</span>" },
+        { id: 'dressing_set', category: 'heal', name: "Dressing set", cost: 30, cures: 'hp', maxStack: 99, short_desc: "ฟื้นฟู | ฮีล 7 หน่วย", desc: "ฟื้นฟู HP ทันที 7 หน่วย<br><span style='color:#FFD700'>(คอมโบ: คู่กับ Betadine รับ +5 Max HP ถาวร)</span>" }
     ];
+
+    const TAG_MAP = {
+        attack: { text: "🔴 สายโจมตี", class: "attack" },
+        defense: { text: "🔵 สายป้องกัน", class: "defense" },
+        economy: { text: "🟡 สายหาเงิน", class: "economy" },
+        heal: { text: "💚 ฟื้นฟู", class: "heal" }
+    };
 
     const hpMap12 = [1, 1, 2, 2, 3, 4, 5, 8, 9, 10]; 
     const hpMap3  = [0, 0, 0, 1, 2, 2, 3, 4, 6, 8];
@@ -417,15 +452,44 @@
         }, duration);
     }
 
-    function toggleBuffUI() { showBuffsUI = !showBuffsUI; }
+    // ฟังก์ชัน Pips จุดไข่ปลา
+    function getPipsHtml(current, max) {
+        if (max === 99) return `<div style="font-size:12px; color:#aaa; margin-top:4px;">ครอบครอง: ${current} ชิ้น</div>`;
+        let html = '<div class="pips-container">';
+        let isMax = current >= max;
+        for(let i=0; i<max; i++) {
+            let pClass = i < current ? (isMax ? 'pip max' : 'pip active') : 'pip';
+            html += `<div class="${pClass}"></div>`;
+        }
+        html += '</div>';
+        return html;
+    }
 
-    document.getElementById('loginScreen').addEventListener('keydown', e => { 
-        if (e.key === 'Enter') handleLogin(); 
-    });
+    // ฟังก์ชันรายการโปรด (Favorite)
+    function toggleFav(id) {
+        if(favoriteItems.includes(id)) {
+            favoriteItems = favoriteItems.filter(i => i !== id);
+        } else {
+            favoriteItems.push(id);
+        }
+        if(currentUser) localStorage.setItem('fas_favs_' + currentUser.username, JSON.stringify(favoriteItems));
+        let searchInput = document.getElementById('shopSearchInput');
+        renderFullShop(searchInput ? searchInput.value : '');
+    }
 
+    // ระบบกด TAB HUD เมนู
     window.addEventListener('keydown', e => {
-        if (gameState !== 'PLAYING' && gameState !== 'SHOP') return; 
         let k = e.key.toLowerCase();
+        
+        if (k === 'tab' && gameState === 'PLAYING') {
+            e.preventDefault();
+            if (!showTabMenu) {
+                showTabMenu = true;
+                renderTabMenu();
+            }
+        }
+        
+        if (gameState !== 'PLAYING' && gameState !== 'SHOP') return; 
         keys[k] = true;
         
         if (currentUser && currentUser.is_admin) {
@@ -433,11 +497,7 @@
             if (k === 'c') { coins += 1000; if(gameState === 'SHOP') updateShopUI(); }
             if (k === 'v') { currentUser.diamonds += 100; if(gameState === 'SHOP') updateShopUI(); }
             
-            const debuffKeys = {
-                '1': 'headache', '2': 'allergy', '3': 'stomach', '4': 'rash', '5': 'swelling',
-                '6': 'mouth_ulcer', '7': 'red_eye', '8': 'sore_throat', '9': 'fresh_wound', '0': 'scald',
-                '-': 'muscle_ache'
-            };
+            const debuffKeys = { '1':'headache', '2':'allergy', '3':'stomach', '4':'rash', '5':'swelling', '6':'mouth_ulcer', '7':'red_eye', '8':'sore_throat', '9':'fresh_wound', '0':'scald', '-':'muscle_ache' };
             if (debuffKeys[k]) {
                 let d = debuffKeys[k];
                 if (player.statuses[d] < 3) {
@@ -445,12 +505,18 @@
                     showToast(`👑 [Admin] เสกอาการป่วย: ${STATUS_NAMES[d]}`, "#ff5555");
                     player.applyPhaseModifiers();
                     if (gameState === 'SHOP') updateShopUI(); 
+                    if (showTabMenu) renderTabMenu();
                 }
             }
         }
     });
     
     window.addEventListener('keyup', e => {
+        if (e.key.toLowerCase() === 'tab' && gameState === 'PLAYING') {
+            e.preventDefault();
+            showTabMenu = false;
+            document.getElementById('hudTabMenu').classList.remove('active');
+        }
         if (!e.key) return;
         keys[e.key.toLowerCase()] = false;
     });
@@ -529,6 +595,10 @@
                 document.getElementById('fullname').style.display = 'none'; document.getElementById('fullname').value = '';
             }
             
+            // โหลดรายการโปรด
+            let storedFavs = localStorage.getItem('fas_favs_' + currentUser.username);
+            if (storedFavs) favoriteItems = JSON.parse(storedFavs);
+
             updateEnergyTimer(); msgEl.innerText = ""; updateTopBar(); await loadLeaderboard(); 
             switchScreen('menuScreen'); gameState = 'MENU';
         } catch (err) { console.error(err); msgEl.innerText = "ล้มเหลว: " + (err.message || err.details || "กรุณาเช็ค Console (F12)"); }
@@ -728,7 +798,6 @@
             
             this.def = this.baseDef - defPenalty + cpmDef + telDef;
 
-            // 💤 เอา cpmDebuffToApply มาคำนวณสปีดด้วย เพื่อให้เห็นผลทันทีในร้านค้าหลังกดซื้อ
             let carbBonus = Math.min(this.inv.carbon, 3);
             this.spd = Math.max(1, this.baseSpd - this.activeStatuses.stomach - this.activeStatuses.muscle_ache + carbBonus - this.activeCpmDebuff - this.cpmDebuffToApply);
 
@@ -984,10 +1053,6 @@
             this.cpDamageTimer = 0.5;
             this.deadProcessed = false;
             
-            const hpMap12 = [1, 1, 2, 2, 3, 4, 5, 8, 9, 10]; 
-            const hpMap3  = [0, 0, 0, 1, 2, 2, 3, 4, 6, 8];
-            const hpMap4  = [0, 0, 0, 5, 6, 7, 9, 9, 10, 13];
-            
             let loop = phase >= 10 ? phase - 10 : 0;
             
             if (type === 1 || type === 2) { 
@@ -1215,7 +1280,6 @@
                         }
                     }
 
-                    // 🏓 ลอจิกกระสุนชิ่งแบบใหม่ (ดึงบัฟ Pierce & Explode ไปด้วย แต่กันการชิ่งทอดที่ 2)
                     let willBounce = (this.bounces > 0 && Math.random() < this.bounceChance);
 
                     if (willBounce) {
@@ -1225,14 +1289,12 @@
                         let targets = potentialTargets.slice(0, this.bounceCount);
                         targets.forEach(target => {
                             let newAngle = Math.atan2(target.y - this.y, target.x - this.x);
-                            // สร้างกระสุนใหม่ วิ่งไปหาเป้าหมาย
-                            // ส่ง bounceChance = 0 เพื่อปิดการชิ่งต่อทอดที่ 2
                             let newBullet = new Bullet(this.x, this.y, newAngle, this.atk, this.size, this.pierce, this.isCrit, 0, this.stunChance, this.explodeRadius, 0);
                             newBullet.bounces = 0; 
-                            newBullet.hitList = [...this.hitList]; // ส่งต่อประวัติการชน จะได้ไม่กลับมาตีตัวเดิม
+                            newBullet.hitList = [...this.hitList]; 
                             newSpawnsList.push(newBullet);
                         });
-                        this.bounces = 0; // ล้างโควต้าชิ่งของกระสุนแม่
+                        this.bounces = 0; 
                     }
 
                     if (!this.pierce) {
@@ -1317,9 +1379,6 @@
         
         let tb = document.getElementById('topBar');
         if (tb) tb.style.display = (currentUser && screenId !== 'loginScreen') ? 'flex' : 'none';
-        
-        let btnTb = document.getElementById('btnToggleBuff');
-        if (btnTb) btnTb.style.display = (gameState === 'PLAYING' && screenId === null) ? 'block' : 'none';
         
         let btnAs = document.getElementById('btnAdminSkip');
         if (btnAs) btnAs.style.display = (currentUser && currentUser.is_admin && gameState === 'SHOP') ? 'block' : 'none';
@@ -1519,7 +1578,6 @@
         }
     }
 
-    // 📣 ฟังก์ชันโชว์ข้อมูลด่านหน้าแบบละเอียด (แก้เรื่องบอสเกิด)
     window.showNextPhaseInfo = function() {
         let nextPh = currentPhase + 1;
         document.getElementById('info-phase-num').innerText = nextPh;
@@ -1689,8 +1747,7 @@
             } else {
                 let isMax = item.maxStack !== 99 && player.inv[item.id] >= item.maxStack;
                 let maxBadge = isMax ? `<span class="max-badge">MAX</span>` : "";
-                let maxStr = item.maxStack === 99 ? "" : `[${player.inv[item.id]}/${item.maxStack}]`;
-
+                
                 let curesArr = item.cures.split(',');
                 let isCureNeeded = false;
                 if(item.cures !== 'hp') {
@@ -1701,68 +1758,81 @@
                 container.innerHTML += `
                     <div class="shop-card ${highlightClass}" onclick="buyItem('${item.id}', ${item.discPrice}, true, ${index})">
                         <h3 style="margin:5px 0; color: #4CAF50; font-size: 20px;">${item.name} ${maxBadge}</h3>
-                        <p style="font-size:13px; margin:10px 0; color: #ddd; height: 35px;">${item.desc}</p>
+                        <p style="font-size:13px; margin:10px 0; color: #ddd; height: 35px;">${item.short_desc}</p>
                         <p style="color:yellow; font-weight:bold; margin:5px 0; text-decoration: line-through; color:gray;">$${item.baseCst}</p>
                         <p style="color:yellow; font-weight:bold; margin:5px 0; font-size:24px;">$${item.discPrice}</p>
-                        <p style="font-size:11px; color:#aaa; margin-top:10px;">${maxStr ? `มีอยู่: ${maxStr}` : ""}</p>
+                        ${getPipsHtml(player.inv[item.id], item.maxStack)}
                     </div>`;
             }
         });
     }
 
     function renderFullShop(filterText = '') {
-        const cNormal = document.getElementById('fullShopNormal'); if(cNormal) cNormal.innerHTML = '';
-        const cCombo = document.getElementById('fullShopCombo'); if(cCombo) cCombo.innerHTML = '';
+        const container = document.getElementById('fullShopList'); 
+        if(!container) return;
+        container.innerHTML = ''; 
         
         let sortedItems = ITEMS_DB.slice().sort((a, b) => {
             if (a.cures < b.cures) return -1;
             if (a.cures > b.cures) return 1;
-            return 0;
+            return a.name.localeCompare(b.name);
         });
 
-        sortedItems.forEach(item => {
-            let curesArr = item.cures.split(',');
-            let cureNames = curesArr.map(c => STATUS_NAMES[c] || '').join(' ');
-            let searchText = `${item.name} ${item.desc} ${cureNames}`.toLowerCase();
-            
-            if (filterText && !searchText.includes(filterText.toLowerCase())) return; 
+        let favs = sortedItems.filter(i => favoriteItems.includes(i.id));
+        let others = sortedItems.filter(i => !favoriteItems.includes(i.id));
 
-            let maxStr = item.maxStack === 99 ? "∞" : item.maxStack;
-            let isMax = item.maxStack !== 99 && player.inv[item.id] >= item.maxStack;
-            let maxBadge = isMax ? `<span class="max-badge">MAX</span>` : "";
+        let buildSection = (title, list) => {
+            if(list.length === 0) return '';
+            let html = `<h3 style="color:#eee; border-bottom:1px solid #555; padding-bottom:5px; margin-top:20px;">${title}</h3>`;
+            list.forEach(item => {
+                let curesArr = item.cures.split(',');
+                let cureNames = curesArr.map(c => STATUS_NAMES[c] || '').join(' ');
+                let searchStr = `${item.name} ${item.short_desc} ${item.desc} ${cureNames}`.toLowerCase();
+                
+                if (filterText && !searchStr.includes(filterText.toLowerCase())) return; 
 
-            let btnText = isMax ? 'ซื้อรักษาโรค' : 'ซื้อ';
-            let btnColor = isMax ? '#555' : '#2196F3';
-            let btnBorder = isMax ? '1px solid #ff5555' : 'none';
+                let isMax = item.maxStack !== 99 && player.inv[item.id] >= item.maxStack;
+                let btnText = isMax ? 'ซื้อรักษาโรค' : 'ซื้อ';
+                let btnColor = isMax ? '#555' : '#2196F3';
+                let isFav = favoriteItems.includes(item.id);
+                let tag = TAG_MAP[item.category];
+                
+                let isCureNeeded = false;
+                if(item.cures !== 'hp') {
+                    isCureNeeded = curesArr.some(cure => player.statuses[cure] > 0);
+                }
+                let rowBorder = isCureNeeded ? 'border-left-color: #ff5555; box-shadow: inset 2px 0 15px rgba(255,85,85,0.2);' : '';
+                let dCost = getDynamicCost(item.id, currentPhase);
 
-            let displayMaxStr = item.maxStack === 99 ? "" : `[${player.inv[item.id]}/${maxStr}]`;
-            
-            let isCureNeeded = false;
-            if(item.cures !== 'hp') {
-                isCureNeeded = curesArr.some(cure => player.statuses[cure] > 0);
-            }
-            let highlightClass = isCureNeeded ? "highlight-cure" : "";
-            let dCost = getDynamicCost(item.id, currentPhase);
+                html += `
+                    <div class="catalog-row" style="${rowBorder}">
+                        <div class="cat-left">
+                            <div class="cat-fav-btn ${isFav ? 'is-fav' : ''}" onclick="toggleFav('${item.id}')">${isFav ? '❤️' : '🤍'}</div>
+                            <div class="cat-info">
+                                <div class="cat-tag ${tag.class}">${tag.text}</div>
+                                <div style="font-size:16px; font-weight:bold; color:#fff;">
+                                    ${item.name} ${isMax ? `<span style="color:#ff5555; font-size:11px;">[MAX]</span>` : ''}
+                                    <span class="has-tooltip">ℹ️
+                                        <span class="tooltip-text">${item.desc}</span>
+                                    </span>
+                                </div>
+                                <div style="font-size:12px; color:#aaa; margin-top:2px;">${item.short_desc}</div>
+                                ${getPipsHtml(player.inv[item.id], item.maxStack)}
+                            </div>
+                        </div>
+                        <div class="cat-right">
+                            <span class="cat-price">$${dCost}</span>
+                            <button onclick="buyItem('${item.id}', ${dCost}, false, -1)" style="background:${btnColor}; padding:8px 20px; font-size:14px; border-radius:6px;">${btnText}</button>
+                        </div>
+                    </div>`;
+            });
+            return html;
+        };
 
-            let htmlStr = `
-                <div class="full-shop-item ${highlightClass}" style="${isMax ? 'border-color:#ff5555;' : ''}">
-                    <div style="width: 100%; text-align: left;">
-                        <strong style="color: #4CAF50; font-size:16px;">${item.name}</strong> ${maxBadge}
-                        <span style="font-size:12px; color:#aaa;">${displayMaxStr !== "" ? `มีอยู่: ${displayMaxStr}` : ""}</span><br>
-                        <span style="font-size:12px; color:#ddd; display: block; margin-top: 5px;">${item.desc}</span>
-                    </div>
-                    <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
-                        <strong style="color:yellow; font-size: 18px;">$${dCost}</strong>
-                        <button onclick="buyItem('${item.id}', ${dCost}, false, -1)" style="padding: 8px 20px; font-size: 14px; background-color: ${btnColor}; border: ${btnBorder};">${btnText}</button>
-                    </div>
-                </div>`;
-            
-            if (item.category === 'heal' && cCombo) { 
-                cCombo.innerHTML += htmlStr; 
-            } else if (cNormal) { 
-                cNormal.innerHTML += htmlStr; 
-            }
-        });
+        let finalHtml = '';
+        finalHtml += buildSection('⭐ รายการโปรด (Favorites)', favs);
+        finalHtml += buildSection('📦 แคตตาล็อกไอเทมทั้งหมด', others);
+        container.innerHTML = finalHtml;
     }
 
     function rerollShop() { 
@@ -1895,8 +1965,6 @@
 
     function gameOver() {
         gameState = 'GAMEOVER';
-        let bb = document.getElementById('btnToggleBuff');
-        if(bb) bb.style.display = 'none';
         
         let gp = document.getElementById('go-phase'); if(gp) gp.innerText = `Phase Reached: ${currentPhase}`;
         let gs = document.getElementById('go-score'); if(gs) gs.innerText = `Score: ${score}`;
@@ -1919,7 +1987,10 @@
             if (dt < 0) dt = 0; 
             lastTime = timestamp;
 
-            update(dt); 
+            // ตรวจจับการเปิด TAB Menu
+            if (!showTabMenu) {
+                update(dt); 
+            }
             draw(); 
             reqId = requestAnimationFrame(gameLoop);
         } catch (err) {
@@ -1950,7 +2021,6 @@
         enemySpawnTimer -= dt;
         if (enemySpawnTimer <= 0) {
             
-            // 👹 ระบบบอส และ มินิบอสเฟสหลังๆ
             if (!bossSpawnedThisPhase && (currentPhase === 3 || currentPhase === 5 || currentPhase === 7 || currentPhase === 9 || currentPhase >= 10)) {
                 let boss = new Enemy(5, currentPhase);
                 boss.bossName = "BOSS";
@@ -2131,48 +2201,73 @@
         drops.forEach(d => d.update(dt)); drops = drops.filter(d => d.active);
     }
 
-    function drawStatusUI(ctx) {
-        if (!showBuffsUI) return; 
+    // 📋 เรนเดอร์เมนู TAB แบบละเอียด (หยุดเวลาชั่วคราวขณะโชว์)
+    function renderTabMenu() {
+        if(gameState !== 'PLAYING') return;
+        let menu = document.getElementById('hudTabMenu');
+        menu.classList.add('active');
         
-        let boxWidth = 280; 
-        let startX = canvas.width - boxWidth;
-        let startY = 80; 
-        let lines = [];
-        
-        if (currentUser && currentUser.is_admin && adminGodMode) {
-            lines.push({ text: "🌟 GOD MODE [ON]", color: '#00ffff' });
+        let debuffHtml = '<h3 style="color:#ff5555; margin-top:0; border-bottom:1px solid #555; padding-bottom:5px;">⚠️ อาการป่วยปัจจุบัน</h3>';
+        let hasDebuff = false;
+        for(let key in player.activeStatuses) {
+            if(player.activeStatuses[key] > 0) {
+                hasDebuff = true;
+                debuffHtml += `<div style="margin-bottom:8px; font-size:15px;"><strong style="color:#ff9999;">🦠 ${STATUS_NAMES[key]} (Lv.${player.activeStatuses[key]}/3)</strong><br><span style="color:#aaa; font-size:13px;">${STATUS_DESC[key]}</span></div>`;
+            }
         }
+        if(!hasDebuff) debuffHtml += '<div style="color:#0f0;">ไม่มีอาการป่วย สุขภาพแข็งแรงดีเยี่ยม!</div>';
 
-        for (let key in player.activeStatuses) {
-            if (player.activeStatuses[key] > 0) {
-                lines.push({ text: `${STATUS_NAMES[key]} [${player.activeStatuses[key]}/3] - ${STATUS_DESC[key]}`, color: '#ff5555' });
-            }
-        }
-        for (let key in player.inv) {
-            if (player.inv[key] > 0) {
-                let item = ITEMS_DB.find(i => i.id === key);
+        let buffHtml = '<h3 style="color:#4CAF50; margin-top:0; border-bottom:1px solid #555; padding-bottom:5px; grid-column: span 2;">💊 ไอเทมและยาที่ถืออยู่</h3>';
+        let hasBuff = false;
+        for(let key in player.inv) {
+            if(player.inv[key] > 0) {
+                let item = ITEMS_DB.find(i=>i.id === key);
                 if(!item) continue;
-                let maxStr = item.maxStack === 99 ? "∞" : item.maxStack;
-                let isMaxText = (item.maxStack !== 99 && player.inv[key] >= item.maxStack) ? "[MAX]" : "";
-                lines.push({ text: `${item.name} [${player.inv[key]}/${maxStr}] ${isMaxText}`, color: '#55ff55' });
+                hasBuff = true;
+                let maxStr = item.maxStack === 99 ? '∞' : item.maxStack;
+                buffHtml += `<div style="background:rgba(0,0,0,0.4); padding:10px; border-radius:6px; border-left:3px solid #4CAF50;"><strong style="color:#a5d6a7;">${item.name} (${player.inv[key]}/${maxStr})</strong><br><span style="color:#ccc; font-size:12px;">${item.short_desc}</span></div>`;
             }
         }
+        if(!hasBuff) buffHtml += '<div style="color:#aaa;">กระเป๋าว่างเปล่า ยังไม่มีไอเทมใดๆ</div>';
+
+        document.getElementById('hudTabDebuff').innerHTML = debuffHtml;
+        document.getElementById('hudTabBuff').innerHTML = buffHtml;
         
-        if (lines.length > 0) {
-            ctx.fillStyle = 'rgba(0,0,0,0.6)';
-            ctx.fillRect(startX - 10, startY - 20, boxWidth, 30 + (lines.length * 18));
+        let dodgePerc = Math.min(70, Math.floor(player.def * 0.7));
+        document.getElementById('hudTabStats').innerHTML = `
+            <h3 style="color:#00bcd4; margin-top:0; border-bottom:1px solid #555; padding-bottom:5px;">📊 สเตตัสปัจจุบัน</h3>
+            <p style="font-size:16px;">❤️ <strong>HP:</strong> <span style="color:#0f0;">${Math.ceil(player.hp)} / ${player.maxHp}</span></p>
+            <p style="font-size:16px;">⚔️ <strong>ATK:</strong> ${player.atk} &nbsp;|&nbsp; 🎯 <strong>คริติคอล:</strong> ${Math.floor(player.critChance*100)}% (x${player.critDamage.toFixed(2)})</p>
+            <p style="font-size:16px;">🛡️ <strong>DEF:</strong> ${player.def} <span style="color:#aaa; font-size:14px;">(หลบหลีก ${dodgePerc}%)</span></p>
+            <p style="font-size:16px;">👟 <strong>SPD:</strong> ${player.spd} &nbsp;|&nbsp; 🔫 <strong>ความเร็วยิง:</strong> ${(1/player.fireRate).toFixed(1)} นัด/วิ</p>
+            <p style="font-size:16px;">🔥 <strong>จำนวนกระสุน:</strong> ${player.bulletCount} นัด / การยิง 1 ครั้ง</p>
+        `;
+    }
+
+    // 🎯 โชว์ HUD แบบย่อ (Mini HUD มุมขวา) ระหว่างเล่นปกติ
+    function drawCompactHUD(ctx) {
+        let startY = 80;
+        let startX = canvas.width - 240;
+        
+        let debuffs = Object.keys(player.activeStatuses).filter(k => player.activeStatuses[k] > 0);
+        if(debuffs.length > 0) {
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+            ctx.fillRect(startX, startY, 220, 30 + (debuffs.length * 20));
+            ctx.fillStyle = '#FFD700'; ctx.font = 'bold 13px Arial';
+            ctx.fillText("⚠️ อาการป่วย (กด TAB ดูรายละเอียด)", startX + 10, startY + 20);
             
-            ctx.fillStyle = '#ffcc00';
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText("สถานะ & บัฟ", startX, startY);
-            startY += 20;
-            
-            ctx.font = '12px Arial';
-            for (let line of lines) {
-                ctx.fillStyle = line.color;
-                ctx.fillText(line.text, startX, startY);
-                startY += 18;
-            }
+            startY += 40;
+            ctx.font = '13px Arial';
+            debuffs.forEach(k => {
+                ctx.fillStyle = '#fff';
+                ctx.fillText(`🦠 ${STATUS_NAMES[k]} Lv.${player.activeStatuses[k]}`, startX + 10, startY);
+                startY += 20;
+            });
+        } else {
+            ctx.fillStyle = 'rgba(0, 200, 0, 0.5)';
+            ctx.fillRect(startX, startY, 220, 35);
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 13px Arial';
+            ctx.fillText("✅ สุขภาพปกติ (กด TAB ดูบัฟ)", startX + 10, startY + 22);
         }
     }
 
@@ -2202,7 +2297,7 @@
             ctx.arc(ex.x, ex.y, ex.radius, 0, Math.PI*2);
             ctx.fillStyle = `rgba(255, 100, 0, ${ex.life / ex.maxLife * 0.6})`;
             ctx.fill();
-            ex.life -= 0.016; 
+            if(!showTabMenu) ex.life -= 0.016; 
         });
         explosions = explosions.filter(ex => ex.life > 0);
 
@@ -2230,7 +2325,9 @@
         ctx.fillStyle = 'yellow'; ctx.fillText(`Coins: ${coins}`, 10, 160);
         ctx.fillStyle = 'cyan'; ctx.fillText(`Diamonds: ${currentUser.diamonds}`, 10, 190);
 
-        drawStatusUI(ctx);
+        if(!showTabMenu) {
+            drawCompactHUD(ctx);
+        }
 
         let bosses = enemies.filter(e => e.isBoss);
         bosses.forEach((boss, index) => {
