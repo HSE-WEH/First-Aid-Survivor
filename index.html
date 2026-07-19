@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V3.4</title>
+    <title>First Aid Survivor V3.5a</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -256,6 +256,45 @@
         ::-webkit-scrollbar-thumb { background: var(--pw-mintDark) !important; }
 
         #gameLogoCanvas{ width:100px !important; height:100px !important; image-rendering:pixelated; image-rendering:crisp-edges; margin-bottom:4px; }
+
+        /* ---- Fix #2: Pharmacy phase action buttons must keep their own semantic colors ---- */
+        .btn-reroll { background: var(--pw-gold) !important; color: #2b2118 !important; }
+        .btn-catalog { background: linear-gradient(90deg, #7b1fa2, #2196F3) !important; color: #fff !important; }
+        .btn-surrender { background: #000 !important; color: #fff !important; border: 3px solid #2196F3 !important; }
+        .btn-info { background: #2196F3 !important; color: #fff !important; }
+        .btn-next { background: #1b5e20 !important; color: #fff !important; }
+        /* keep the 3 bottom buttons perfectly symmetric (no leftover default button margin) */
+        .btn-action-group .btn-surrender,
+        .btn-action-group .btn-info,
+        .btn-action-group .btn-next { margin: 0 !important; }
+
+        /* ---- Fix #1: full-shop search bar + category filters stay on one row ---- */
+        #fullShopModal .shop-search-row { display: flex !important; gap: 10px; align-items: center; width: 100%; flex-wrap: nowrap; }
+        #shopSearchInput { flex: 1 1 220px !important; min-width: 140px; }
+        #shopCatFilters { flex: 0 1 auto; flex-wrap: nowrap !important; overflow-x: auto; padding-bottom: 2px; }
+        #shopCatFilters button { white-space: nowrap; flex-shrink: 0; }
+
+        /* ---- Fix #5: theme the character customization popup to match the rest of the game ---- */
+        .custom-modal { background: rgba(8,6,4,0.92) !important; }
+        .custom-panel {
+            background: var(--pw-panel) !important;
+            border: 3px solid var(--pw-gold) !important;
+            box-shadow: inset 0 0 0 2px #4a3826, 0 10px 40px rgba(0,0,0,0.7) !important;
+        }
+        .custom-row-title { color: var(--pw-sub) !important; }
+        #customPreviewCanvas { background: var(--pw-panelDark) !important; border: 2px solid #000 !important; }
+        .custom-opt-btn { background: var(--pw-panelDark) !important; border: 2px solid #000 !important; color: var(--pw-parch) !important; }
+        .custom-opt-btn.selected { background: var(--pw-mintDark) !important; border-color: var(--pw-gold) !important; color: #0c1310 !important; box-shadow: 0 0 8px var(--pw-gold); }
+
+        /* ---- Fix #3: themed confirm popup for "surrender" ---- */
+        .confirm-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .confirm-modal.active { display: flex; }
+        .confirm-panel { background: var(--pw-panel) !important; border: 3px solid var(--pw-gold) !important; box-shadow: inset 0 0 0 2px #4a3826, 0 10px 40px rgba(0,0,0,0.7) !important; border-radius: 12px; padding: 30px; width: 420px; max-width: 90vw; text-align: center; }
+        .confirm-panel h2 { margin: 0 0 15px 0; color: var(--pw-coral) !important; }
+        .confirm-panel p { color: var(--pw-parch) !important; line-height: 1.6; margin: 0; }
+        .confirm-btn-row { display: flex; gap: 15px; margin-top: 22px; }
+        .btn-confirm-yes { flex: 1; background: var(--pw-coral) !important; color: #2b0f0a !important; }
+        .btn-confirm-no { flex: 1; background: var(--pw-mintDark) !important; color: #0c1310 !important; }
     </style>
 </head>
 <body>
@@ -325,6 +364,18 @@
                 <div id="custRowOutfit"></div>
             </div>
             <button onclick="closeCustomizeModal()" style="width:100%; padding:14px; font-size:16px; background-color:#4CAF50; margin-top:5px;">✅ บันทึกและปิด</button>
+        </div>
+    </div>
+
+    <!-- Surrender confirmation popup -->
+    <div id="confirmSurrenderModal" class="confirm-modal">
+        <div class="confirm-panel">
+            <h2>🏳️ ยืนยันการยอมแพ้</h2>
+            <p>คุณแน่ใจหรือไม่ว่าต้องการยอมแพ้?<br>(จบเกมและบันทึกคะแนนรอบนี้ทันที)</p>
+            <div class="confirm-btn-row">
+                <button onclick="confirmSurrender()" class="btn-confirm-yes">✅ ยืนยัน</button>
+                <button onclick="closeSurrenderConfirm()" class="btn-confirm-no">❌ ยกเลิก</button>
+            </div>
         </div>
     </div>
 
@@ -458,9 +509,9 @@
                                 <button onclick="toggleFullShop(false)" style="background-color: #f44336; padding: 8px 20px; font-size: 14px;">ปิด (X)</button>
                             </div>
                         </div>
-                        <div style="display:flex; gap:10px; align-items:center; width:100%;">
-                            <input type="text" id="shopSearchInput" oninput="renderFullShop(this.value)" placeholder="🔍 ค้นหาชื่อยา..." style="flex: 0 0 45%; padding: 10px; border-radius: 8px; border: 1px solid #4CAF50; background: #222; color: #fff; outline: none; font-size: 15px;">
-                            <div id="shopCatFilters" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+                        <div class="shop-search-row">
+                            <input type="text" id="shopSearchInput" oninput="renderFullShop(this.value)" placeholder="🔍 ค้นหาชื่อยา..." style="padding: 10px; border-radius: 8px; border: 1px solid #4CAF50; background: #222; color: #fff; outline: none; font-size: 15px;">
+                            <div id="shopCatFilters" style="display:flex; gap:6px;"></div>
                         </div>
                     </div>
                     
@@ -704,7 +755,7 @@
                         if (isFemale || isLongHair) { c.fillRect(3, 4, 2, 10); c.fillRect(15, 4, 2, 10); }
                         if (isFemale) { c.fillStyle = bow; c.fillRect(12, 1, 3, 2); }
                     }
-                    drawFace(10, 6);
+                    drawFace(10, 6, 6);
                 } else {
                     if (!isBald) {
                         c.fillStyle = hairColor; c.beginPath(); c.arc(10, 5, 6.4, 0, Math.PI * 2); c.fill();
@@ -1800,11 +1851,20 @@
     function logout() { location.reload(); }
 
     function surrenderGame() {
-        if(confirm("คุณแน่ใจหรือไม่ว่าต้องการยอมแพ้? (จบเกมและบันทึกคะแนนรอบนี้ทันที)")) {
-            player.hp = 0;
-            player.isDead = true;
-            gameOver();
-        }
+        let m = document.getElementById('confirmSurrenderModal');
+        if (m) m.classList.add('active');
+    }
+
+    function closeSurrenderConfirm() {
+        let m = document.getElementById('confirmSurrenderModal');
+        if (m) m.classList.remove('active');
+    }
+
+    function confirmSurrender() {
+        closeSurrenderConfirm();
+        player.hp = 0;
+        player.isDead = true;
+        gameOver();
     }
 
     function startGame() {
@@ -2114,7 +2174,7 @@
         ];
         holder.innerHTML = filters.map(f => {
             let active = activeCatFilter === f.id;
-            return `<button onclick="setCatFilter(${f.id ? `'${f.id}'` : 'null'})" style="padding:8px 12px; font-size:12px; border-radius:6px; background:${active ? '#4CAF50' : '#333'}; color:#fff; border:1px solid ${active ? '#8BC34A' : '#555'};">${f.text}</button>`;
+            return `<button onclick="setCatFilter(${f.id ? `'${f.id}'` : 'null'})" style="padding:6px 10px; font-size:11px; border-radius:6px; background:${active ? '#4CAF50' : '#333'}; color:#fff; border:1px solid ${active ? '#8BC34A' : '#555'};">${f.text}</button>`;
         }).join('');
     }
 
