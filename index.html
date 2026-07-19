@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V3.1.2</title>
+    <title>First Aid Survivor V3.2</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -98,7 +98,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V3.1.2)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V3.2)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -228,19 +228,21 @@
                     <button id="btnAdminSkip" onclick="adminSkipPhase()" class="btn-reroll" style="display:none; background-color: #ff5722; margin-top: 5px;">👑 [Admin] วาร์ปข้าม Phase</button>
                 </div>
                 
-                <!-- Modal แคตตาล็อกยาทั้งหมด -->
+                <!-- Modal แคตตาล็อกยาทั้งหมด (แบบรวมหมวด และมีช่องค้นหา) -->
                 <div id="fullShopModal">
-                    <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;">
-                        <h2 style="margin: 0; color: #4CAF50; font-size: 24px;">🛒 แคตตาล็อกยาทั้งหมด</h2>
-                        <div style="display: flex; align-items: center; gap: 20px;">
-                            <h3 style="margin:0; color: yellow;">เงิน: 💰 <span id="full-shop-coins">0</span></h3>
-                            <button onclick="toggleFullShop(false)" style="background-color: #f44336; padding: 8px 20px; font-size: 14px;">ปิด (X)</button>
+                    <div style="width: 100%; display: flex; flex-direction: column; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; margin-bottom: 15px; gap: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h2 style="margin: 0; color: #4CAF50; font-size: 24px;">🛒 แคตตาล็อกยาทั้งหมด</h2>
+                            <div style="display: flex; align-items: center; gap: 20px;">
+                                <h3 style="margin:0; color: yellow;">เงิน: 💰 <span id="full-shop-coins">0</span></h3>
+                                <button onclick="toggleFullShop(false)" style="background-color: #f44336; padding: 8px 20px; font-size: 14px;">ปิด (X)</button>
+                            </div>
                         </div>
+                        <input type="text" id="shopSearchInput" oninput="renderFullShop(this.value)" placeholder="🔍 ค้นหาชื่อยา, อาการป่วย หรือสรรพคุณ..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #4CAF50; background: #222; color: #fff; outline: none; font-size: 16px;">
                     </div>
                     
                     <div class="full-shop-list">
-                        <!-- ไม่แยกประเภทให้ผู้เล่นเห็น แบ่งเป็นแค่ ยาทั่วไป กับ อุปกรณ์ทำแผล -->
-                        <h3 style="color: #2196F3; border-bottom: 2px solid #555; padding-bottom: 5px; margin-top: 5px;">💊 หมวดหมู่ยาและบัฟทั่วไป</h3>
+                        <h3 style="color: #2196F3; border-bottom: 2px solid #555; padding-bottom: 5px; margin-top: 5px;">💊 หมวดหมู่ยาทั่วไป</h3>
                         <div class="full-shop-grid" id="fullShopNormal"></div>
                         
                         <h3 style="color: #ff5555; border-bottom: 2px solid #555; padding-bottom: 5px; margin-top: 10px;">🩹 หมวดหมู่อุปกรณ์ทำแผล (รักษา HP & บัฟถาวร)</h3>
@@ -352,15 +354,14 @@
     };
 
     // หมวดหมู่ภายในยังคงใช้ 'attack', 'defense', 'economy', 'heal' เพื่อการสุ่มเรท RNG ในร้านค้า
-    // แต่ในการแสดงผลให้ผู้เล่นเห็น จะถูกรวมหมวดหมู่เข้าด้วยกัน
     const ITEMS_DB = [
         { id: 'tylenol', category: 'attack', tier: 'S', name: "Tylenol", cost: 30, cures: 'headache', maxStack: 6, desc: "แก้ปวดหัว | +ATK (2, 4, 6, 8, 10, 12)" },
         { id: 'ponstan', category: 'attack', tier: 'A', name: "Ponstan", cost: 30, cures: 'headache,muscle_ache', maxStack: 3, desc: "แก้ปวดหัว, ปวดกล้ามเนื้อ | +กระสุน 1 นัด & +ATK 1 แต้ม /สแต็ก" },
         { id: 'air_x', category: 'attack', tier: 'S', name: "Air-X", cost: 20, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | ปืน 3 แฉก (มีผล 1 เฟส)" },
         { id: 'flying_rabit', category: 'attack', tier: 'S', name: "Flying Rabit", cost: 20, cures: 'stomach', maxStack: 1, desc: "แก้ปวดท้อง | กระสุนทะลุศัตรู (มีผล 1 เฟส)" },
-        { id: 'gumgig', category: 'attack', tier: 'A', name: "Gumgig pean", cost: 30, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ยิงไว 5,10,15% / ชิ่ง 10,15,25% / +ATK 1,2,3" },
+        { id: 'gumgig', category: 'attack', tier: 'A', name: "Gumgig pean", cost: 30, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ยิงไว 10, 15, 30% / ชิ่ง 20, 25, 30% (ออก 1, 2, 3 นัด) / +ATK 1, 2, 3" },
         { id: 'eye_lotion', category: 'attack', tier: 'A', name: "Eye lotion", cost: 30, cures: 'red_eye', maxStack: 3, desc: "แก้ตาแดง | โอกาสคริติคอลเพิ่ม 10%, 20%, 30%" },
-        { id: 'apache', category: 'attack', tier: 'A', name: "Apache", cost: 30, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ยิงไว 5,10,15% / สตั้น 5,10,20% / +ATK 1,2,3" },
+        { id: 'apache', category: 'attack', tier: 'A', name: "Apache", cost: 30, cures: 'sore_throat', maxStack: 3, desc: "แก้เจ็บคอ | ยิงไว 10, 15, 30% / สตั้น 5, 10, 20% / +ATK 1, 2, 3" },
         { id: 'eye_drop', category: 'attack', tier: 'A', name: "Eye Drop", cost: 30, cures: 'red_eye', maxStack: 3, desc: "แก้ตาแดง | ความแรงคริติคอลเพิ่มเป็น x1.75, x2.0, x2.5" },
 
         { id: 'cpm', category: 'defense', tier: 'A', name: "CPM", cost: 20, cures: 'allergy', maxStack: 3, desc: "แก้ภูมิแพ้ | +DEF 15, 25, 35 (ติดง่วงนอน ลด Spd 1/สแต็ก)" },
@@ -369,7 +370,7 @@
         { id: 'counterpain', category: 'defense', tier: 'S', name: "Counterpain Cool", cost: 20, cures: 'muscle_ache', maxStack: 3, desc: "แก้ปวดกล้ามเนื้อ | กางออร่าสโลว์ -1, -1.5, -2 Spd & ทำดาเมจ 1.5, 2.5, 3.5 ทุก 0.5 วิ (ทำงาน 1 เฟส)" },
         { id: 'silver_cream', category: 'defense', tier: 'S', name: "Silver cream", cost: 30, cures: 'scald', maxStack: 3, desc: "แก้น้ำร้อนลวก | ฮีล 5%, 7%, 10% ของ MaxHP ทุก 4 วิ" },
         { id: 'betadine', category: 'defense', tier: 'A', name: "Betadine", cost: 30, cures: 'fresh_wound', maxStack: 3, desc: "แก้แผลสด | เพิ่ม Max HP (+10, +16, +21)" },
-        { id: 'oral_paste', category: 'defense', tier: 'S', name: "Oral paste", cost: 30, cures: 'mouth_ulcer', maxStack: 3, desc: "แก้แผลในปาก | กระสุนระเบิดกว้าง 6, 14, 25 px & +MaxHP 5, 8, 15" },
+        { id: 'oral_paste', category: 'defense', tier: 'S', name: "Oral paste", cost: 30, cures: 'mouth_ulcer', maxStack: 3, desc: "แก้แผลในปาก | กระสุนระเบิด 6, 14, 25 px & +MaxHP 5, 8, 15" },
 
         { id: 'cardamine', category: 'economy', tier: 'A', name: "Cardamine", cost: 30, cures: 'rash', maxStack: 3, desc: "แก้ผื่นแพ้ | รับโบนัสเหรียญจบด่าน +20, 30, 45" },
         { id: 'golden_cup', category: 'economy', tier: 'A', name: "Golden Cup Blam", cost: 30, cures: 'swelling', maxStack: 3, desc: "แก้ผื่นบวม | ขยายระยะการดูดเหรียญ & แม่เหล็กตกเพิ่ม 5, 5, 10%" },
@@ -734,10 +735,10 @@
             let throatPen = [0, 0.20, 0.35, 0.50][throatPenLv] || 0;
 
             let gumLv = Math.min(this.inv.gumgig, 3);
-            let gumBuff = [0, 0.05, 0.10, 0.15][gumLv] || 0;
+            let gumBuff = [0, 0.10, 0.15, 0.30][gumLv] || 0;
 
             let apaLv = Math.min(this.inv.apache, 3);
-            let apaBuff = [0, 0.05, 0.10, 0.15][apaLv] || 0;
+            let apaBuff = [0, 0.10, 0.15, 0.30][apaLv] || 0;
             
             this.fireRate = this.baseFireRate * (1 + throatPen) * (1 - gumBuff) * (1 - apaBuff);
             this.fireRate = Math.max(0.1, this.fireRate); 
@@ -880,7 +881,8 @@
                 let isPierce = (this.inv.flying_rabit > 0);
                 
                 let gumLv = Math.min(this.inv.gumgig, 3);
-                let bounceChance = [0, 0.10, 0.15, 0.25][gumLv] || 0; 
+                let bounceChance = [0, 0.20, 0.25, 0.30][gumLv] || 0; 
+                let bounceCount = gumLv; 
                 
                 let apaLv = Math.min(this.inv.apache, 3);
                 let stunChance = [0, 0.05, 0.10, 0.20][apaLv] || 0;
@@ -894,8 +896,7 @@
                         
                         let isCrit = Math.random() < this.critChance;
                         let finalAtk = isCrit ? this.atk * this.critDamage : this.atk;
-                        // ใช้ Base Size ของกระสุน 6 พิกเซล
-                        bullets.push(new Bullet(bx, by, actualAngle, finalAtk, 6, isPierce, isCrit, bounceChance, stunChance, this.explodeRadius));
+                        bullets.push(new Bullet(bx, by, actualAngle, finalAtk, 6, isPierce, isCrit, bounceChance, stunChance, this.explodeRadius, bounceCount));
                     }
                 };
 
@@ -940,7 +941,6 @@
                     });
                 }
 
-                // ⚠️ จำกัดการติดโรคสูงสุดแค่ 1 โรค ต่อ 1 ฮิต
                 if (triggered.length > 1) {
                     triggered = triggered.sort(() => 0.5 - Math.random()).slice(0, 1);
                 }
@@ -955,7 +955,7 @@
 
                 if (appliedDebuffs.length > 0) {
                     showToast(`⚠️ ป่วย: ${appliedDebuffs.join(', ')}`, "#ff5555");
-                    this.debuffCooldownTimer = 1.0; // 🛡️ ดีเลย์ป้องกันโรค 1 วิ
+                    this.debuffCooldownTimer = 1.0; 
                 }
                 
                 if (appliedAny) {
@@ -963,7 +963,7 @@
                 }
             }
             
-            this.invulnerableTimer = 0.3; // 🛡️ ไอเฟรมกันดาเมจ 0.3 วิ
+            this.invulnerableTimer = 0.3; 
             
             if (this.hp <= 0) {
                 this.hp = 0; this.isDead = true; gameOver();
@@ -982,6 +982,10 @@
             this.stunTimer = 0;
             this.cpDamageTimer = 0.5;
             this.deadProcessed = false;
+            
+            const hpMap12 = [1, 1, 2, 2, 3, 4, 5, 8, 9, 10]; 
+            const hpMap3  = [0, 0, 0, 1, 2, 2, 3, 4, 6, 8];
+            const hpMap4  = [0, 0, 0, 5, 6, 7, 9, 9, 10, 13];
             
             let loop = phase >= 10 ? phase - 10 : 0;
             
@@ -1174,7 +1178,7 @@
     }
 
     class Bullet {
-        constructor(x, y, angle, atk, size, pierce, isCrit, bounceChance, stunChance, explodeRadius) {
+        constructor(x, y, angle, atk, size, pierce, isCrit, bounceChance, stunChance, explodeRadius, bounceCount=1) {
             this.x = x; this.y = y; this.angle = angle; this.atk = atk; 
             this.spd = 12; this.size = size; this.pierce = pierce; 
             this.active = true; this.hitList = []; this.isCrit = isCrit;
@@ -1182,12 +1186,14 @@
             this.stunChance = stunChance;
             this.explodeRadius = explodeRadius;
             this.bounces = 1;
+            this.bounceCount = bounceCount;
         }
-        update(dt) {
+        update(dt, enemiesList, explosionsList, newSpawnsList) {
             this.x += Math.cos(this.angle) * this.spd * 60 * dt; this.y += Math.sin(this.angle) * this.spd * 60 * dt;
             if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.active = false;
+            if (!this.active) return;
             
-            for (let e of enemies) {
+            for (let e of enemiesList) {
                 if (e.hp <= 0 || e.spawnDelay > 0 || this.hitList.includes(e)) continue; 
                 let dist = Math.hypot(e.x - this.x, e.y - this.y);
                 if (dist < this.size + e.size) {
@@ -1198,10 +1204,9 @@
                         e.stunTimer = 0.4;
                     }
 
-                    // 💥 เอฟเฟกต์กระสุนระเบิดทำดาเมจหมู่วงกว้าง (Oral Paste)
                     if (this.explodeRadius > 0) {
-                        explosions.push({x: this.x, y: this.y, radius: this.explodeRadius, life: 0.15, maxLife: 0.15});
-                        for (let other of enemies) {
+                        explosionsList.push({x: this.x, y: this.y, radius: this.explodeRadius, life: 0.15, maxLife: 0.15});
+                        for (let other of enemiesList) {
                             if (other === e || other.hp <= 0 || other.spawnDelay > 0) continue;
                             let dEx = Math.hypot(other.x - this.x, other.y - this.y);
                             if (dEx <= this.explodeRadius + other.size) {
@@ -1213,24 +1218,24 @@
                     let willBounce = (this.bounces > 0 && Math.random() < this.bounceChance);
 
                     if (willBounce) {
-                        let nearest = null; let minDist = Infinity;
-                        for (let other of enemies) {
-                            if (other === e || other.hp <= 0 || other.spawnDelay > 0 || this.hitList.includes(other)) continue;
-                            let d = Math.hypot(other.x - this.x, other.y - this.y);
-                            if (d < minDist) { minDist = d; nearest = other; }
-                        }
-                        if (nearest) {
-                            this.angle = Math.atan2(nearest.y - this.y, nearest.x - this.x);
-                            this.bounces--;
-                            this.active = true;
-                            break; 
-                        } else {
-                            if (!this.pierce) this.active = false;
-                        }
-                    } else {
-                        if (!this.pierce) this.active = false;
+                        let potentialTargets = enemiesList.filter(other => other !== e && other.hp > 0 && other.spawnDelay <= 0 && !this.hitList.includes(other));
+                        potentialTargets.sort((a, b) => Math.hypot(a.x - this.x, a.y - this.y) - Math.hypot(b.x - this.x, b.y - this.y));
+                        
+                        let targets = potentialTargets.slice(0, this.bounceCount);
+                        targets.forEach(target => {
+                            let newAngle = Math.atan2(target.y - this.y, target.x - this.x);
+                            let newBullet = new Bullet(this.x, this.y, newAngle, this.atk, this.size, this.pierce, this.isCrit, 0, this.stunChance, this.explodeRadius, 0);
+                            newBullet.bounces = 0; 
+                            newBullet.hitList.push(e);
+                            newSpawnsList.push(newBullet);
+                        });
+                        this.bounces = 0; 
                     }
-                    if (!this.active) break;
+
+                    if (!this.pierce) {
+                        this.active = false;
+                        break;
+                    }
                 }
             }
         }
@@ -1504,13 +1509,13 @@
         }
         let m = document.getElementById('fullShopModal');
         if (m && m.classList.contains('active-modal')) {
-            renderFullShop();
+            let searchInput = document.getElementById('shopSearchInput');
+            renderFullShop(searchInput ? searchInput.value : '');
             let fc = document.getElementById('full-shop-coins');
             if (fc) fc.innerText = coins;
         }
     }
 
-    // 📣 ฟังก์ชันโชว์ข้อมูลด่านหน้าแบบละเอียด
     window.showNextPhaseInfo = function() {
         let nextPh = currentPhase + 1;
         document.getElementById('info-phase-num').innerText = nextPh;
@@ -1594,13 +1599,34 @@
         let m = document.getElementById('fullShopModal');
         if(m) m.className = show ? 'active-modal' : '';
         if(show) {
-            renderFullShop();
+            let searchInput = document.getElementById('shopSearchInput');
+            if (searchInput) searchInput.value = ''; // รีเซ็ตการค้นหาเมื่อเปิดใหม่
+            renderFullShop('');
             let fc = document.getElementById('full-shop-coins');
             if(fc) fc.innerText = coins;
         }
     }
 
-    // ฟังก์ชันสุ่มการ์ด 3 ใบใหม่ล่าสุด แบบแบ่งหมวด Attack / Defense / Random
+    function getRandomShopItem() {
+        let isHealingBoosted = (player.hp < player.maxHp * 0.6) && (shopBoardGenerations <= 3);
+        let hpWeight = isHealingBoosted ? 1.5 : 1.0; 
+
+        let totalWeight = 0;
+        let weights = ITEMS_DB.map(item => {
+            let w = item.cures === 'hp' ? hpWeight : 1.0;
+            totalWeight += w;
+            return w;
+        });
+        
+        let r = Math.random() * totalWeight;
+        let sum = 0;
+        for(let i=0; i<ITEMS_DB.length; i++) {
+            sum += weights[i];
+            if (r <= sum) return ITEMS_DB[i];
+        }
+        return ITEMS_DB[0];
+    }
+
     function rollShopCards() { 
         shopBoardGenerations++; 
         currentDiscountItems = []; discountedBoughtCount = 0;
@@ -1609,21 +1635,18 @@
         
         let isHealingBoosted = (player.hp < player.maxHp * 0.6) && (shopBoardGenerations <= 3);
 
-        // Card 1: Attack (S or A)
         let atkItems = ITEMS_DB.filter(i => i.category === 'attack');
-        let isAtkS = Math.random() < 0.3; // S=30%, A=70%
+        let isAtkS = Math.random() < 0.3; 
         let card1Pool = atkItems.filter(i => i.tier === (isAtkS ? 'S' : 'A'));
         if(card1Pool.length === 0) card1Pool = atkItems;
         let item1 = card1Pool[Math.floor(Math.random() * card1Pool.length)];
 
-        // Card 2: Defense (S or A)
         let defItems = ITEMS_DB.filter(i => i.category === 'defense');
         let isDefS = Math.random() < 0.3;
         let card2Pool = defItems.filter(i => i.tier === (isDefS ? 'S' : 'A'));
         if(card2Pool.length === 0) card2Pool = defItems;
         let item2 = card2Pool[Math.floor(Math.random() * card2Pool.length)];
 
-        // Card 3: Pure Random (With Healing Boost logic)
         let hpWeight = isHealingBoosted ? 1.5 : 1.0; 
         let totalWeight = 0;
         let weights = ITEMS_DB.map(i => {
@@ -1678,11 +1701,24 @@
         });
     }
 
-    function renderFullShop() {
+    // 🔍 ฟังก์ชัน Render แคตตาล็อกที่รองรับการเรียงหมวดและค้นหา
+    function renderFullShop(filterText = '') {
         const cNormal = document.getElementById('fullShopNormal'); if(cNormal) cNormal.innerHTML = '';
         const cCombo = document.getElementById('fullShopCombo'); if(cCombo) cCombo.innerHTML = '';
         
-        ITEMS_DB.forEach(item => {
+        let sortedItems = ITEMS_DB.slice().sort((a, b) => {
+            if (a.cures < b.cures) return -1;
+            if (a.cures > b.cures) return 1;
+            return 0;
+        });
+
+        sortedItems.forEach(item => {
+            let curesArr = item.cures.split(',');
+            let cureNames = curesArr.map(c => STATUS_NAMES[c] || '').join(' ');
+            let searchText = `${item.name} ${item.desc} ${cureNames}`.toLowerCase();
+            
+            if (filterText && !searchText.includes(filterText.toLowerCase())) return; 
+
             let maxStr = item.maxStack === 99 ? "∞" : item.maxStack;
             let isMax = item.maxStack !== 99 && player.inv[item.id] >= item.maxStack;
             let maxBadge = isMax ? `<span class="max-badge">MAX</span>` : "";
@@ -1693,13 +1729,11 @@
 
             let displayMaxStr = item.maxStack === 99 ? "" : `[${player.inv[item.id]}/${maxStr}]`;
             
-            let curesArr = item.cures.split(',');
             let isCureNeeded = false;
             if(item.cures !== 'hp') {
                 isCureNeeded = curesArr.some(cure => player.statuses[cure] > 0);
             }
             let highlightClass = isCureNeeded ? "highlight-cure" : "";
-            
             let dCost = getDynamicCost(item.id, currentPhase);
 
             let htmlStr = `
@@ -1715,11 +1749,10 @@
                     </div>
                 </div>`;
             
-            if (['attack', 'defense', 'economy'].includes(item.category) && cNormal) { 
-                cNormal.innerHTML += htmlStr; 
-            } 
-            else if (item.category === 'heal' && cCombo) { 
+            if (item.category === 'heal' && cCombo) { 
                 cCombo.innerHTML += htmlStr; 
+            } else if (cNormal) { 
+                cNormal.innerHTML += htmlStr; 
             }
         });
     }
@@ -1738,7 +1771,7 @@
         
         if (player.inv[itemId] >= itemDef.maxStack && itemDef.cures !== 'hp') {
             if (itemId === 'counterpain' && !player.activeCounterpain) {
-                // ยอมให้ซื้อได้เพื่อกดใช้งาน Active
+                // อนุญาต
             } else {
                 showToast("คุณมีไอเทมนี้เต็มแล้ว!", "#ff5555", 2500); 
                 return; 
@@ -1759,7 +1792,7 @@
         
         if (player.inv[itemId] >= itemDef.maxStack && !hasAilment && itemDef.cures !== 'hp') { 
             if (itemId === 'counterpain' && !player.activeCounterpain) {
-                // ซื้อผ่าน
+                // อนุญาต
             } else if (!isDiscounted) {
                 showToast("ไอเทมนี้ให้บัฟระดับสูงสุดแล้ว!", "#ff5555", 2500); 
                 return; 
@@ -2010,7 +2043,12 @@
             enemySpawnTimer = baseDelay;
         }
 
-        bullets.forEach(b => b.update(dt)); bullets = bullets.filter(b => b.active);
+        // 🔫 อัปเดตกระสุนและใส่ New Spawns จากลูกชิ่งเพื่อกันบั๊กกวน Loop
+        let newSpawns = [];
+        bullets.forEach(b => b.update(dt, enemies, explosions, newSpawns)); 
+        bullets.push(...newSpawns);
+        bullets = bullets.filter(b => b.active);
+        
         enemyBullets.forEach(b => b.update(dt)); enemyBullets = enemyBullets.filter(b => b.active);
         enemies.forEach(e => e.update(dt)); 
         
