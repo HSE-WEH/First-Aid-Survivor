@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V3.2.1</title>
+    <title>First Aid Survivor - End Game Rebalance</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -98,7 +98,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V3.2.1)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -353,6 +353,7 @@
         scald: "น้ำร้อนลวก" 
     };
 
+    // หมวดหมู่ภายในยังคงใช้ 'attack', 'defense', 'economy', 'heal' เพื่อการสุ่มเรท RNG ในร้านค้า
     const ITEMS_DB = [
         { id: 'tylenol', category: 'attack', tier: 'S', name: "Tylenol", cost: 30, cures: 'headache', maxStack: 6, desc: "แก้ปวดหัว | +ATK (2, 4, 6, 8, 10, 12)" },
         { id: 'ponstan', category: 'attack', tier: 'A', name: "Ponstan", cost: 30, cures: 'headache,muscle_ache', maxStack: 3, desc: "แก้ปวดหัว, ปวดกล้ามเนื้อ | +กระสุน 1 นัด & +ATK 1 แต้ม /สแต็ก" },
@@ -727,6 +728,7 @@
             
             this.def = this.baseDef - defPenalty + cpmDef + telDef;
 
+            // 💤 เอา cpmDebuffToApply มาคำนวณสปีดด้วย เพื่อให้เห็นผลทันทีในร้านค้าหลังกดซื้อ
             let carbBonus = Math.min(this.inv.carbon, 3);
             this.spd = Math.max(1, this.baseSpd - this.activeStatuses.stomach - this.activeStatuses.muscle_ache + carbBonus - this.activeCpmDebuff - this.cpmDebuffToApply);
 
@@ -989,12 +991,12 @@
             let loop = phase >= 10 ? phase - 10 : 0;
             
             if (type === 1 || type === 2) { 
-                this.hp = phase <= 10 ? hpMap12[phase-1] : 10 + (phase - 10);
+                this.hp = phase <= 10 ? hpMap12[phase-1] : 10 + (loop * 3);
                 
                 let atkAdd = 0;
                 if (phase >= 4 && phase <= 6) atkAdd = 1;
                 else if (phase >= 7 && phase <= 9) atkAdd = 2;
-                if (phase >= 10) atkAdd = 3 + 1 + loop; 
+                if (phase >= 10) atkAdd = 4 + (loop * 2); 
                 this.atk = 1 + atkAdd;
 
                 this.spd = 2.5; this.size = 20; 
@@ -1020,11 +1022,11 @@
                 }
             } 
             else if (type === 3) { 
-                this.hp = phase <= 10 ? hpMap3[phase-1] : 8 + (phase - 10);
+                this.hp = phase <= 10 ? hpMap3[phase-1] : 8 + (loop * 2);
 
                 let atkAdd = 0;
                 if (phase >= 7 && phase <= 9) atkAdd = 1; 
-                if (phase >= 10) atkAdd = 2 + loop; 
+                if (phase >= 10) atkAdd = 3 + (loop * 2); 
                 this.atk = 2 + atkAdd;
 
                 let spd = 3.5;
@@ -1042,11 +1044,11 @@
                 this.isRanged = false; 
             } 
             else if (type === 4) { 
-                this.hp = phase <= 10 ? hpMap4[phase-1] : 13 + (phase - 10)*2;
+                this.hp = phase <= 10 ? hpMap4[phase-1] : 13 + (loop * 4);
 
                 let atkAdd = 0;
                 if (phase >= 7 && phase <= 9) atkAdd = 2;
-                if (phase >= 10) atkAdd = 2 + 1 + loop; 
+                if (phase >= 10) atkAdd = 3 + (loop * 2); 
                 this.atk = 5 + atkAdd;
                 this.rangedAtk = 3 + atkAdd;
                 
@@ -1071,10 +1073,10 @@
                 else if (phase === 7) { this.hp = 800; this.atk = 6; this.spd = 3.5; this.fireRateBase = 2.0; }
                 else if (phase === 9) { this.hp = 2000; this.atk = 8; this.spd = 3.5; this.fireRateBase = 2.0; }
                 else if (phase >= 10) { 
-                    this.hp = 3000 + (loop * 500); 
-                    this.atk = 8 + (loop * 2); 
-                    this.spd = 3.5 + (loop * 0.2); 
-                    this.fireRateBase = Math.max(1.0, 1.5 - (loop * 0.1)); 
+                    this.hp = 3000 + (loop * 1000); 
+                    this.atk = 8 + (loop * 3); 
+                    this.spd = 3.5 + (loop * 0.3); 
+                    this.fireRateBase = Math.max(0.5, 1.5 - (loop * 0.15)); 
                 }
                 this.shootTimer = this.fireRateBase;
             }
@@ -1213,6 +1215,7 @@
                         }
                     }
 
+                    // 🏓 ลอจิกกระสุนชิ่งแบบใหม่ (ดึงบัฟ Pierce & Explode ไปด้วย แต่กันการชิ่งทอดที่ 2)
                     let willBounce = (this.bounces > 0 && Math.random() < this.bounceChance);
 
                     if (willBounce) {
@@ -1222,12 +1225,14 @@
                         let targets = potentialTargets.slice(0, this.bounceCount);
                         targets.forEach(target => {
                             let newAngle = Math.atan2(target.y - this.y, target.x - this.x);
+                            // สร้างกระสุนใหม่ วิ่งไปหาเป้าหมาย
+                            // ส่ง bounceChance = 0 เพื่อปิดการชิ่งต่อทอดที่ 2
                             let newBullet = new Bullet(this.x, this.y, newAngle, this.atk, this.size, this.pierce, this.isCrit, 0, this.stunChance, this.explodeRadius, 0);
                             newBullet.bounces = 0; 
-                            newBullet.hitList.push(e);
+                            newBullet.hitList = [...this.hitList]; // ส่งต่อประวัติการชน จะได้ไม่กลับมาตีตัวเดิม
                             newSpawnsList.push(newBullet);
                         });
-                        this.bounces = 0; 
+                        this.bounces = 0; // ล้างโควต้าชิ่งของกระสุนแม่
                     }
 
                     if (!this.pierce) {
@@ -1514,6 +1519,7 @@
         }
     }
 
+    // 📣 ฟังก์ชันโชว์ข้อมูลด่านหน้าแบบละเอียด (แก้เรื่องบอสเกิด)
     window.showNextPhaseInfo = function() {
         let nextPh = currentPhase + 1;
         document.getElementById('info-phase-num').innerText = nextPh;
@@ -1586,6 +1592,11 @@
             player.inv.air_x = 0;
             player.inv.flying_rabit = 0;
             player.activeCounterpain = false; 
+            
+            // 💤 เคลียร์ดีบัฟง่วงนอนจากตอนเล่น
+            player.activeCpmDebuff = 0; 
+            player.cpmDebuffToApply = 0;
+            
             player.applyPhaseModifiers();
         }
 
@@ -1829,7 +1840,7 @@
             showToast(`💚 ฟื้นฟูเลือด 7 หน่วย`, "#0f0");
         }
         
-        if (itemId === 'cpm') { player.activeCpmDebuff++; }
+        if (itemId === 'cpm') { player.cpmDebuffToApply++; }
 
         if (isDiscounted && index !== -1) {
             currentDiscountItems[index].bought = true;
@@ -1853,7 +1864,10 @@
         currentPhase++; phaseTimer = 30; bossSpawnedThisPhase = false;
         enemies.length = 0; bullets.length = 0; enemyBullets.length = 0; drops.length = 0; explosions = [];
         
-        player.activeCpmDebuff = 0;
+        // 💤 โอนดีบัฟง่วงนอนจากร้านค้าเข้าสู่ตัวผู้เล่นจริง
+        player.activeCpmDebuff = player.cpmDebuffToApply;
+        player.cpmDebuffToApply = 0;
+
         player.applyPhaseModifiers();
         
         resetKeys();
@@ -1936,8 +1950,10 @@
         enemySpawnTimer -= dt;
         if (enemySpawnTimer <= 0) {
             
+            // 👹 ระบบบอส และ มินิบอสเฟสหลังๆ
             if (!bossSpawnedThisPhase && (currentPhase === 3 || currentPhase === 5 || currentPhase === 7 || currentPhase === 9 || currentPhase >= 10)) {
                 let boss = new Enemy(5, currentPhase);
+                boss.bossName = "BOSS";
                 let edge = Math.floor(Math.random() * 4);
                 if (edge === 0) { boss.x = Math.random() * canvas.width; boss.y = -50; }
                 else if (edge === 1) { boss.x = canvas.width + 50; boss.y = Math.random() * canvas.height; }
@@ -1945,9 +1961,10 @@
                 else { boss.x = -50; boss.y = Math.random() * canvas.height; }
                 enemies.push(boss);
                 
-                if (currentPhase >= 14) {
+                if (currentPhase >= 12) {
                     let miniBoss = new Enemy(5, currentPhase);
-                    miniBoss.hp *= 0.7; miniBoss.maxHp *= 0.7;
+                    miniBoss.bossName = "MINI-BOSS 1";
+                    miniBoss.hp *= 0.6; miniBoss.maxHp *= 0.6;
                     miniBoss.atk *= 0.7; miniBoss.size *= 0.8;
                     
                     let mbEdge;
@@ -1960,6 +1977,24 @@
                     
                     enemies.push(miniBoss);
                 }
+
+                if (currentPhase >= 20) {
+                    let miniBoss2 = new Enemy(5, currentPhase);
+                    miniBoss2.bossName = "MINI-BOSS 2";
+                    miniBoss2.hp *= 0.6; miniBoss2.maxHp *= 0.6;
+                    miniBoss2.atk *= 0.7; miniBoss2.size *= 0.8;
+                    
+                    let mbEdge2;
+                    do { mbEdge2 = Math.floor(Math.random() * 4); } while (mbEdge2 === edge);
+
+                    if (mbEdge2 === 0) { miniBoss2.x = Math.random() * canvas.width; miniBoss2.y = -50; }
+                    else if (mbEdge2 === 1) { miniBoss2.x = canvas.width + 50; miniBoss2.y = Math.random() * canvas.height; }
+                    else if (mbEdge2 === 2) { miniBoss2.x = Math.random() * canvas.width; miniBoss2.y = canvas.height + 50; }
+                    else { miniBoss2.x = -50; miniBoss2.y = Math.random() * canvas.height; }
+                    
+                    enemies.push(miniBoss2);
+                }
+
                 bossSpawnedThisPhase = true;
             }
 
@@ -2205,14 +2240,13 @@
             
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             ctx.fillRect(barX, barY, barWidth, 25); 
-            ctx.fillStyle = index === 0 ? '#ff3333' : '#ff9900'; 
+            ctx.fillStyle = boss.bossName === "BOSS" ? '#ff3333' : '#ff9900'; 
             ctx.fillRect(barX, barY, barWidth * (boss.hp / boss.maxHp), 25); 
             
             ctx.fillStyle = 'white';
             ctx.font = 'bold 16px Arial';
             ctx.textAlign = 'center';
-            let titleStr = index === 0 ? "BOSS HP" : "MINI-BOSS HP";
-            ctx.fillText(`${titleStr}: ${Math.ceil(boss.hp)} / ${Math.ceil(boss.maxHp)}`, canvas.width / 2, barY + 18);
+            ctx.fillText(`${boss.bossName} HP: ${Math.ceil(boss.hp)} / ${Math.ceil(boss.maxHp)}`, canvas.width / 2, barY + 18);
             ctx.textAlign = 'left'; 
         });
     }
