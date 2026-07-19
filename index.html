@@ -232,7 +232,7 @@
 
         ::-webkit-scrollbar-thumb { background: var(--pw-mintDark) !important; }
 
-        #gameLogoCanvas{ image-rendering:pixelated; image-rendering:crisp-edges; margin-bottom:4px; }
+        #gameLogoCanvas{ width:100px !important; height:100px !important; image-rendering:pixelated; image-rendering:crisp-edges; margin-bottom:4px; }
     </style>
 </head>
 <body>
@@ -251,7 +251,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <canvas id="gameLogoCanvas" width="192" height="150"></canvas>
+        <canvas id="gameLogoCanvas" width="110" height="110"></canvas>
         <h1 style="font-size: 30px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
@@ -262,7 +262,17 @@
 
     <!-- Main Menu -->
     <div id="menuScreen" class="screen">
-        <h2 style="font-size: 48px; margin-bottom: 40px; color: #fff;">MAIN MENU</h2>
+        <h2 style="font-size: 48px; margin-bottom: 20px; color: #fff;">MAIN MENU</h2>
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom:22px;">
+            <canvas id="charPreviewCanvas" width="90" height="110" style="width:70px !important; height:86px !important; image-rendering:pixelated;"></canvas>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <span style="font-size:13px; color:var(--pw-sub,#B7A98C);">เลือกตัวละคร</span>
+                <div style="display:flex; gap:8px;">
+                    <button id="btnGenderMale" onclick="setPlayerGender('male')" style="padding:8px 14px; font-size:14px;">👨 ชาย</button>
+                    <button id="btnGenderFemale" onclick="setPlayerGender('female')" style="padding:8px 14px; font-size:14px;">👩 หญิง</button>
+                </div>
+            </div>
+        </div>
         <button onclick="startGame()" style="font-size: 26px; padding: 20px 80px; margin-bottom: 20px; background-color: #2196F3; border-radius: 10px;">🔥 GAME START</button>
         <button onclick="switchScreen('howToPlayScreen'); showHtpTab('basic');" style="width: 300px; padding: 15px; margin-bottom: 15px;">📖 ข้อมูลเกม & คู่มือ</button>
         <button onclick="switchScreen('leaderboardScreen')" style="width: 300px; padding: 15px; margin-bottom: 15px;">🏆 Leader Board</button>
@@ -469,6 +479,165 @@
         if (img && img.complete && img.naturalWidth > 0) { ctx.drawImage(img, x - size, y - size, size * 2, size * 2); } 
         else { fallbackDraw(); }
     }
+
+    /* ================= PIXEL-ART SPRITE CACHE (arena stays plain black; only entity art is themed) ================= */
+    const SPRITE_CACHE = {};
+    function getCachedSprite(key, lowW, lowH, drawFn) {
+        if (SPRITE_CACHE[key]) return SPRITE_CACHE[key];
+        const off = document.createElement('canvas');
+        off.width = lowW; off.height = lowH;
+        const o = off.getContext('2d');
+        o.imageSmoothingEnabled = false;
+        drawFn(o, lowW, lowH);
+        SPRITE_CACHE[key] = off;
+        return off;
+    }
+    function ditherPx(c, x0, y0, w, h, color, density) {
+        c.fillStyle = color;
+        for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) { if (Math.random() < density) c.fillRect(x, y, 1, 1); }
+    }
+    function drawCachedSprite(ctx, src, x, y, halfSize, angle, flipX) {
+        ctx.save();
+        ctx.translate(x, y);
+        if (angle !== undefined && angle !== null) ctx.rotate(angle);
+        if (flipX) ctx.scale(-1, 1);
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(src, -halfSize, -halfSize, halfSize * 2, halfSize * 2);
+        ctx.restore();
+    }
+
+    function buildGermSprite(type) {
+        const S = 24;
+        return getCachedSprite('germ' + type, S, S, (c) => {
+            if (type === 1) { // spiky virus (pink)
+                c.fillStyle = '#FF6B9D'; c.fillRect(4, 7, 16, 12); c.fillRect(7, 4, 10, 18);
+                c.fillStyle = '#D9447C';
+                [[2, 2], [19, 2], [2, 19], [19, 19], [11, 0], [11, 21]].forEach(p => c.fillRect(p[0], p[1], 3, 3));
+                ditherPx(c, 4, 7, 16, 12, '#D9447C', 0.15);
+                c.fillStyle = '#FFF'; c.fillRect(7, 10, 5, 5); c.fillRect(13, 10, 5, 5);
+                c.fillStyle = '#1A130D'; c.fillRect(8, 12, 3, 3); c.fillRect(14, 12, 3, 3);
+            } else if (type === 2) { // toxic amoeba (green)
+                c.fillStyle = '#8BC34A';
+                c.fillRect(3, 8, 18, 11); c.fillRect(6, 4, 12, 5); c.fillRect(4, 18, 5, 4); c.fillRect(15, 18, 5, 4);
+                ditherPx(c, 3, 8, 18, 11, '#5E8C2A', 0.2);
+                c.fillStyle = '#1A130D'; c.fillRect(7, 11, 3, 3); c.fillRect(14, 12, 3, 3);
+            } else if (type === 3) { // fast bacteria capsule (purple)
+                c.fillStyle = '#9B6BFF'; c.fillRect(3, 8, 17, 8);
+                c.fillStyle = '#6E42C4'; c.fillRect(3, 8, 3, 8); c.fillRect(17, 8, 3, 8); c.fillRect(20, 10, 3, 3);
+                ditherPx(c, 3, 8, 17, 8, '#6E42C4', 0.18);
+                c.fillStyle = '#FFF'; c.fillRect(9, 9, 5, 5);
+                c.fillStyle = '#1A130D'; c.fillRect(11, 10, 3, 3);
+            } else if (type === 4) { // tank mold (teal)
+                c.fillStyle = '#4A9B8E'; c.fillRect(4, 4, 16, 16);
+                ditherPx(c, 4, 4, 16, 16, '#2F6D63', 0.2);
+                c.fillStyle = '#6BB8AB';
+                [[2, 2], [19, 2], [2, 19], [19, 19], [11, 0], [11, 21], [0, 11], [21, 11]].forEach(p => c.fillRect(p[0], p[1], 3, 3));
+                c.fillStyle = '#1A130D'; c.fillRect(8, 10, 3, 3); c.fillRect(14, 10, 3, 3); c.fillRect(9, 16, 7, 2);
+            }
+        });
+    }
+    function buildBossSprite() {
+        const S = 30;
+        return getCachedSprite('bossGerm', S, S, (c) => {
+            c.fillStyle = '#E74C3C'; c.fillRect(5, 9, 20, 17); c.fillRect(9, 5, 12, 25);
+            ditherPx(c, 5, 9, 20, 17, '#A32E22', 0.2);
+            c.fillStyle = '#A32E22';
+            [[2, 2], [26, 2], [2, 26], [26, 26], [15, 0], [15, 28], [0, 15], [28, 15]].forEach(p => c.fillRect(p[0], p[1], 3, 3));
+            c.fillStyle = '#FFD866'; c.fillRect(9, 3, 12, 2);
+            c.fillStyle = '#FFF'; c.fillRect(9, 13, 6, 6); c.fillRect(17, 13, 6, 6);
+            c.fillStyle = '#1A130D'; c.fillRect(11, 15, 3, 3); c.fillRect(19, 15, 3, 3);
+            c.fillRect(11, 23, 10, 2);
+        });
+    }
+    function buildBulletSprite(isCrit) {
+        const S = isCrit ? 16 : 12;
+        return getCachedSprite(isCrit ? 'bulletCrit' : 'bulletNormal', S, S, (c) => {
+            if (!isCrit) {
+                c.fillStyle = '#7FE8C6'; c.fillRect(1, 4, 10, 4);
+                c.fillStyle = '#4FBE96'; c.fillRect(1, 7, 10, 1);
+                c.fillStyle = '#FFFFFF'; c.fillRect(2, 4, 3, 2);
+            } else {
+                c.fillStyle = 'rgba(255,179,71,0.35)'; c.beginPath(); c.arc(8, 8, 8, 0, Math.PI * 2); c.fill();
+                c.fillStyle = '#FFB347'; c.beginPath(); c.arc(8, 8, 5, 0, Math.PI * 2); c.fill();
+                c.fillStyle = '#FFF3D6'; c.fillRect(6, 5, 3, 3);
+                c.fillStyle = '#C9762A';
+                [[0, 7], [14, 7], [7, 0], [7, 14]].forEach(p => c.fillRect(p[0], p[1], 2, 2));
+            }
+        });
+    }
+    function buildEnemyBulletSprite() {
+        const S = 12;
+        return getCachedSprite('enemyBullet', S, S, (c) => {
+            c.fillStyle = '#FF6B6B'; c.fillRect(2, 2, 8, 7);
+            c.fillStyle = '#B33333'; c.fillRect(2, 7, 8, 2);
+            c.fillStyle = '#FFCFCF'; c.fillRect(4, 3, 3, 2);
+        });
+    }
+    function buildDropSprite(kind) {
+        const S = 14;
+        return getCachedSprite('drop_' + kind, S, S, (c) => {
+            if (kind === 'coin') {
+                c.fillStyle = '#FFD866'; c.beginPath(); c.arc(7, 7, 6, 0, Math.PI * 2); c.fill();
+                c.strokeStyle = '#B5842A'; c.lineWidth = 1; c.stroke();
+                c.fillStyle = '#FFF3D0'; c.fillRect(5, 4, 2, 2);
+            } else if (kind === 'diamond') {
+                c.fillStyle = '#7FE8C6'; c.beginPath();
+                c.moveTo(7, 1); c.lineTo(13, 7); c.lineTo(7, 13); c.lineTo(1, 7); c.closePath(); c.fill();
+                c.fillStyle = '#C8FFF0'; c.fillRect(5, 4, 3, 3);
+                c.strokeStyle = '#3FA184'; c.stroke();
+            } else if (kind === 'magnet') {
+                c.fillStyle = '#FF6F5E'; c.fillRect(2, 2, 4, 9); c.fillRect(8, 2, 4, 9);
+                c.fillStyle = '#EFEFEF'; c.fillRect(2, 9, 4, 3); c.fillRect(8, 9, 4, 3);
+                c.strokeStyle = '#1A130D'; c.lineWidth = 1; c.strokeRect(2, 2, 4, 9); c.strokeRect(8, 2, 4, 9);
+            }
+        });
+    }
+    function buildPlayerSprite(gender, dir) {
+        const W = 20, H = 28;
+        return getCachedSprite('player_' + gender + '_' + dir, W, H, (c) => {
+            const isFemale = gender === 'female';
+            const hairColor = isFemale ? '#6B3F2A' : '#4A2C17';
+            const coat = '#F3F6F8', coatShade = '#D2D2D2', trim = '#3FA184', skin = '#F1C7A3', shoe = '#1A2530', badge = '#FFD866', bow = '#FF9EB0';
+
+            if (dir === 'down' || dir === 'up') {
+                if (isFemale) {
+                    c.fillStyle = '#33465A'; c.beginPath(); c.moveTo(6, 20); c.lineTo(14, 20); c.lineTo(16, 26); c.lineTo(4, 26); c.closePath(); c.fill();
+                } else {
+                    c.fillStyle = '#33465A'; c.fillRect(6, 20, 3, 6); c.fillRect(11, 20, 3, 6);
+                }
+                c.fillStyle = shoe; c.fillRect(5, 25, 4, 2); c.fillRect(11, 25, 4, 2);
+                c.fillStyle = coat; c.fillRect(4, 10, 12, 11);
+                if (dir === 'down') { c.fillStyle = coatShade; c.fillRect(4, 10, 3, 11); }
+                c.fillStyle = trim; c.fillRect(9, 10, 2, 11);
+                if (dir === 'down') { c.fillStyle = badge; c.fillRect(6, 13, 2, 3); }
+                c.fillStyle = coat; c.fillRect(1, 12, 3, 7); c.fillRect(16, 12, 3, 7);
+                c.fillStyle = skin; c.beginPath(); c.arc(10, 6, 6, 0, Math.PI * 2); c.fill();
+                if (dir === 'down') {
+                    c.fillStyle = hairColor; c.beginPath(); c.arc(10, 4, 6, Math.PI, 0); c.fill();
+                    if (isFemale) { c.fillRect(3, 4, 2, 10); c.fillRect(15, 4, 2, 10); c.fillStyle = bow; c.fillRect(12, 1, 3, 2); }
+                    c.fillStyle = '#1A130D'; c.fillRect(6, 6, 3, 2); c.fillRect(11, 6, 3, 2);
+                } else {
+                    c.fillStyle = hairColor; c.beginPath(); c.arc(10, 5, 6.4, 0, Math.PI * 2); c.fill();
+                    if (isFemale) { c.fillRect(6, 10, 8, 8); c.fillStyle = bow; c.fillRect(9, 9, 3, 2); }
+                }
+            } else if (dir === 'side') {
+                c.fillStyle = '#33465A'; c.fillRect(9, 20, 3, 6); c.fillRect(4, 21, 3, 5);
+                c.fillStyle = shoe; c.fillRect(9, 25, 4, 2); c.fillRect(3, 25, 4, 2);
+                if (isFemale) { c.fillStyle = '#33465A'; c.beginPath(); c.moveTo(4, 18); c.lineTo(16, 18); c.lineTo(15, 22); c.lineTo(5, 22); c.closePath(); c.fill(); }
+                c.fillStyle = coat; c.fillRect(5, 10, 10, 10);
+                c.fillStyle = coatShade; c.fillRect(5, 10, 10, 3);
+                c.fillStyle = badge; c.fillRect(9, 13, 2, 2);
+                c.fillStyle = coat; c.fillRect(13, 12, 4, 6);
+                c.fillStyle = skin; c.beginPath(); c.arc(11, 6, 6, 0, Math.PI * 2); c.fill();
+                c.fillRect(15, 6, 2, 2);
+                c.fillStyle = hairColor; c.beginPath(); c.arc(10, 4, 6, Math.PI, 0); c.fill();
+                if (isFemale) { c.fillRect(4, 4, 3, 12); c.fillStyle = bow; c.fillRect(13, 1, 3, 2); } else { c.fillRect(5, 4, 2, 4); }
+                c.fillStyle = '#1A130D'; c.fillRect(13, 6, 2, 2);
+            }
+        });
+    }
+
+    let playerGender = (window.playerGender || 'male');
 
     const SUPABASE_URL = 'https://budgugzxmgmptxycfyeb.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1ZGd1Z3p4bWdtcHR4eWNmeWViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxODgyNDMsImV4cCI6MjA5OTc2NDI0M30.85-Yr-DDFQa0eioI_rydxhljP96pg24t3GVnj7PrP0E';
@@ -899,6 +1068,7 @@
             this.appliedCombos = new Set();
             this.cpmDebuffToApply = 0; this.activeCpmDebuff = 0;
             this.activeCounterpain = false; 
+            this.facing = 'down'; this.gender = (window.playerGender === 'female') ? 'female' : 'male';
         }
 
         applyPhaseModifiers() {
@@ -1022,6 +1192,13 @@
             if (keys['a'] && this.x > this.size) this.x -= moveSpd;
             if (keys['d'] && this.x < canvas.width - this.size) this.x += moveSpd;
 
+            let mvX = (keys['d'] ? 1 : 0) - (keys['a'] ? 1 : 0);
+            let mvY = (keys['s'] ? 1 : 0) - (keys['w'] ? 1 : 0);
+            if (mvX !== 0 || mvY !== 0) {
+                if (Math.abs(mvX) > Math.abs(mvY)) this.facing = mvX > 0 ? 'right' : 'left';
+                else this.facing = mvY > 0 ? 'down' : 'up';
+            }
+
             this.fireTimer -= dt;
             if (this.fireTimer <= 0 && enemies.length > 0) {
                 let missChance = [0, 0.15, 0.25, 0.40][this.activeStatuses.red_eye] || 0;
@@ -1058,7 +1235,10 @@
             ctx.arc(this.x, this.y, this.size + 15 + this.magnetRange, 0, Math.PI * 2); ctx.stroke();
 
             drawSprite(ctx, ASSETS.player, this.x, this.y, this.size, () => {
-                ctx.fillStyle = '#00ff00'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+                let dir = (this.facing === 'left' || this.facing === 'right') ? 'side' : this.facing;
+                let flip = (this.facing === 'left');
+                let sp = buildPlayerSprite(this.gender, dir);
+                drawCachedSprite(ctx, sp, this.x, this.y, this.size * 1.5, undefined, flip);
             });
 
             ctx.fillStyle = 'red'; ctx.fillRect(this.x - 20, this.y - 35, 40, 6);
@@ -1358,7 +1538,9 @@
             }
 
             drawSprite(ctx, imgAsset, this.x, this.y, this.size, () => {
-                ctx.fillStyle = this.isBoss ? '#ff5555' : 'red'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+                let sp = this.isBoss ? buildBossSprite() : buildGermSprite(this.type);
+                let ds = this.isBoss ? this.size * 1.35 : this.size * 1.7;
+                drawCachedSprite(ctx, sp, this.x, this.y, ds);
             });
 
             if (this.isElite) {
@@ -1441,10 +1623,9 @@
         }
         draw(ctx) { 
             drawSprite(ctx, ASSETS.bullet, this.x, this.y, this.size, () => {
-                ctx.fillStyle = this.isCrit ? '#ff5500' : 'yellow'; 
-                ctx.beginPath(); 
-                ctx.arc(this.x, this.y, this.isCrit ? this.size * 1.3 : this.size, 0, Math.PI*2); 
-                ctx.fill(); 
+                let sp = buildBulletSprite(this.isCrit);
+                let ds = this.isCrit ? this.size * 3.0 : this.size * 2.6;
+                drawCachedSprite(ctx, sp, this.x, this.y, ds, this.angle);
             });
         }
     }
@@ -1465,7 +1646,8 @@
         }
         draw(ctx) { 
             drawSprite(ctx, ASSETS.enemyBullet, this.x, this.y, this.size, () => {
-                ctx.fillStyle = '#ff9900'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill(); 
+                let sp = buildEnemyBulletSprite();
+                drawCachedSprite(ctx, sp, this.x, this.y, this.size * 2.2, this.angle);
             });
         }
     }
@@ -1490,14 +1672,8 @@
         draw(ctx) {
             let imgAsset = this.type === 'coin' ? ASSETS.coin : (this.type === 'diamond' ? ASSETS.diamond : ASSETS.magnet);
             drawSprite(ctx, imgAsset, this.x, this.y, this.size, () => {
-                if (this.type === 'coin') {
-                    ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
-                } else if (this.type === 'diamond') {
-                    ctx.fillStyle = 'cyan'; ctx.beginPath(); ctx.rect(this.x - this.size/2, this.y - this.size/2, this.size, this.size); ctx.fill();
-                } else if (this.type === 'magnet') {
-                    ctx.fillStyle = '#ff5555'; ctx.beginPath(); ctx.rect(this.x - this.size, this.y - this.size, this.size*2, this.size*2); ctx.fill();
-                    ctx.fillStyle = 'white'; ctx.beginPath(); ctx.rect(this.x - this.size/2, this.y - this.size/2, this.size, this.size); ctx.fill();
-                }
+                let sp = buildDropSprite(this.type);
+                drawCachedSprite(ctx, sp, this.x, this.y, this.size * 1.6);
             });
         }
     }
@@ -2426,6 +2602,7 @@
     }
 
     function draw() {
+        ctx.imageSmoothingEnabled = false;
         ctx.fillStyle = '#111'; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         if (phaseTimer <= 5 && phaseTimer > 0) {
@@ -2514,7 +2691,7 @@
             ctx.imageSmoothingEnabled = false;
 
             // draw at low internal resolution then blow up crisp (pixel-art technique)
-            const lowW = 24, lowH = 24, scale = 8;
+            const lowW = 24, lowH = 24, scale = 4;
             const off = document.createElement('canvas');
             off.width = lowW; off.height = lowH;
             const o = off.getContext('2d');
@@ -2577,5 +2754,39 @@
 })();
 </script>
 
+<script>
+/* ---- Character (gender) selector for the main menu, self-contained ---- */
+window.playerGender = window.playerGender || 'male';
+
+function drawCharPreview(){
+    try{
+        const canvas = document.getElementById('charPreviewCanvas');
+        if(!canvas || typeof buildPlayerSprite !== 'function') return;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        const sp = buildPlayerSprite(window.playerGender, 'down');
+        drawCachedSprite(ctx, sp, canvas.width/2, canvas.height/2, 42);
+    }catch(e){ /* fail silently — preview is decorative only */ }
+}
+
+function setPlayerGender(g){
+    window.playerGender = g;
+    try{
+        const m = document.getElementById('btnGenderMale');
+        const f = document.getElementById('btnGenderFemale');
+        if(m) m.style.boxShadow = (g==='male') ? '0 0 0 3px #FFD866' : '';
+        if(f) f.style.boxShadow = (g==='female') ? '0 0 0 3px #FFD866' : '';
+    }catch(e){}
+    drawCharPreview();
+}
+
+function initCharSelector(){
+    setPlayerGender(window.playerGender);
+}
+if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', initCharSelector);
+} else { initCharSelector(); }
+</script>
 </body>
 </html>
