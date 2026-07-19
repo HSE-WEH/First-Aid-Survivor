@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V3.3 (UI Overhaul)</title>
+    <title>First Aid Survivor V3.4</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -36,6 +36,11 @@
         .shop-card:hover { transform: translateY(-5px) scale(1.03); background: #383838; box-shadow: 0 8px 20px rgba(255, 215, 0, 0.2); }
         .shop-card.sold { opacity: 0.4; pointer-events: none; border-color: #555; filter: grayscale(100%); }
         .max-badge { color: #ff5555; font-weight: bold; border: 1px solid #ff5555; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: rgba(255,0,0,0.1); margin-left: 5px; }
+
+        .tier-badge { position: absolute; top: -5px; right: -5px; padding: 5px 10px; font-weight: bold; font-size: 12px; border-bottom-left-radius: 10px; }
+        .tier-s { background-color: #FFD700; color: #000; }
+        .tier-a { background-color: #e0e0e0; color: #000; }
+        .tier-b { background-color: #cd7f32; color: #fff; }
 
         .highlight-cure { border: 2px solid #ff5555 !important; box-shadow: 0 0 15px rgba(255, 85, 85, 0.8) !important; animation: pulse-red 1.5s infinite; }
         @keyframes pulse-red { 0% { box-shadow: 0 0 5px rgba(255,85,85,0.5); } 50% { box-shadow: 0 0 20px rgba(255,85,85,1); } 100% { box-shadow: 0 0 5px rgba(255,85,85,0.5); } }
@@ -82,7 +87,7 @@
         /* HUD TAB MENU */
         .hud-tab-menu { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 40px; box-sizing: border-box; backdrop-filter: blur(5px); }
         .hud-tab-menu.active { display: flex; }
-        .hud-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 80%; max-width: 1000px; }
+        .hud-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 80%; max-width: 900px; height: 75vh; }
         .hud-box { background: rgba(30,30,30,0.9); border: 1px solid #555; border-radius: 8px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
         .upg-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding: 15px 0; }
@@ -92,7 +97,7 @@
         .htp-content { display: none; background: #333; padding: 25px; border-radius: 0 8px 8px 8px; text-align: left; width: 600px; height: 400px; overflow-y: auto; line-height: 1.6; margin-bottom: 15px; }
         .htp-content.active-content { display: block; }
         
-        #btnToggleBuff { display: none; } /* ซ่อนปุ่มเดิมเพราะเรามี HUD ใหม่อันนี้แล้ว */
+        #btnToggleBuff { display: none; }
         
         #notificationList { position: absolute; top: 220px; left: 10px; z-index: 1000; display: flex; flex-direction: column; gap: 5px; pointer-events: none; }
         .toast-item { background: rgba(0,0,0,0.8); color: #fff; padding: 8px 15px; border-left: 4px solid #ffeb3b; border-radius: 4px; font-size: 14px; font-weight: bold; opacity: 1; transition: opacity 0.5s ease-out; animation: slideIn 0.2s ease-out; }
@@ -100,7 +105,14 @@
 
         .lb-entry { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #555; }
         .lb-entry:last-child { border-bottom: none; }
+        
         .info-panel { background: #222; border: 2px solid #00bcd4; border-radius: 12px; width: 80%; max-width: 1000px; padding: 20px; max-height: 90%; overflow-y: auto; text-align: left; margin: auto; }
+        
+        /* Scrollbar adjustments */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #777; }
     </style>
 </head>
 <body>
@@ -195,6 +207,7 @@
             
             <div class="shop-left">
                 <h3 style="margin: 0; color: #4CAF50; border-bottom: 2px solid #555; padding-bottom: 10px;">📊 Player Status</h3>
+                
                 <div class="stat-badge"><span style="color:#0f0;">❤️ Max HP</span> <strong id="shop-hp-stat">0/0</strong></div>
                 <div class="stat-badge"><span style="color:#ff5555;">⚔️ Attack</span> <strong id="shop-atk-stat">0</strong></div>
                 <div class="stat-badge"><span style="color:#aaa;">🛡️ ภูมิคุ้มกัน</span> <strong id="shop-def-stat">0 (หลบ 0%)</strong></div>
@@ -285,13 +298,15 @@
 
     <!-- HUD กด TAB เมนูสถานะโปร่งใส -->
     <div id="hudTabMenu" class="hud-tab-menu">
-        <h2 style="color:#00bcd4; margin-bottom:30px; font-size:36px; border-bottom:2px solid #00bcd4; padding-bottom:10px;">📋 ข้อมูลสถานะผู้เล่น (Player Status)</h2>
+        <h2 style="color:#00bcd4; margin-bottom:20px; font-size:32px; border-bottom:2px solid #00bcd4; padding-bottom:10px;">📋 ข้อมูลสถานะ (Player Status)</h2>
         <div class="hud-grid">
-            <div class="hud-box" id="hudTabStats"></div>
-            <div class="hud-box" id="hudTabDebuff"></div>
-            <div class="hud-box" id="hudTabBuff" style="grid-column: span 2; display:grid; grid-template-columns: 1fr 1fr; gap:10px;"></div>
+            <div class="hud-box" id="hudTabStats" style="overflow-y: auto; height: 100%; box-sizing: border-box;"></div>
+            <div style="display: flex; flex-direction: column; gap: 20px; height: 100%; overflow: hidden;">
+                <div class="hud-box" id="hudTabBuff" style="flex: 1; overflow-y: auto; box-sizing: border-box;"></div>
+                <div class="hud-box" id="hudTabDebuff" style="flex: 1; overflow-y: auto; box-sizing: border-box;"></div>
+            </div>
         </div>
-        <p style="color:#ccc; margin-top:30px;">ปล่อยปุ่ม TAB เพื่อกลับสู่เกม</p>
+        <p style="color:#ccc; margin-top:15px;">ปล่อยปุ่ม TAB เพื่อกลับสู่เกม</p>
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -311,7 +326,7 @@
     let currentDiscountItems = []; 
     let favoriteItems = []; 
     let adminGodMode = false; 
-    let showTabMenu = false; // สำหรับเปิด HUD
+    let showTabMenu = false; 
     let reqId = null; 
 
     let player = null;
@@ -381,7 +396,6 @@
         scald: "น้ำร้อนลวก" 
     };
 
-    // 📋 โครงสร้างตารางไอเทมใหม่ (แยก short_desc สำหรับหน้าการ์ด และ desc สำหรับ Tooltip)
     const ITEMS_DB = [
         { id: 'tylenol', category: 'attack', name: "Tylenol", cost: 30, cures: 'headache', maxStack: 6, short_desc: "รักษาปวดหัว | +ATK", desc: "+ATK 2, 4, 6, 8, 10, 12 ตามลำดับ" },
         { id: 'ponstan', category: 'attack', name: "Ponstan", cost: 30, cures: 'headache,muscle_ache', maxStack: 3, short_desc: "รักษาปวดหัว,ปวดกล้ามเนื้อ | +นัดกระสุน, +ATK", desc: "เพิ่มกระสุน 1 นัด และบวก ATK 1 แต้ม (ต่อ 1 สแต็ก)" },
@@ -452,7 +466,6 @@
         }, duration);
     }
 
-    // ฟังก์ชัน Pips จุดไข่ปลา
     function getPipsHtml(current, max) {
         if (max === 99) return `<div style="font-size:12px; color:#aaa; margin-top:4px;">ครอบครอง: ${current} ชิ้น</div>`;
         let html = '<div class="pips-container">';
@@ -465,7 +478,6 @@
         return html;
     }
 
-    // ฟังก์ชันรายการโปรด (Favorite)
     function toggleFav(id) {
         if(favoriteItems.includes(id)) {
             favoriteItems = favoriteItems.filter(i => i !== id);
@@ -477,7 +489,6 @@
         renderFullShop(searchInput ? searchInput.value : '');
     }
 
-    // ระบบกด TAB HUD เมนู
     window.addEventListener('keydown', e => {
         let k = e.key.toLowerCase();
         
@@ -595,7 +606,6 @@
                 document.getElementById('fullname').style.display = 'none'; document.getElementById('fullname').value = '';
             }
             
-            // โหลดรายการโปรด
             let storedFavs = localStorage.getItem('fas_favs_' + currentUser.username);
             if (storedFavs) favoriteItems = JSON.parse(storedFavs);
 
@@ -1053,6 +1063,10 @@
             this.cpDamageTimer = 0.5;
             this.deadProcessed = false;
             
+            const hpMap12 = [1, 1, 2, 2, 3, 4, 5, 8, 9, 10]; 
+            const hpMap3  = [0, 0, 0, 1, 2, 2, 3, 4, 6, 8];
+            const hpMap4  = [0, 0, 0, 5, 6, 7, 9, 9, 10, 13];
+            
             let loop = phase >= 10 ? phase - 10 : 0;
             
             if (type === 1 || type === 2) { 
@@ -1414,7 +1428,7 @@
             
             player = new Player(); player.applyPhaseModifiers(); 
             enemies = []; bullets = []; enemyBullets = []; drops = []; explosions = [];
-            currentPhase = 1; phaseTimer = 30; score = 0; coins = 0; adminGodMode = false;
+            currentPhase = 1; phaseTimer = 30; score = 0; coins = 0; adminGodMode = false; showTabMenu = false;
             
             resetKeys(); 
             gameState = 'PLAYING'; 
@@ -1651,7 +1665,6 @@
             player.inv.flying_rabit = 0;
             player.activeCounterpain = false; 
             
-            // 💤 เคลียร์ดีบัฟง่วงนอนจากตอนเล่น
             player.activeCpmDebuff = 0; 
             player.cpmDebuffToApply = 0;
             
@@ -1747,7 +1760,7 @@
             } else {
                 let isMax = item.maxStack !== 99 && player.inv[item.id] >= item.maxStack;
                 let maxBadge = isMax ? `<span class="max-badge">MAX</span>` : "";
-                
+
                 let curesArr = item.cures.split(',');
                 let isCureNeeded = false;
                 if(item.cures !== 'hp') {
@@ -1767,14 +1780,25 @@
         });
     }
 
+    // 🗂️ ระบบเรนเดอร์ Catalog แบบ List แนวนอน แบ่งหมวดหมู่+เรียงตามโรค
     function renderFullShop(filterText = '') {
         const container = document.getElementById('fullShopList'); 
         if(!container) return;
         container.innerHTML = ''; 
         
+        // น้ำหนักสำหรับการเรียงลำดับ Category
+        const catWeight = { attack: 1, defense: 2, economy: 3, heal: 4 };
+
         let sortedItems = ITEMS_DB.slice().sort((a, b) => {
+            // 1. เรียงตามหมวดหมู่ (Category)
+            if (catWeight[a.category] !== catWeight[b.category]) {
+                return catWeight[a.category] - catWeight[b.category];
+            }
+            // 2. เรียงตามโรคที่รักษา (Cures) เพื่อให้ตัวรักษาโรคเดียวกันอยู่ติดกัน
             if (a.cures < b.cures) return -1;
             if (a.cures > b.cures) return 1;
+            
+            // 3. เรียงตามตัวอักษร
             return a.name.localeCompare(b.name);
         });
 
@@ -1822,7 +1846,7 @@
                         </div>
                         <div class="cat-right">
                             <span class="cat-price">$${dCost}</span>
-                            <button onclick="buyItem('${item.id}', ${dCost}, false, -1)" style="background:${btnColor}; padding:8px 20px; font-size:14px; border-radius:6px;">${btnText}</button>
+                            <button onclick="buyItem('${item.id}', ${dCost}, false, -1)" style="background:${btnColor}; padding:8px 20px; font-size:14px; border-radius:6px; min-width: 100px;">${btnText}</button>
                         </div>
                     </div>`;
             });
@@ -2021,6 +2045,7 @@
         enemySpawnTimer -= dt;
         if (enemySpawnTimer <= 0) {
             
+            // 👹 ระบบบอส และ มินิบอสเฟสหลังๆ
             if (!bossSpawnedThisPhase && (currentPhase === 3 || currentPhase === 5 || currentPhase === 7 || currentPhase === 9 || currentPhase >= 10)) {
                 let boss = new Enemy(5, currentPhase);
                 boss.bossName = "BOSS";
@@ -2201,23 +2226,25 @@
         drops.forEach(d => d.update(dt)); drops = drops.filter(d => d.active);
     }
 
-    // 📋 เรนเดอร์เมนู TAB แบบละเอียด (หยุดเวลาชั่วคราวขณะโชว์)
+    // 📋 เรนเดอร์เมนู TAB แบบละเอียด (หยุดเวลาชั่วคราวขณะโชว์) เรียงเลย์เอาต์ใหม่!
     function renderTabMenu() {
         if(gameState !== 'PLAYING') return;
         let menu = document.getElementById('hudTabMenu');
         menu.classList.add('active');
         
-        let debuffHtml = '<h3 style="color:#ff5555; margin-top:0; border-bottom:1px solid #555; padding-bottom:5px;">⚠️ อาการป่วยปัจจุบัน</h3>';
+        // --- 1. Right Bottom: DEBUFFS ---
+        let debuffHtml = '<h3 style="color:#ff5555; margin-top:0; border-bottom:1px solid #555; padding-bottom:5px;">⚠️ อาการป่วย</h3>';
         let hasDebuff = false;
         for(let key in player.activeStatuses) {
             if(player.activeStatuses[key] > 0) {
                 hasDebuff = true;
-                debuffHtml += `<div style="margin-bottom:8px; font-size:15px;"><strong style="color:#ff9999;">🦠 ${STATUS_NAMES[key]} (Lv.${player.activeStatuses[key]}/3)</strong><br><span style="color:#aaa; font-size:13px;">${STATUS_DESC[key]}</span></div>`;
+                debuffHtml += `<div style="margin-bottom:4px; font-size:14px; color:#ff9999;">🦠 ${STATUS_NAMES[key]} (Lv.${player.activeStatuses[key]}/3)</div>`;
             }
         }
-        if(!hasDebuff) debuffHtml += '<div style="color:#0f0;">ไม่มีอาการป่วย สุขภาพแข็งแรงดีเยี่ยม!</div>';
+        if(!hasDebuff) debuffHtml += '<div style="color:#0f0; font-size:14px;">ไม่มีอาการป่วย</div>';
 
-        let buffHtml = '<h3 style="color:#4CAF50; margin-top:0; border-bottom:1px solid #555; padding-bottom:5px; grid-column: span 2;">💊 ไอเทมและยาที่ถืออยู่</h3>';
+        // --- 2. Right Top: BUFFS ---
+        let buffHtml = '<h3 style="color:#4CAF50; margin-top:0; border-bottom:1px solid #555; padding-bottom:5px;">💊 ยาและไอเทม</h3>';
         let hasBuff = false;
         for(let key in player.inv) {
             if(player.inv[key] > 0) {
@@ -2225,22 +2252,28 @@
                 if(!item) continue;
                 hasBuff = true;
                 let maxStr = item.maxStack === 99 ? '∞' : item.maxStack;
-                buffHtml += `<div style="background:rgba(0,0,0,0.4); padding:10px; border-radius:6px; border-left:3px solid #4CAF50;"><strong style="color:#a5d6a7;">${item.name} (${player.inv[key]}/${maxStr})</strong><br><span style="color:#ccc; font-size:12px;">${item.short_desc}</span></div>`;
+                buffHtml += `<div style="margin-bottom:4px; font-size:14px; color:#a5d6a7;">✔️ ${item.name} (${player.inv[key]}/${maxStr})</div>`;
             }
         }
-        if(!hasBuff) buffHtml += '<div style="color:#aaa;">กระเป๋าว่างเปล่า ยังไม่มีไอเทมใดๆ</div>';
+        if(!hasBuff) buffHtml += '<div style="color:#aaa; font-size:14px;">กระเป๋าว่างเปล่า</div>';
 
         document.getElementById('hudTabDebuff').innerHTML = debuffHtml;
         document.getElementById('hudTabBuff').innerHTML = buffHtml;
         
+        // --- 3. Left: STATS ---
         let dodgePerc = Math.min(70, Math.floor(player.def * 0.7));
         document.getElementById('hudTabStats').innerHTML = `
-            <h3 style="color:#00bcd4; margin-top:0; border-bottom:1px solid #555; padding-bottom:5px;">📊 สเตตัสปัจจุบัน</h3>
-            <p style="font-size:16px;">❤️ <strong>HP:</strong> <span style="color:#0f0;">${Math.ceil(player.hp)} / ${player.maxHp}</span></p>
-            <p style="font-size:16px;">⚔️ <strong>ATK:</strong> ${player.atk} &nbsp;|&nbsp; 🎯 <strong>คริติคอล:</strong> ${Math.floor(player.critChance*100)}% (x${player.critDamage.toFixed(2)})</p>
-            <p style="font-size:16px;">🛡️ <strong>DEF:</strong> ${player.def} <span style="color:#aaa; font-size:14px;">(หลบหลีก ${dodgePerc}%)</span></p>
-            <p style="font-size:16px;">👟 <strong>SPD:</strong> ${player.spd} &nbsp;|&nbsp; 🔫 <strong>ความเร็วยิง:</strong> ${(1/player.fireRate).toFixed(1)} นัด/วิ</p>
-            <p style="font-size:16px;">🔥 <strong>จำนวนกระสุน:</strong> ${player.bulletCount} นัด / การยิง 1 ครั้ง</p>
+            <h3 style="color:#00bcd4; margin-top:0; border-bottom:1px solid #555; padding-bottom:5px;">📊 สเตตัสตัวละคร</h3>
+            <div style="display:flex; flex-direction:column; gap:12px; margin-top: 15px;">
+                <div style="font-size:16px;">❤️ <strong>HP:</strong> <span style="color:#0f0;">${Math.ceil(player.hp)} / ${player.maxHp}</span></div>
+                <div style="font-size:16px;">⚔️ <strong>ATK:</strong> ${player.atk}</div>
+                <div style="font-size:16px;">🎯 <strong>คริติคอล:</strong> ${Math.floor(player.critChance*100)}% (x${player.critDamage.toFixed(2)})</div>
+                <div style="font-size:16px;">🛡️ <strong>DEF:</strong> ${player.def} <span style="color:#aaa; font-size:14px;">(หลบหลีก ${dodgePerc}%)</span></div>
+                <div style="font-size:16px;">👟 <strong>SPD:</strong> ${player.spd}</div>
+                <div style="font-size:16px;">🔫 <strong>ความเร็วยิง:</strong> ${(1/player.fireRate).toFixed(1)} นัด/วิ</div>
+                <div style="font-size:16px;">🔥 <strong>จำนวนกระสุน:</strong> ${player.bulletCount} นัด/ยิง</div>
+                <div style="font-size:16px;">🧲 <strong>ระยะเก็บเหรียญ:</strong> +${Math.round(player.magnetRange)}</div>
+            </div>
         `;
     }
 
