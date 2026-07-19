@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V3.2</title>
+    <title>First Aid Survivor V3.2.1</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -98,7 +98,7 @@
 
     <!-- Login -->
     <div id="loginScreen" class="screen active">
-        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V3.2)</h1>
+        <h1 style="font-size: 48px; color: #4CAF50; margin-bottom: 30px;">First Aid Survivor (V3.2.1)</h1>
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
@@ -353,7 +353,6 @@
         scald: "น้ำร้อนลวก" 
     };
 
-    // หมวดหมู่ภายในยังคงใช้ 'attack', 'defense', 'economy', 'heal' เพื่อการสุ่มเรท RNG ในร้านค้า
     const ITEMS_DB = [
         { id: 'tylenol', category: 'attack', tier: 'S', name: "Tylenol", cost: 30, cures: 'headache', maxStack: 6, desc: "แก้ปวดหัว | +ATK (2, 4, 6, 8, 10, 12)" },
         { id: 'ponstan', category: 'attack', tier: 'A', name: "Ponstan", cost: 30, cures: 'headache,muscle_ache', maxStack: 3, desc: "แก้ปวดหัว, ปวดกล้ามเนื้อ | +กระสุน 1 นัด & +ATK 1 แต้ม /สแต็ก" },
@@ -1086,7 +1085,6 @@
             
             if (this.spawnDelay > 0) { this.spawnDelay -= dt; return; }
 
-            // ระบบสตั้น (Apache)
             if (this.stunTimer > 0) {
                 this.stunTimer -= dt;
                 return; 
@@ -1600,7 +1598,7 @@
         if(m) m.className = show ? 'active-modal' : '';
         if(show) {
             let searchInput = document.getElementById('shopSearchInput');
-            if (searchInput) searchInput.value = ''; // รีเซ็ตการค้นหาเมื่อเปิดใหม่
+            if (searchInput) searchInput.value = ''; 
             renderFullShop('');
             let fc = document.getElementById('full-shop-coins');
             if(fc) fc.innerText = coins;
@@ -1701,7 +1699,6 @@
         });
     }
 
-    // 🔍 ฟังก์ชัน Render แคตตาล็อกที่รองรับการเรียงหมวดและค้นหา
     function renderFullShop(filterText = '') {
         const cNormal = document.getElementById('fullShopNormal'); if(cNormal) cNormal.innerHTML = '';
         const cCombo = document.getElementById('fullShopCombo'); if(cCombo) cCombo.innerHTML = '';
@@ -1771,7 +1768,7 @@
         
         if (player.inv[itemId] >= itemDef.maxStack && itemDef.cures !== 'hp') {
             if (itemId === 'counterpain' && !player.activeCounterpain) {
-                // อนุญาต
+                // อนุญาตให้ซื้อ Counterpain ซ้ำเพื่อ Active ได้แม้ Stack จะเต็ม 3 แล้ว
             } else {
                 showToast("คุณมีไอเทมนี้เต็มแล้ว!", "#ff5555", 2500); 
                 return; 
@@ -1792,7 +1789,7 @@
         
         if (player.inv[itemId] >= itemDef.maxStack && !hasAilment && itemDef.cures !== 'hp') { 
             if (itemId === 'counterpain' && !player.activeCounterpain) {
-                // อนุญาต
+                // ซื้อผ่าน
             } else if (!isDiscounted) {
                 showToast("ไอเทมนี้ให้บัฟระดับสูงสุดแล้ว!", "#ff5555", 2500); 
                 return; 
@@ -2043,7 +2040,6 @@
             enemySpawnTimer = baseDelay;
         }
 
-        // 🔫 อัปเดตกระสุนและใส่ New Spawns จากลูกชิ่งเพื่อกันบั๊กกวน Loop
         let newSpawns = [];
         bullets.forEach(b => b.update(dt, enemies, explosions, newSpawns)); 
         bullets.push(...newSpawns);
@@ -2071,12 +2067,12 @@
                 if (dropCoin) {
                     let sysLv = Math.min(player.inv.systral, 3);
                     let sysChance = [0, 0.05, 0.10, 0.20][sysLv];
-                    let baseDoubleChance = 0.10; 
+                    let baseDoubleChance = 0.05; 
                     
                     let numCoins = 1;
                     if (Math.random() < (baseDoubleChance + sysChance)) {
                         if (sysLv > 0) {
-                            numCoins = Math.floor(Math.random() * 4) + 1; 
+                            numCoins = Math.floor(Math.random() * 2) + 2; 
                         } else {
                             numCoins = 2;
                         }
