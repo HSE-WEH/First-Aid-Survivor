@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V3.9</title>
+    <title>First Aid Survivor V4.0 (with 8-Bit Audio)</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -289,6 +289,171 @@
 </head>
 <body>
 
+<script>
+// ==========================================
+// 🎵 8-BIT SOUND FX GENERATOR (Web Audio API)
+// ==========================================
+const SFX = {
+    ctx: null,
+    isMuted: false,
+    bgmInterval: null,
+    bgmStep: 0,
+    bgmNotes: [220, 261.63, 329.63, 261.63, 220, 261.63, 329.63, 392.00], // A3 C4 E4 C4 A3 C4 E4 G4
+    
+    init() {
+        if (!this.ctx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+    },
+
+    toggleMute() {
+        this.isMuted = !this.isMuted;
+        if (this.isMuted) this.stopBGM();
+        else if (gameState === 'PLAYING') this.playBGM();
+        return this.isMuted;
+    },
+
+    playBGM() {
+        if (this.isMuted || this.bgmInterval || !this.ctx) return;
+        this.bgmStep = 0;
+        this.bgmInterval = setInterval(() => {
+            if(this.isMuted || gameState !== 'PLAYING') return;
+            const t = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(this.bgmNotes[this.bgmStep], t);
+            gain.gain.setValueAtTime(0.03, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(t); osc.stop(t + 0.2);
+            this.bgmStep = (this.bgmStep + 1) % this.bgmNotes.length;
+        }, 250); 
+    },
+
+    stopBGM() {
+        if (this.bgmInterval) { clearInterval(this.bgmInterval); this.bgmInterval = null; }
+    },
+
+    play(name) {
+        if (this.isMuted || !this.ctx) return;
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        switch (name) {
+            case 'click':
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(600, t);
+                gain.gain.setValueAtTime(0.05, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+                osc.start(t); osc.stop(t + 0.05);
+                break;
+            case 'shoot':
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(880, t);
+                osc.frequency.exponentialRampToValueAtTime(110, t + 0.1);
+                gain.gain.setValueAtTime(0.02, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+                osc.start(t); osc.stop(t + 0.1);
+                break;
+            case 'hit':
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, t);
+                osc.frequency.exponentialRampToValueAtTime(50, t + 0.1);
+                gain.gain.setValueAtTime(0.02, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+                osc.start(t); osc.stop(t + 0.1);
+                break;
+            case 'damage':
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, t);
+                osc.frequency.linearRampToValueAtTime(50, t + 0.3);
+                gain.gain.setValueAtTime(0.1, t);
+                gain.gain.linearRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+                break;
+            case 'debuff':
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(300, t);
+                osc.frequency.linearRampToValueAtTime(200, t + 0.2);
+                osc.frequency.linearRampToValueAtTime(250, t + 0.4);
+                gain.gain.setValueAtTime(0.05, t);
+                gain.gain.linearRampToValueAtTime(0.01, t + 0.4);
+                osc.start(t); osc.stop(t + 0.4);
+                break;
+            case 'explode':
+                let bufferSize = this.ctx.sampleRate * 0.3; 
+                let buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                let data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                let noise = this.ctx.createBufferSource();
+                noise.buffer = buffer;
+                let noiseFilter = this.ctx.createBiquadFilter();
+                noiseFilter.type = 'lowpass';
+                noiseFilter.frequency.setValueAtTime(1000, t);
+                noiseFilter.frequency.linearRampToValueAtTime(100, t + 0.3);
+                noise.connect(noiseFilter);
+                noiseFilter.connect(gain);
+                gain.gain.setValueAtTime(0.1, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                noise.start(t);
+                break;
+            case 'coin':
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(987.77, t); 
+                osc.frequency.setValueAtTime(1318.51, t + 0.05); 
+                gain.gain.setValueAtTime(0.05, t);
+                gain.gain.linearRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+                break;
+            case 'diamond':
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1567.98, t); 
+                osc.frequency.setValueAtTime(2093.00, t + 0.1); 
+                gain.gain.setValueAtTime(0.05, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
+                osc.start(t); osc.stop(t + 0.4);
+                break;
+            case 'magnet':
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, t);
+                osc.frequency.exponentialRampToValueAtTime(1200, t + 0.3);
+                gain.gain.setValueAtTime(0.05, t);
+                gain.gain.linearRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t); osc.stop(t + 0.3);
+                break;
+            case 'tick':
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(800, t);
+                gain.gain.setValueAtTime(0.05, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+                osc.start(t); osc.stop(t + 0.05);
+                break;
+            case 'gameover':
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(300, t);
+                osc.frequency.linearRampToValueAtTime(100, t + 1.0);
+                gain.gain.setValueAtTime(0.1, t);
+                gain.gain.linearRampToValueAtTime(0.01, t + 1.0);
+                osc.start(t); osc.stop(t + 1.0);
+                break;
+        }
+    }
+};
+
+function toggleSound() {
+    let muted = SFX.toggleMute();
+    let btns = document.querySelectorAll('.btn-sound-toggle');
+    btns.forEach(b => b.innerText = muted ? '🔇' : '🔊');
+    if (!muted) SFX.play('click');
+}
+</script>
+
 <div id="game-container">
     <div id="topBar" class="top-bar">
         <span id="tb-name">Player: ---</span>
@@ -296,7 +461,10 @@
             <span id="tb-energy" style="display: none;">Energy: -/5</span>
             <span id="tb-energy-timer" style="display: none; color: #ffeb3b; margin-left: 5px;"></span>
         </span>
-        <button onclick="logout()" style="padding: 5px 15px; font-size: 12px; background-color: #f44336;">Logout</button>
+        <div>
+            <button class="btn-sound-toggle" onclick="toggleSound()" style="padding: 5px 10px; font-size: 14px; background-color: #555; margin-right: 10px;">🔊</button>
+            <button onclick="logout()" style="padding: 5px 15px; font-size: 12px; background-color: #f44336;">Logout</button>
+        </div>
     </div>
     
     <div id="notificationList"></div>
@@ -316,10 +484,10 @@
     <div id="menuScreen" class="screen">
         <h2 style="font-size: 48px; margin-bottom: 20px; color: #fff;">MAIN MENU</h2>
         <button onclick="startGame()" class="menu-btn" style="font-size: 26px; padding: 20px 0; background-color: #2196F3;">🔥 GAME START</button>
-        <button onclick="switchScreen('howToPlayScreen'); showHtpTab('basic');" class="menu-btn">📖 ข้อมูลเกม & คู่มือ</button>
-        <button onclick="switchScreen('leaderboardScreen')" class="menu-btn">🏆 Leader Board</button>
-        <button onclick="showUpgrade()" class="menu-btn" style="background-color: #9c27b0;">💎 Upgrades (เพชร: <span id="menu-diamonds">0</span>)</button>
-        <button onclick="openCustomizeModal()" class="menu-btn" style="background-color: #ff9800;">🎨 แต่งตัว</button>
+        <button onclick="switchScreen('howToPlayScreen'); showHtpTab('basic'); SFX.play('click');" class="menu-btn">📖 ข้อมูลเกม & คู่มือ</button>
+        <button onclick="switchScreen('leaderboardScreen'); SFX.play('click');" class="menu-btn">🏆 Leader Board</button>
+        <button onclick="showUpgrade(); SFX.play('click');" class="menu-btn" style="background-color: #9c27b0;">💎 Upgrades (เพชร: <span id="menu-diamonds">0</span>)</button>
+        <button onclick="openCustomizeModal(); SFX.play('click');" class="menu-btn" style="background-color: #ff9800;">🎨 แต่งตัว</button>
         <canvas id="charPreviewCanvas" width="90" height="110" style="width:90px !important; height:110px !important; image-rendering:pixelated; margin-top:15px;"></canvas>
     </div>
 
@@ -328,7 +496,7 @@
         <div class="custom-panel">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #555; padding-bottom:10px; margin-bottom:15px;">
                 <h2 style="margin:0; color:#ff9800;">🎨 แต่งตัวละคร</h2>
-                <button onclick="closeCustomizeModal()" style="background:#f44336; padding:8px 16px; font-size:14px;">ปิด (X)</button>
+                <button onclick="closeCustomizeModal(); SFX.play('click');" style="background:#f44336; padding:8px 16px; font-size:14px;">ปิด (X)</button>
             </div>
             <div style="display:flex; justify-content:center; margin-bottom:15px;">
                 <canvas id="customPreviewCanvas" width="90" height="110" style="width:90px !important; height:110px !important; image-rendering:pixelated; background:rgba(0,0,0,0.4); border-radius:8px; padding:10px;"></canvas>
@@ -353,7 +521,7 @@
                 <div class="custom-row-title">👕 ชุด</div>
                 <div id="custRowOutfit"></div>
             </div>
-            <button onclick="closeCustomizeModal()" style="width:100%; padding:14px; font-size:16px; background-color:#4CAF50; margin-top:5px;">✅ บันทึกและปิด</button>
+            <button onclick="closeCustomizeModal(); SFX.play('click');" style="width:100%; padding:14px; font-size:16px; background-color:#4CAF50; margin-top:5px;">✅ บันทึกและปิด</button>
         </div>
     </div>
 
@@ -363,8 +531,8 @@
             <h2>🏳️ ยืนยันการยอมแพ้</h2>
             <p>คุณแน่ใจหรือไม่ว่าต้องการยอมแพ้?<br>(จบเกมและบันทึกคะแนนรอบนี้ทันที)</p>
             <div class="confirm-btn-row">
-                <button onclick="confirmSurrender()" class="btn-confirm-yes">✅ ยืนยัน</button>
-                <button onclick="closeSurrenderConfirm()" class="btn-confirm-no">❌ ยกเลิก</button>
+                <button onclick="confirmSurrender(); SFX.play('click');" class="btn-confirm-yes">✅ ยืนยัน</button>
+                <button onclick="closeSurrenderConfirm(); SFX.play('click');" class="btn-confirm-no">❌ ยกเลิก</button>
             </div>
         </div>
     </div>
@@ -373,11 +541,11 @@
     <div id="howToPlayScreen" class="screen">
         <h2 style="font-size: 32px; margin-bottom: 20px;">คู่มือข้อมูลเกม</h2>
         <div style="display: flex; gap: 2px;">
-            <button class="tab-btn active-tab" id="btn-tab-basic" onclick="showHtpTab('basic')">วิธีเล่น</button>
-            <button class="tab-btn" id="btn-tab-enemy" onclick="showHtpTab('enemy')">มอนสเตอร์</button>
-            <button class="tab-btn" id="btn-tab-shop" onclick="showHtpTab('shop')">ยาในร้านค้า</button>
-            <button class="tab-btn" id="btn-tab-debuff" onclick="showHtpTab('debuff')">อาการป่วย</button>
-            <button class="tab-btn" id="btn-tab-upg" onclick="showHtpTab('upg')">อัปเกรด</button>
+            <button class="tab-btn active-tab" id="btn-tab-basic" onclick="showHtpTab('basic'); SFX.play('click');">วิธีเล่น</button>
+            <button class="tab-btn" id="btn-tab-enemy" onclick="showHtpTab('enemy'); SFX.play('click');">มอนสเตอร์</button>
+            <button class="tab-btn" id="btn-tab-shop" onclick="showHtpTab('shop'); SFX.play('click');">ยาในร้านค้า</button>
+            <button class="tab-btn" id="btn-tab-debuff" onclick="showHtpTab('debuff'); SFX.play('click');">อาการป่วย</button>
+            <button class="tab-btn" id="btn-tab-upg" onclick="showHtpTab('upg'); SFX.play('click');">อัปเกรด</button>
         </div>
         
         <div id="tab-basic" class="htp-content active-content">
@@ -455,7 +623,7 @@
             </p>
         </div>
         
-        <button onclick="switchScreen('menuScreen')" style="background-color: #777; padding: 15px 40px; font-size: 18px;">กลับสู่เมนูหลัก</button>
+        <button onclick="switchScreen('menuScreen'); SFX.play('click');" style="background-color: #777; padding: 15px 40px; font-size: 18px;">กลับสู่เมนูหลัก</button>
     </div>
 
     <!-- Upgrade Screen -->
@@ -463,20 +631,20 @@
         <h2 style="font-size: 36px; margin-bottom: 10px;">Permanent Upgrades</h2>
         <p style="font-size: 20px; margin-bottom: 20px;">เพชรที่มี: <span id="upg-diamonds" style="color: cyan; font-weight: bold; font-size: 24px;">0</span> 💎</p>
         <div style="background: rgba(40,40,40,0.9); padding: 30px; border-radius: 12px; width: 500px; border: 2px solid #4CAF50;">
-            <div class="upg-row"><span style="font-size: 18px;">❤️ <strong>Max HP</strong> (+<span id="upg-lvl-hp">0</span>/40)</span><button id="btn-upg-hp" onclick="buyUpgrade('hp')">อัปเกรด</button></div>
-            <div class="upg-row"><span style="font-size: 18px;">⚔️ <strong>Attack</strong> (+<span id="upg-lvl-atk">0</span>/10)</span><button id="btn-upg-atk" onclick="buyUpgrade('atk')">อัปเกรด</button></div>
-            <div class="upg-row"><span style="font-size: 18px;">🛡️ <strong>ภูมิคุ้มกัน</strong> (+<span id="upg-lvl-def">0</span>/50)</span><button id="btn-upg-def" onclick="buyUpgrade('def')">อัปเกรด</button></div>
-            <div class="upg-row"><span style="font-size: 18px;">👟 <strong>Speed</strong> (+<span id="upg-lvl-spd">0</span>/3)</span><button id="btn-upg-spd" onclick="buyUpgrade('spd')">อัปเกรด</button></div>
-            <div class="upg-row"><span style="font-size: 18px;">🎯 <strong>Critical</strong> (+<span id="upg-lvl-crit">0</span>%/5%)</span><button id="btn-upg-crit" onclick="buyUpgrade('crit')">อัปเกรด</button></div>
+            <div class="upg-row"><span style="font-size: 18px;">❤️ <strong>Max HP</strong> (+<span id="upg-lvl-hp">0</span>/40)</span><button id="btn-upg-hp" onclick="buyUpgrade('hp'); SFX.play('click');">อัปเกรด</button></div>
+            <div class="upg-row"><span style="font-size: 18px;">⚔️ <strong>Attack</strong> (+<span id="upg-lvl-atk">0</span>/10)</span><button id="btn-upg-atk" onclick="buyUpgrade('atk'); SFX.play('click');">อัปเกรด</button></div>
+            <div class="upg-row"><span style="font-size: 18px;">🛡️ <strong>ภูมิคุ้มกัน</strong> (+<span id="upg-lvl-def">0</span>/50)</span><button id="btn-upg-def" onclick="buyUpgrade('def'); SFX.play('click');">อัปเกรด</button></div>
+            <div class="upg-row"><span style="font-size: 18px;">👟 <strong>Speed</strong> (+<span id="upg-lvl-spd">0</span>/3)</span><button id="btn-upg-spd" onclick="buyUpgrade('spd'); SFX.play('click');">อัปเกรด</button></div>
+            <div class="upg-row"><span style="font-size: 18px;">🎯 <strong>Critical</strong> (+<span id="upg-lvl-crit">0</span>%/5%)</span><button id="btn-upg-crit" onclick="buyUpgrade('crit'); SFX.play('click');">อัปเกรด</button></div>
         </div>
-        <button onclick="switchScreen('menuScreen')" style="margin-top: 30px; background-color: #777; padding: 15px 40px; font-size: 18px;">กลับสู่เมนูหลัก</button>
+        <button onclick="switchScreen('menuScreen'); SFX.play('click');" style="margin-top: 30px; background-color: #777; padding: 15px 40px; font-size: 18px;">กลับสู่เมนูหลัก</button>
     </div>
 
     <!-- Leaderboard -->
     <div id="leaderboardScreen" class="screen">
         <h2 style="font-size: 36px;">🏆 Leader Board (Top 10)</h2>
         <div id="leaderboardList" style="background: #333; padding: 20px; border-radius: 8px; width: 500px; max-height: 400px; overflow-y: auto; margin: 20px 0; font-size: 18px; border: 2px solid #FFD700;">Loading...</div>
-        <button onclick="switchScreen('menuScreen')" style="background-color: #777; padding: 15px 40px; font-size: 18px;">กลับสู่เมนูหลัก</button>
+        <button onclick="switchScreen('menuScreen'); SFX.play('click');" style="background-color: #777; padding: 15px 40px; font-size: 18px;">กลับสู่เมนูหลัก</button>
     </div>
     
     <!-- Game Over Screen -->
@@ -484,7 +652,7 @@
         <h1 style="font-size: 80px; color: #ff5555; margin-bottom: 20px;">GAME OVER</h1>
         <h2 id="go-phase" style="color: white; font-size: 30px;">Phase Reached: 1</h2>
         <h2 id="go-score" style="color: yellow; font-size: 30px; margin-bottom: 40px;">Score: 0</h2>
-        <button onclick="switchScreen('menuScreen')" style="font-size: 24px; padding: 15px 40px; background-color: #2196F3;">กลับสู่เมนูหลัก</button>
+        <button onclick="switchScreen('menuScreen'); SFX.play('click');" style="font-size: 24px; padding: 15px 40px; background-color: #2196F3;">กลับสู่เมนูหลัก</button>
     </div>
 
     <!-- 🏪 SHOP PHASE -->
@@ -506,7 +674,7 @@
                 </div>
 
                 <div class="combo-box" id="bagBox">
-                    <div class="bag-header" onclick="toggleBagBox()">
+                    <div class="bag-header" onclick="toggleBagBox(); SFX.play('click');">
                         <strong style="color: #4CAF50;">🎒 กระเป๋ายา</strong>
                         <span class="bag-toggle-icon" id="bagToggleIcon">▼</span>
                     </div>
@@ -532,23 +700,23 @@
                     <div class="shop-cards-wrapper" id="shopCards">
                         <!-- Cards injected by JS -->
                     </div>
-                    <button onclick="rerollShop()" id="btnReroll" class="btn-reroll">🔄 สุ่มกระดานใหม่ (ใช้ <span id="shop-reroll-cost">1</span> เหรียญ)</button>
+                    <button onclick="rerollShop(); SFX.play('click');" id="btnReroll" class="btn-reroll">🔄 สุ่มกระดานใหม่ (ใช้ <span id="shop-reroll-cost">1</span> เหรียญ)</button>
                 </div>
 
                 <div class="btn-action-group">
-                    <button onclick="toggleFullShop(true)" class="btn-catalog">🛒 เปิดแคตตาล็อกยาทั้งหมด (Full Shop)</button>
+                    <button onclick="toggleFullShop(true); SFX.play('click');" class="btn-catalog">🛒 เปิดแคตตาล็อกยาทั้งหมด (Full Shop)</button>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <button id="btn-quick-airx" onclick="buyQuickItem('air_x')" class="btn-quick-buy"></button>
-                        <button id="btn-quick-rabbit" onclick="buyQuickItem('flying_rabit')" class="btn-quick-buy"></button>
-                        <button id="btn-quick-counterpain" onclick="buyQuickItem('counterpain')" class="btn-quick-buy"></button>
-                        <button id="btn-quick-dressing" onclick="buyQuickItem('dressing_set')" class="btn-quick-buy"></button>
+                        <button id="btn-quick-airx" onclick="buyQuickItem('air_x'); SFX.play('click');" class="btn-quick-buy"></button>
+                        <button id="btn-quick-rabbit" onclick="buyQuickItem('flying_rabit'); SFX.play('click');" class="btn-quick-buy"></button>
+                        <button id="btn-quick-counterpain" onclick="buyQuickItem('counterpain'); SFX.play('click');" class="btn-quick-buy"></button>
+                        <button id="btn-quick-dressing" onclick="buyQuickItem('dressing_set'); SFX.play('click');" class="btn-quick-buy"></button>
                     </div>
 
                     <div style="display: flex; gap: 10px; margin-top: 5px;">
-                        <button onclick="surrenderGame()" class="btn-surrender" style="flex: 1;">🏳️ ยอมแพ้</button>
-                        <button onclick="showNextPhaseInfo()" class="btn-info" style="flex: 1;">ℹ️ ข้อมูลด่านหน้า</button>
-                        <button onclick="nextPhase()" id="btn-next-phase" class="btn-next" style="flex: 1;">➡️ ลุย Phase ถัดไป</button>
+                        <button onclick="surrenderGame(); SFX.play('click');" class="btn-surrender" style="flex: 1;">🏳️ ยอมแพ้</button>
+                        <button onclick="showNextPhaseInfo(); SFX.play('click');" class="btn-info" style="flex: 1;">ℹ️ ข้อมูลด่านหน้า</button>
+                        <button onclick="nextPhase(); SFX.play('click');" id="btn-next-phase" class="btn-next" style="flex: 1;">➡️ ลุย Phase ถัดไป</button>
                     </div>
                     
                     <button id="btnAdminSkip" onclick="adminSkipPhase()" class="btn-reroll" style="display:none; background-color: #ff5722; margin-top: 5px;">👑 [Admin] วาร์ปข้าม Phase</button>
@@ -561,7 +729,7 @@
                             <h2 style="margin: 0; color: #4CAF50; font-size: 24px;">🛒 แคตตาล็อกยาทั้งหมด (Shop)</h2>
                             <div style="display: flex; align-items: center; gap: 20px;">
                                 <h3 style="margin:0; color: yellow;">เงิน: 💰 <span id="full-shop-coins">0</span></h3>
-                                <button onclick="toggleFullShop(false)" style="background-color: #f44336; padding: 8px 20px; font-size: 14px;">ปิด (X)</button>
+                                <button onclick="toggleFullShop(false); SFX.play('click');" style="background-color: #f44336; padding: 8px 20px; font-size: 14px;">ปิด (X)</button>
                             </div>
                         </div>
                         <div class="shop-search-row">
@@ -580,7 +748,7 @@
                     <div class="info-panel">
                         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #555; padding-bottom:10px;">
                             <h2 style="margin:0; color:#00bcd4;">ℹ️ ข้อมูล Phase ถัดไป (<span id="info-phase-num"></span>)</h2>
-                            <button onclick="document.getElementById('nextPhaseModal').classList.remove('active-modal')" style="background:#f44336; padding:8px 20px; font-size:14px;">ปิด (X)</button>
+                            <button onclick="document.getElementById('nextPhaseModal').classList.remove('active-modal'); SFX.play('click');" style="background:#f44336; padding:8px 20px; font-size:14px;">ปิด (X)</button>
                         </div>
                         <h3 style="color:#FFD700; margin-top:20px; margin-bottom:10px;">👹 มอนสเตอร์ที่จะพบ</h3>
                         <div id="info-monsters"></div>
@@ -612,6 +780,7 @@
     let currentPhase = 1;
     let phaseTimer = 30;
     let lastTime = 0;
+    let lastTick = 0; // Дляเสียงนับถอยหลัง
     let coins = 0;
     let score = 0;
     let rerollCost = 1;
@@ -737,58 +906,50 @@
         });
     }
     function buildDropSprite(kind) {
-        const S = 18; // Increased slightly for better rendering of details
+        const S = 18; 
         return getCachedSprite('drop_' + kind, S, S, (c) => {
             if (kind === 'coin') {
                 c.fillStyle = '#FFD866'; c.beginPath(); c.arc(9, 9, 8, 0, Math.PI * 2); c.fill();
                 c.strokeStyle = '#B5842A'; c.lineWidth = 1.5; c.stroke();
                 c.fillStyle = '#B5842A';
                 c.font = 'bold 12px Arial'; c.textAlign = 'center'; c.textBaseline = 'middle';
-                c.fillText('$', 9, 10); // Draw '$' in the middle
-                c.fillStyle = '#FFF3D0'; c.fillRect(4, 4, 2, 2); // shine
+                c.fillText('$', 9, 10); 
+                c.fillStyle = '#FFF3D0'; c.fillRect(4, 4, 2, 2); 
             } else if (kind === 'diamond') {
                 c.fillStyle = '#7FE8C6'; c.beginPath();
                 c.moveTo(9, 2); c.lineTo(16, 9); c.lineTo(9, 16); c.lineTo(2, 9); c.closePath(); c.fill();
                 c.fillStyle = '#C8FFF0'; c.fillRect(6, 5, 3, 3);
                 c.strokeStyle = '#3FA184'; c.stroke();
             } else if (kind === 'magnet') {
-                // 1. ลงสีพื้นตัวแม่เหล็ก (สีแดง)
                 c.fillStyle = '#FF6F5E';
-                c.fillRect(4, 3, 4, 6);   // ขาซ้าย
-                c.fillRect(10, 3, 4, 6);  // ขาขวา
-                c.fillRect(4, 9, 10, 4);  // ฐานโค้งด้านล่าง
+                c.fillRect(4, 3, 4, 6);   
+                c.fillRect(10, 3, 4, 6);  
+                c.fillRect(4, 9, 10, 4);  
 
-                // 2. มิติแสงเงา (Shading & Highlight) ให้ดูเป็น 3D
-                // -- เงามืด (Shadow) - ตกกระทบขอบขวาและขอบล่าง
                 c.fillStyle = '#C0392B';
-                c.fillRect(7, 3, 1, 6);   // เงาขาซ้าย (ร่องใน)
-                c.fillRect(13, 3, 1, 10); // เงาขาขวาและขอบขวาสุด
-                c.fillRect(4, 11, 10, 2); // เงาขอบล่างของตัวแม่เหล็กทั้งหมด
+                c.fillRect(7, 3, 1, 6);   
+                c.fillRect(13, 3, 1, 10); 
+                c.fillRect(4, 11, 10, 2); 
                 
-                // -- แสงสว่าง (Highlight) - ตกกระทบขอบซ้ายและขอบบน
                 c.fillStyle = '#FFA096'; 
-                c.fillRect(4, 3, 1, 8);   // ไฮไลท์ขอบซ้ายสุด
-                c.fillRect(10, 3, 1, 6);  // ไฮไลท์ขอบซ้ายของขาขวา
-                c.fillRect(5, 9, 5, 1);   // ไฮไลท์ร่องตรงกลาง
+                c.fillRect(4, 3, 1, 8);   
+                c.fillRect(10, 3, 1, 6);  
+                c.fillRect(5, 9, 5, 1);   
 
-                // -- จุดแสงสะท้อน (Shine) ให้ดูวาวเหมือนเหรียญ/เพชร
                 c.fillStyle = '#FFFFFF';
-                c.fillRect(5, 4, 1, 2);   // จุดวาวที่ขาซ้ายด้านบน
+                c.fillRect(5, 4, 1, 2);   
 
-                // 3. ลงสีขั้วแม่เหล็ก (สีเงิน)
                 c.fillStyle = '#EFEFEF';
                 c.fillRect(4, 1, 4, 2);
                 c.fillRect(10, 1, 4, 2);
                 
-                // -- แสงเงาสำหรับขั้วสีเงิน
-                c.fillStyle = '#FFFFFF';  // แสงขอบซ้าย
+                c.fillStyle = '#FFFFFF';  
                 c.fillRect(4, 1, 1, 2);
                 c.fillRect(10, 1, 1, 2);
-                c.fillStyle = '#BDBDBD';  // เงาขอบขวา
+                c.fillStyle = '#BDBDBD';  
                 c.fillRect(7, 1, 1, 2);
                 c.fillRect(13, 1, 1, 2);
 
-                // 4. วาดเส้นขอบรอบนอกตัว U (Outline)
                 c.strokeStyle = '#1A130D';
                 c.lineWidth = 1;
                 c.beginPath();
@@ -799,7 +960,6 @@
                 c.closePath();        
                 c.stroke();
 
-                // 5. วาดเส้นขอบคั่นระหว่างขั้วสีเงินกับสีแดง
                 c.beginPath();
                 c.moveTo(3.5, 2.5); c.lineTo(8.5, 2.5);
                 c.moveTo(9.5, 2.5); c.lineTo(14.5, 2.5);
@@ -1068,9 +1228,9 @@
         if(currentUser) localStorage.setItem('fas_favs_' + currentUser.username, JSON.stringify(favoriteItems));
         let searchInput = document.getElementById('shopSearchInput');
         renderFullShop(searchInput ? searchInput.value : '');
+        SFX.play('click');
     }
 
-    // Login screen inputs Enter key handler
     document.addEventListener('DOMContentLoaded', () => {
         ['username', 'pincode', 'fullname'].forEach(id => {
             let el = document.getElementById(id);
@@ -1081,7 +1241,6 @@
             }
         });
         
-        // Populate HTP Icons after Load
         setTimeout(() => {
             try {
                 document.getElementById('htp-icon-t1').src = buildGermSprite(1).toDataURL();
@@ -1111,8 +1270,8 @@
         
         if (currentUser && currentUser.is_admin) {
             if (k === 'g') adminGodMode = !adminGodMode;
-            if (k === 'c') { coins += 1000; if(gameState === 'SHOP') updateShopUI(); }
-            if (k === 'v') { currentUser.diamonds += 100; if(gameState === 'SHOP') updateShopUI(); }
+            if (k === 'c') { coins += 1000; if(gameState === 'SHOP') updateShopUI(); SFX.play('click');}
+            if (k === 'v') { currentUser.diamonds += 100; if(gameState === 'SHOP') updateShopUI(); SFX.play('click');}
             
             const debuffKeys = { '1':'headache', '2':'allergy', '3':'stomach', '4':'rash', '5':'swelling', '6':'mouth_ulcer', '7':'red_eye', '8':'sore_throat', '9':'fresh_wound', '0':'scald', '-':'muscle_ache' };
             if (debuffKeys[k]) {
@@ -1123,6 +1282,7 @@
                     player.applyPhaseModifiers();
                     if (gameState === 'SHOP') updateShopUI(); 
                     if (showTabMenu) renderTabMenu();
+                    SFX.play('debuff');
                 }
             }
         }
@@ -1178,6 +1338,7 @@
     }
 
     async function handleLogin() {
+        SFX.init(); SFX.play('click');
         const userStr = document.getElementById('username').value.trim();
         const pinStr = document.getElementById('pincode').value.trim();
         const fnameStr = document.getElementById('fullname').value.trim();
@@ -1327,7 +1488,7 @@
         let maxLvl = { hp: 40, atk: 10, def: 50, spd: 3, crit: 5 }[stat]; 
         if (currentLvl >= maxLvl) return;
         let cost = getUpgradeCost(stat, currentLvl);
-        if (currentUser.diamonds < cost) { showToast("เพชรไม่พอ!", "#ff5555", 2500); return; }
+        if (currentUser.diamonds < cost) { showToast("เพชรไม่พอ!", "#ff5555", 2500); SFX.play('debuff'); return; }
 
         currentUser.diamonds -= cost; currentUser[`upgraded_${stat}`] = currentLvl + 1;
         updateUpgradeUI(); updateTopBar();
@@ -1335,7 +1496,7 @@
     }
 
     window.activateCombo = function(comboId, cost, hpBonus) {
-        if (coins < cost) { showToast("เหรียญไม่พอ!", "#ff5555", 2500); return; }
+        if (coins < cost) { showToast("เหรียญไม่พอ!", "#ff5555", 2500); SFX.play('debuff'); return; }
         
         if (comboId === 'full_set') {
             let has1 = player.appliedCombos.has('saline_plaster');
@@ -1343,6 +1504,7 @@
             let has3 = player.appliedCombos.has('dress_bet');
             if (!has1 || !has2 || !has3) {
                 showToast("ต้องจ่ายเงินเปิดใช้งานชุด 1, 2 และ 3 ให้ครบก่อน!", "#ff5555", 3500);
+                SFX.play('debuff');
                 return;
             }
         }
@@ -1362,6 +1524,7 @@
         }
         
         updateShopUI();
+        SFX.play('click');
     }
 
     // ----------------------------------------------------------------
@@ -1453,7 +1616,7 @@
             this.fireRate = this.baseFireRate * (1 + throatPen) * (1 - totalFireRateBuff);
             this.fireRate = Math.max(0.1, this.fireRate); 
 
-            let tyLv = Math.min(this.inv.tylenol, 5); // Tylenol max stack is 5 now
+            let tyLv = Math.min(this.inv.tylenol, 5);
             let tyAtk = tyLv * 2; 
             let ponstanLv = Math.min(this.inv.ponstan, 3);
             
@@ -1503,6 +1666,7 @@
                     if (this.hp > 1) {
                         this.hp = Math.max(1, this.hp - dmg);
                         showToast(`🔥 น้ำร้อนลวก! เสียเลือด ${dmg}`, "#ff5555");
+                        SFX.play('damage');
                     }
                 }
             } else {
@@ -1597,8 +1761,9 @@
                 if (dist < minDist) { minDist = dist; nearest = e; }
             }
             if (nearest) {
+                SFX.play('shoot');
                 let angle = Math.atan2(nearest.y - this.y, nearest.x - this.x);
-                let pierceCount = (this.inv.flying_rabit > 0) ? 2 : 0; // ทะลุได้ 2 ตัว
+                let pierceCount = (this.inv.flying_rabit > 0) ? 2 : 0;
                 
                 let gumLv = Math.min(this.inv.gumgig, 3);
                 let slowAmt = [0, 1, 1.5, 2][gumLv] || 0; 
@@ -1642,6 +1807,7 @@
             let fwMult = 1 + ([0, 0.20, 0.30, 0.50][fwLv] || 0);
             
             this.hp -= (amt * fwMult);
+            SFX.play('damage');
             
             if (this.debuffCooldownTimer <= 0) {
                 let appliedAny = false;
@@ -1674,6 +1840,7 @@
 
                 if (appliedDebuffs.length > 0) {
                     showToast(`⚠️ ป่วย: ${appliedDebuffs.join(', ')}`, "#ff5555");
+                    SFX.play('debuff');
                     this.debuffCooldownTimer = 1.0; 
                 }
                 
@@ -1926,6 +2093,7 @@
                 if (dist < this.size + e.size) {
                     e.hp -= this.atk; 
                     this.hitList.push(e);
+                    SFX.play('hit');
                     
                     if (this.stunChance > 0 && Math.random() < this.stunChance) {
                         e.stunTimer = 0.4;
@@ -1936,6 +2104,7 @@
                     }
 
                     if (this.explodeRadius > 0) {
+                        SFX.play('explode');
                         explosionsList.push({x: this.x, y: this.y, radius: this.explodeRadius, life: 0.15, maxLife: 0.15});
                         for (let other of enemiesList) {
                             if (other === e || other.hp <= 0 || other.spawnDelay > 0) continue; 
@@ -1992,9 +2161,15 @@
             let dist = Math.hypot(player.x - this.x, player.y - this.y);
             if (dist < player.size + this.size + player.magnetRange) { 
                 this.active = false;
-                if (this.type === 'coin') coins++;
-                if (this.type === 'diamond') { currentUser.diamonds++; let dUi = document.getElementById('shop-diamonds'); if(dUi) dUi.innerText = currentUser.diamonds; }
+                if (this.type === 'coin') { coins++; SFX.play('coin'); }
+                if (this.type === 'diamond') { 
+                    currentUser.diamonds++; 
+                    SFX.play('diamond'); 
+                    let dUi = document.getElementById('shop-diamonds'); 
+                    if(dUi) dUi.innerText = currentUser.diamonds; 
+                }
                 if (this.type === 'magnet') {
+                    SFX.play('magnet');
                     if (player.magnetActiveTime <= 0) {
                         player.magnetActiveTime = 1.5; 
                         player.magnetMaxTime = 1.5;
@@ -2051,6 +2226,7 @@
 
     function startGame() {
         try {
+            SFX.init(); SFX.play('click'); SFX.playBGM();
             if (gameState === 'PLAYING') return; 
             
             currentUser.last_played_at = new Date().toISOString(); 
@@ -2066,6 +2242,7 @@
             player = new Player(); player.applyPhaseModifiers(); 
             enemies = []; bullets = []; enemyBullets = []; drops = []; explosions = [];
             currentPhase = 1; phaseTimer = 30; score = 0; coins = 0; adminGodMode = false; showTabMenu = false;
+            lastTick = 0;
             
             resetKeys(); 
             gameState = 'PLAYING'; 
@@ -2357,6 +2534,7 @@
     }
 
     function enterShopPhase() { 
+        SFX.stopBGM();
         gameState = 'SHOP'; switchScreen('shopScreen'); 
         resetKeys();
         
@@ -2407,6 +2585,7 @@
         renderCatFilterButtons();
         let searchInput = document.getElementById('shopSearchInput');
         renderFullShop(searchInput ? searchInput.value : '');
+        SFX.play('click');
     }
 
     function renderCatFilterButtons() {
@@ -2616,19 +2795,21 @@
         if (coins >= rerollCost) { 
             coins -= rerollCost; rerollCost += 2; 
             updateShopUI(); rollShopCards(); 
+            SFX.play('click');
         } else showToast("เหรียญไม่พอสำหรับสุ่มใหม่!", "#ff5555", 2500); 
     }
 
     function buyQuickItem(itemId) {
         let itemDef = ITEMS_DB.find(i => i.id === itemId);
         let dynamicPrice = getDynamicCost(itemId, currentPhase);
-        if (coins < dynamicPrice) { showToast("เหรียญไม่พอ!", "#ff5555", 2500); return; }
+        if (coins < dynamicPrice) { showToast("เหรียญไม่พอ!", "#ff5555", 2500); SFX.play('debuff'); return; }
         
         if (player.inv[itemId] >= itemDef.maxStack && itemDef.cures !== 'hp') {
             if (itemId === 'counterpain' && !player.activeCounterpain) {
                 // อนุญาตให้ซื้อ Counterpain ซ้ำเพื่อ Active ได้แม้ Stack จะเต็ม 3 แล้ว
             } else {
                 showToast("คุณมีไอเทมนี้เต็มแล้ว!", "#ff5555", 2500); 
+                SFX.play('debuff');
                 return; 
             }
         }
@@ -2643,18 +2824,20 @@
             hasAilment = curesArr.some(cure => player.statuses[cure] > 0);
         }
 
-        if (coins < price) { showToast("เหรียญไม่พอ!", "#ff5555", 2500); return; }
+        if (coins < price) { showToast("เหรียญไม่พอ!", "#ff5555", 2500); SFX.play('debuff'); return; }
         
         if (player.inv[itemId] >= itemDef.maxStack && !hasAilment && itemDef.cures !== 'hp') { 
             if (itemId === 'counterpain' && !player.activeCounterpain) {
                 // ซื้อผ่าน
             } else if (!isDiscounted) {
                 showToast("ไอเทมนี้ให้บัฟระดับสูงสุดแล้ว!", "#ff5555", 2500); 
+                SFX.play('debuff');
                 return; 
             }
         }
 
         coins -= price; 
+        SFX.play('click');
         
         let oldMaxHp = player.maxHp;
         let oldInv = player.inv[itemId];
@@ -2709,6 +2892,7 @@
     function nextPhase() {
         if (gameState === 'PLAYING') return; 
         gameState = 'PLAYING'; 
+        SFX.playBGM();
         
         currentPhase++; phaseTimer = 30; bossSpawnedThisPhase = false;
         enemies.length = 0; bullets.length = 0; enemyBullets.length = 0; drops.length = 0; explosions = [];
@@ -2750,6 +2934,8 @@
 
     function gameOver() {
         gameState = 'GAMEOVER';
+        SFX.stopBGM();
+        SFX.play('gameover');
         
         let gp = document.getElementById('go-phase'); if(gp) gp.innerText = `Phase Reached: ${currentPhase}`;
         let gs = document.getElementById('go-score'); if(gs) gs.innerText = `Score: ${score}`;
@@ -3027,14 +3213,22 @@
         ctx.fillStyle = '#111'; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         if (phaseTimer <= 5 && phaseTimer > 0) {
+            let currentSec = Math.ceil(phaseTimer);
+            if (currentSec !== lastTick) {
+                SFX.play('tick');
+                lastTick = currentSec;
+            }
+            
             ctx.save();
             ctx.globalAlpha = (phaseTimer % 1) * 0.5 + 0.1; 
             ctx.fillStyle = 'white';
             ctx.font = 'bold 300px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(Math.ceil(phaseTimer), canvas.width / 2, canvas.height / 2);
+            ctx.fillText(currentSec, canvas.width / 2, canvas.height / 2);
             ctx.restore();
+        } else if (phaseTimer > 5) {
+            lastTick = 0;
         }
 
         drops.forEach(d => d.draw(ctx)); 
@@ -3203,6 +3397,7 @@ function setPlayerGender(g){
     drawCustomPreview();
     renderCustomizeRows();
     saveCustomization();
+    SFX.play('click');
 }
 
 function setCustomOption(category, value){
@@ -3211,6 +3406,7 @@ function setCustomOption(category, value){
     drawCustomPreview();
     renderCustomizeRows();
     saveCustomization();
+    SFX.play('click');
 }
 
 function renderCustomizeRows(){
