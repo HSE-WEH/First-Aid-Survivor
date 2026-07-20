@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V3.5</title>
+    <title>First Aid Survivor V3.6</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -70,7 +70,7 @@
         .full-shop-list { width: 100%; max-height: 80%; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-top: 15px; padding-right: 15px; }
         
         /* ---------------- Catalog Row & List Style ---------------- */
-        .catalog-row { display: flex; justify-content: space-between; align-items: center; background: #222; margin-bottom: 8px; padding: 12px 20px; border-radius: 8px; border-left: 6px solid #555; transition: 0.2s; }
+        .catalog-row { display: flex; justify-content: space-between; align-items: center; background: #222; margin-bottom: 8px; padding: 12px 20px; border-radius: 8px; border-left: 6px solid #555; transition: 0.2s; position: relative; }
         .catalog-row:hover { background: #2a2a2a; border-left-color: #4CAF50; transform: scale(1.01); }
         .cat-left { display: flex; align-items: center; gap: 15px; flex: 2; }
         .cat-fav-btn { font-size: 24px; cursor: pointer; color: #555; user-select: none; transition: 0.2s; }
@@ -82,7 +82,7 @@
         .cat-tag.defense { background: rgba(68, 138, 255, 0.2); color: #448AFF; border: 1px solid #448AFF; }
         .cat-tag.economy { background: rgba(255, 215, 0, 0.2); color: #FFD700; border: 1px solid #FFD700; }
         .cat-tag.heal { background: rgba(76, 175, 80, 0.2); color: #4CAF50; border: 1px solid #4CAF50; }
-        .cat-right { display: flex; align-items: center; gap: 15px; flex: 1; justify-content: flex-end; }
+        .cat-right { display: flex; align-items: center; gap: 15px; flex: 1; justify-content: flex-end; z-index: 5; }
         .cat-price { color: #FFD700; font-weight: bold; font-size: 18px; }
         
         /* Pips */
@@ -120,7 +120,7 @@
         .custom-row-title { font-size: 14px; color: #ccc; margin-bottom: 8px; font-weight: bold; }
         .custom-opt-btn { padding: 8px 14px; font-size: 13px; margin-right: 6px; margin-bottom: 6px; border-radius: 6px; background: #333; border: 2px solid #555; color: #eee; cursor: pointer; }
         .custom-opt-btn.selected { border-color: #FFD700; background: #4CAF50; color: #fff; }
-        .lb-avatar { width: 22px; height: 28px; image-rendering: pixelated; margin-right: 8px; vertical-align: middle; }
+        .lb-avatar { width: 30px; height: 38px; image-rendering: pixelated; margin-right: 8px; vertical-align: middle; background: rgba(0,0,0,0.5); border-radius: 6px; border: 1px solid #555; }
         
         #btnToggleBuff { display: none; }
         
@@ -140,10 +140,7 @@
         ::-webkit-scrollbar-thumb:hover { background: #777; }
 
         /* ======================================================================
-           PIXEL OFFICE / GERM THEME — applies to UI chrome (login, menu, shop,
-           upgrade, leaderboard, how-to-play, game over) only.
-           #game-container / canvas#gameCanvas are left untouched on purpose so
-           the battlefield stays plain black and bullets stay readable.
+           PIXEL OFFICE / GERM THEME — applies to UI chrome
            ====================================================================== */
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
@@ -190,14 +187,13 @@
         button:hover { filter: brightness(1.15) !important; }
         button:active { filter: brightness(0.9) !important; }
         button:disabled { background:#4a4a4a !important; color:#999 !important; box-shadow:none !important; }
-        /* keep semantic button colors readable by matching their existing inline hints */
+        
         button[style*="2196F3"] { background: #5B8DEF !important; color:#fff !important; }
         button[style*="9c27b0"] { background: #B98AE0 !important; color:#241a30 !important; }
         button[style*="e74c3c"], button[style*="f44336"] { background: var(--pw-coral) !important; color:#2b0f0a !important; }
         button[style*="f39c12"] { background: var(--pw-gold) !important; color:#2b2118 !important; }
         button[style*="777"] { background: #6b5236 !important; color: var(--pw-parch) !important; }
 
-        /* recolor common inline text colors to the new palette */
         [style*="color: #4CAF50"], [style*="color:#4CAF50"] { color: var(--pw-mint) !important; }
         [style*="color: #ff5555"], [style*="color:#ff5555"] { color: var(--pw-coral) !important; }
         [style*="color: yellow"], [style*="color:yellow"] { color: var(--pw-gold) !important; }
@@ -250,7 +246,7 @@
 
         #fullShopModal, #nextPhaseModal, .hud-tab-menu { background: rgba(8,6,4,0.97) !important; }
 
-        /* ---- explicitly protect gameplay visuals: keep pure black, no theme ---- */
+        /* ---- explicitly protect gameplay visuals ---- */
         #game-container { background-color:#000 !important; }
         #gameCanvas { background:#000 !important; }
         .top-bar { background: rgba(0,0,0,0.85) !important; border-bottom: 3px solid var(--pw-mintDark) !important; }
@@ -259,7 +255,6 @@
 
         #gameLogoCanvas{ width:100px !important; height:100px !important; image-rendering:pixelated; image-rendering:crisp-edges; margin-bottom:4px; }
 
-        /* ---- Pharmacy phase action buttons must keep their own semantic colors ---- */
         .btn-reroll { background: var(--pw-gold) !important; color: #2b2118 !important; }
         .btn-catalog { background: linear-gradient(90deg, #7b1fa2, #2196F3) !important; color: #fff !important; }
         .btn-surrender { background: #000 !important; color: #fff !important; border: 3px solid #2196F3 !important; }
@@ -269,13 +264,11 @@
         .btn-action-group .btn-info,
         .btn-action-group .btn-next { margin: 0 !important; }
 
-        /* ---- full-shop search bar + category filters stay on one row ---- */
         #fullShopModal .shop-search-row { display: flex !important; gap: 10px; align-items: center; width: 100%; flex-wrap: nowrap; }
         #shopSearchInput { flex: 1 1 220px !important; min-width: 140px; }
         #shopCatFilters { flex: 0 1 auto; flex-wrap: nowrap !important; overflow-x: auto; padding-bottom: 2px; }
         #shopCatFilters button { white-space: nowrap; flex-shrink: 0; }
 
-        /* ---- theme the character customization popup to match the rest of the game ---- */
         .custom-modal { background: rgba(8,6,4,0.92) !important; }
         .custom-panel {
             background: var(--pw-panel) !important;
@@ -287,7 +280,6 @@
         .custom-opt-btn { background: var(--pw-panelDark) !important; border: 2px solid #000 !important; color: var(--pw-parch) !important; }
         .custom-opt-btn.selected { background: var(--pw-mintDark) !important; border-color: var(--pw-gold) !important; color: #0c1310 !important; box-shadow: 0 0 8px var(--pw-gold); }
 
-        /* ---- themed confirm popup for "surrender" ---- */
         .confirm-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
         .confirm-modal.active { display: flex; }
         .confirm-panel { background: var(--pw-panel) !important; border: 3px solid var(--pw-gold) !important; box-shadow: inset 0 0 0 2px #4a3826, 0 10px 40px rgba(0,0,0,0.7) !important; border-radius: 12px; padding: 30px; width: 420px; max-width: 90vw; text-align: center; }
@@ -704,11 +696,11 @@
     
     const SKIN_TONES = { fair: '#F1C7A3', tan: '#D9A066', deep: '#8B5A2B' };
     const OUTFIT_THEMES = {
-        doctor: { coat: '#F3F6F8', coatShade: '#D2D2D2', trim: '#3FA184', badge: '#FFD866' },
-        nurse:  { coat: '#FFD9E6', coatShade: '#F0B8CC', trim: '#FF6F9E', badge: '#FFFFFF' },
-        scrub:  { coat: '#8FBFE0', coatShade: '#6FA3C9', trim: '#2C5F82', badge: '#FFD866' }
+        white: { coat: '#F3F6F8', coatShade: '#D2D2D2', trim: '#3FA184', badge: '#FFD866' },
+        pink:  { coat: '#FFD9E6', coatShade: '#F0B8CC', trim: '#FF6F9E', badge: '#FFFFFF' },
+        blue:  { coat: '#8FBFE0', coatShade: '#6FA3C9', trim: '#2C5F82', badge: '#FFD866' }
     };
-    const DEFAULT_CUSTOM = { face: 'normal', skin: 'fair', hair: 'default', outfit: 'doctor' };
+    const DEFAULT_CUSTOM = { face: 'normal', skin: 'fair', hair: 'default', outfit: 'white' };
 
     function buildPlayerSprite(gender, dir, custom) {
         custom = Object.assign({}, DEFAULT_CUSTOM, custom || {});
@@ -718,13 +710,13 @@
             const isFemale = gender === 'female';
             const hairColor = isFemale ? '#6B3F2A' : '#4A2C17';
             const skin = SKIN_TONES[custom.skin] || SKIN_TONES.fair;
-            const theme = OUTFIT_THEMES[custom.outfit] || OUTFIT_THEMES.doctor;
+            const theme = OUTFIT_THEMES[custom.outfit] || OUTFIT_THEMES.white;
             const coat = theme.coat, coatShade = theme.coatShade, trim = theme.trim, badge = theme.badge;
             const shoe = '#1A2530', bow = '#FF9EB0';
             const isBald = custom.hair === 'bald';
             const isLongHair = custom.hair === 'long';
 
-            const drawFace = (cx, cy, eyeY) => {
+            const drawFaceFront = (cx, cy, eyeY) => {
                 if (custom.face === 'cool') {
                     c.fillStyle = '#1A130D';
                     c.fillRect(cx - 5, eyeY, 10, 1); 
@@ -737,6 +729,20 @@
                     c.beginPath(); c.arc(cx, eyeY + 2.5, 1.5, 0, Math.PI); c.stroke(); 
                 } else {
                     c.fillStyle = '#1A130D'; c.fillRect(cx - 4, eyeY, 3, 2); c.fillRect(cx + 1, eyeY, 3, 2);
+                }
+            };
+            
+            const drawFaceSide = (cx, cy, eyeY) => {
+                if (custom.face === 'cool') {
+                    c.fillStyle = '#1A130D';
+                    c.fillRect(cx - 2, eyeY, 6, 1); 
+                    c.fillRect(cx, eyeY + 1, 3, 2); 
+                } else if (custom.face === 'happy') {
+                    c.strokeStyle = '#1A130D'; c.lineWidth = 1;
+                    c.beginPath(); c.arc(cx + 0.5, eyeY + 1, 1.5, Math.PI, 0); c.stroke();
+                    c.beginPath(); c.arc(cx + 0.5, eyeY + 2.5, 1.5, 0, Math.PI/2); c.stroke();
+                } else {
+                    c.fillStyle = '#1A130D'; c.fillRect(cx, eyeY, 2, 2);
                 }
             };
 
@@ -765,7 +771,7 @@
                         if (isFemale || isLongHair) { c.fillRect(3, 4, 2, 10); c.fillRect(15, 4, 2, 10); }
                         if (isFemale) { c.fillStyle = bow; c.fillRect(12, 1, 3, 2); }
                     }
-                    drawFace(10, 6, 6);
+                    drawFaceFront(10, 6, 6);
                 } else {
                     if (!isBald) {
                         c.fillStyle = hairColor; c.beginPath(); c.arc(10, 5, 6.4, 0, Math.PI * 2); c.fill();
@@ -778,7 +784,7 @@
                 if (isFemale) { c.fillStyle = '#33465A'; c.beginPath(); c.moveTo(4, 18); c.lineTo(16, 18); c.lineTo(15, 22); c.lineTo(5, 22); c.closePath(); c.fill(); }
                 c.fillStyle = coat; c.fillRect(5, 10, 10, 10);
                 c.fillStyle = coatShade; c.fillRect(5, 10, 10, 3);
-                c.fillStyle = badge; c.fillRect(9, 13, 2, 2);
+                
                 c.fillStyle = coat; c.fillRect(13, 12, 4, 6);
                 c.fillStyle = skin; c.beginPath(); c.arc(11, 6, 6, 0, Math.PI * 2); c.fill();
                 c.fillRect(15, 6, 2, 2);
@@ -790,17 +796,7 @@
                     if (!isFemale && !isLongHair) c.fillRect(5, 4, 2, 4);
                 }
                 
-                if (custom.face === 'cool') {
-                    c.fillStyle = '#1A130D';
-                    c.fillRect(11, 6, 6, 1); 
-                    c.fillRect(13, 7, 3, 2); 
-                } else if (custom.face === 'happy') {
-                    c.strokeStyle = '#1A130D'; c.lineWidth = 1;
-                    c.beginPath(); c.arc(13.5, 7, 1.5, Math.PI, 0); c.stroke();
-                    c.beginPath(); c.arc(13.5, 8.5, 1.5, 0, Math.PI/2); c.stroke();
-                } else {
-                    c.fillStyle = '#1A130D'; c.fillRect(13, 6, 2, 2);
-                }
+                drawFaceSide(13, 6, 6);
             }
         });
     }
@@ -896,6 +892,9 @@
 
     function getDynamicCost(itemId, phase) {
         if (['air_x', 'flying_rabit', 'counterpain'].includes(itemId)) {
+            return Math.floor(20 + (phase * 1.5));
+        }
+        if (itemId === 'dressing_set' && phase >= 10) {
             return Math.floor(20 + (phase * 1.5));
         }
         let item = ITEMS_DB.find(i => i.id === itemId);
@@ -1080,7 +1079,7 @@
             const { data: lbData } = await supabaseClient.from('leaderboards').select('username, max_score, max_phase').order('max_score', { ascending: false }).limit(10);
             const lbList = document.getElementById('leaderboardList');
             if (lbData && lbData.length > 0 && lbList) {
-                lbList.innerHTML = lbData.map((p, i) => `<div class="lb-entry"><span><strong>#${i + 1}</strong> <span class="lb-avatar-slot" data-user="${p.username}" style="display:inline-block; width:22px;"></span>${p.username}</span><span><strong style="color:#ffeb3b;">${p.max_score}</strong> Pts (Ph ${p.max_phase})</span></div>`).join('');
+                lbList.innerHTML = lbData.map((p, i) => `<div class="lb-entry"><span><strong>#${i + 1}</strong> <span class="lb-avatar-slot" data-user="${p.username}" style="display:inline-block; width:30px;"></span>${p.username}</span><span><strong style="color:#ffeb3b;">${p.max_score}</strong> Pts (Ph ${p.max_phase})</span></div>`).join('');
                 if (typeof attachLeaderboardAvatars === 'function') attachLeaderboardAvatars(lbData.map(p => p.username));
             }
         } catch(e){}
@@ -1089,12 +1088,20 @@
     async function saveScoreToDB() {
         if (!currentUser) return;
         try {
-            try { supabaseClient.from('players').update({ diamonds: currentUser.diamonds, daily_energy: currentUser.daily_energy }).eq('username', currentUser.username).then(()=>{}).catch(()=>{}); }catch(e){}
+            try { await supabaseClient.from('players').update({ diamonds: currentUser.diamonds, daily_energy: currentUser.daily_energy }).eq('username', currentUser.username); } catch(e){}
             if (currentUser.is_admin) return;
 
             const { data: cur } = await supabaseClient.from('leaderboards').select('max_score').eq('username', currentUser.username).maybeSingle();
             let oldScore = cur ? cur.max_score : 0;
-            if (score > oldScore) { try{ supabaseClient.from('leaderboards').upsert({ username: currentUser.username, max_score: score, max_phase: currentPhase, updated_at: new Date() }).then(()=>{}).catch(()=>{}); }catch(e){} } 
+            if (Number(score) > Number(oldScore)) { 
+                try { 
+                    await supabaseClient.from('leaderboards').upsert({ 
+                        username: currentUser.username, 
+                        max_score: Number(score), 
+                        max_phase: Number(currentPhase) 
+                    }); 
+                } catch(e){} 
+            } 
         } catch(e){}
     }
 
@@ -1192,11 +1199,19 @@
         }
         
         coins -= cost;
+        
+        let oldMaxHp = player.maxHp;
+        
         player.appliedCombos.add(comboId);
         player.bonusMaxHp += hpBonus;
-        player.hp += hpBonus;
-        showToast(`ปลดล็อกคอมโบสำเร็จ (+${hpBonus} Max HP)`, "#0f0", 3000);
+        
         player.applyPhaseModifiers();
+        let hpGain = player.maxHp - oldMaxHp;
+        if (hpGain > 0) {
+            player.hp += hpGain;
+            showToast(`ปลดล็อกคอมโบสำเร็จ (+${hpBonus} Max HP)`, "#0f0", 3000);
+        }
+        
         updateShopUI();
     }
 
@@ -1273,7 +1288,8 @@
             this.def = this.baseDef - defPenalty + cpmDef + telDef;
 
             let carbBonus = Math.min(this.inv.carbon, 3);
-            this.spd = Math.max(1, this.baseSpd - this.activeStatuses.stomach - this.activeStatuses.muscle_ache + carbBonus - this.activeCpmDebuff - this.cpmDebuffToApply);
+            let speedCpmPenalty = Math.max(this.activeCpmDebuff, this.cpmDebuffToApply);
+            this.spd = Math.max(1, this.baseSpd - this.activeStatuses.stomach - this.activeStatuses.muscle_ache + carbBonus - speedCpmPenalty);
 
             let throatPenLv = Math.min(this.activeStatuses.sore_throat, 3);
             let throatPen = [0, 0.20, 0.35, 0.50][throatPenLv] || 0;
@@ -2009,10 +2025,17 @@
         let statusHtml = ""; let hasStatus = false;
         for (let key in player.statuses) {
             if (player.statuses[key] > 0) { 
-                statusHtml += `<div style="margin-bottom: 5px;"><strong style="color:#ff5555;">${STATUS_NAMES[key]} [Lv.${player.statuses[key]}/3]</strong><span class="has-tooltip" style="width:16px; height:16px; line-height:16px; font-size:11px; margin-left:5px;">ℹ️<span class="tooltip-text">${STATUS_DESC[key]}</span></span></div>`; 
+                statusHtml += `<div style="margin-bottom: 5px;"><strong style="color:#ff5555;">${STATUS_NAMES[key]} [Lv.${player.statuses[key]}/3]</strong><span style="font-size:12px; color:#ff9999; margin-left:5px;">(${STATUS_DESC[key]})</span></div>`; 
                 hasStatus = true; 
             }
         }
+        
+        let cpmLvl = player.cpmDebuffToApply;
+        if (cpmLvl > 0) {
+            statusHtml += `<div style="margin-bottom: 5px;"><strong style="color:#ff5555;">ง่วงนอน [Lv.${cpmLvl}]</strong><span style="font-size:12px; color:#ff9999; margin-left:5px;">(ลดความเร็วเดิน ${cpmLvl} หน่วย)</span></div>`; 
+            hasStatus = true; 
+        }
+
         let txtStat = document.getElementById('shop-status-text');
         if(txtStat) txtStat.innerHTML = hasStatus ? statusHtml : '<span style="color:#00ff00;">✅ สุขภาพแข็งแรงดี! ไม่มีอาการเจ็บป่วย</span>';
     }
@@ -2112,8 +2135,8 @@
             let iconSrc = (t === 5 ? buildBossSprite() : buildGermSprite(t)).toDataURL();
             
             let formatChance = (arr) => arr.map(a => `${STATUS_NAMES[a.id]} (${Math.round(a.chance*100)}%)`).join(', ') || '-';
-            let meleeDis = formatChance(e.meleeAilments);
-            let rangedDis = formatChance(e.rangedAilments);
+            let meleeDis = t === 5 ? 'สุ่มติดทุกสถานะ 100% (ครั้งละ 2 อาการ)' : formatChance(e.meleeAilments);
+            let rangedDis = t === 5 ? 'สุ่มติดทุกสถานะ 100% (ครั้งละ 2 อาการ)' : formatChance(e.rangedAilments);
 
             html += `<div style="background: rgba(0,0,0,0.5); border:1px solid #555; padding:12px; border-radius:8px; display:flex; gap:10px;">
                 <img src="${iconSrc}" style="width:32px; height:32px; image-rendering:pixelated; flex-shrink:0; margin-top:2px;">
@@ -2276,13 +2299,21 @@
 
                 let curesArr = item.cures.split(',');
                 let isCureNeeded = false;
+                let cureLabel = "";
                 if(item.cures !== 'hp') {
-                    isCureNeeded = curesArr.some(cure => player.statuses[cure] > 0);
+                    curesArr.forEach(cure => {
+                        if (player.statuses[cure] > 0) {
+                            isCureNeeded = true;
+                            cureLabel = STATUS_NAMES[cure];
+                        }
+                    });
                 }
                 let highlightClass = isCureNeeded ? "highlight-cure" : "";
+                let cureBadge = isCureNeeded ? `<div style="position:absolute; top:4px; left:4px; background:#ff5555; color:#fff; font-size:11px; font-weight:bold; padding:3px 6px; border-radius:4px; z-index:2; border: 1px solid #fff;">รักษา ${cureLabel}</div>` : "";
 
                 container.innerHTML += `
                     <div class="shop-card ${highlightClass}" onclick="buyItem('${item.id}', ${item.discPrice}, true, ${index})">
+                        ${cureBadge}
                         <h3 style="margin:5px 0; color: #4CAF50; font-size: 20px;">${item.name} ${maxBadge}</h3>
                         <p style="font-size:13px; margin:10px 0; color: #ddd; height: 35px;">${item.short_desc}</p>
                         <p style="color:yellow; font-weight:bold; margin:5px 0; text-decoration: line-through; color:gray;">$${item.baseCst}</p>
@@ -2332,11 +2363,18 @@
                 let tag = TAG_MAP[item.category];
                 
                 let isCureNeeded = false;
+                let cureLabel = "";
                 if(item.cures !== 'hp') {
-                    isCureNeeded = curesArr.some(cure => player.statuses[cure] > 0);
+                    curesArr.forEach(cure => {
+                        if (player.statuses[cure] > 0) {
+                            isCureNeeded = true;
+                            cureLabel = STATUS_NAMES[cure];
+                        }
+                    });
                 }
                 let rowBorder = isCureNeeded ? 'border-left-color: #ff5555; box-shadow: inset 2px 0 15px rgba(255,85,85,0.2);' : '';
                 let dCost = getDynamicCost(item.id, currentPhase);
+                let cureBadge = isCureNeeded ? `<span style="background:#ff5555; color:#fff; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; margin-left:8px; border:1px solid #ff9999;">✅ แนะนำ (รักษา ${cureLabel})</span>` : "";
 
                 html += `
                     <div class="catalog-row" style="${rowBorder}">
@@ -2346,6 +2384,7 @@
                                 <div class="cat-tag ${tag.class}">${tag.text}</div>
                                 <div style="font-size:16px; font-weight:bold; color:#fff;">
                                     ${item.name} ${isMax ? `<span style="color:#ff5555; font-size:11px;">[MAX]</span>` : ''}
+                                    ${cureBadge}
                                     <span class="has-tooltip">ℹ️
                                         <span class="tooltip-text">${item.desc}</span>
                                     </span>
@@ -2412,6 +2451,9 @@
         }
 
         coins -= price; 
+        
+        let oldMaxHp = player.maxHp;
+
         let oldInv = player.inv[itemId];
         
         if (player.inv[itemId] < itemDef.maxStack || itemDef.cures === 'hp') {
@@ -2428,11 +2470,14 @@
             });
         }
 
-        if (itemId === 'betadine') { 
-            let oldLv = Math.min(oldInv, 3);
-            let newLv = Math.min(player.inv[itemId], 3);
-            let diff = [0, 10, 16, 21][newLv] - [0, 10, 16, 21][oldLv];
-            player.hp += diff; 
+        if (itemId === 'cpm') { player.cpmDebuffToApply++; }
+
+        player.applyPhaseModifiers(); 
+        
+        let hpGain = player.maxHp - oldMaxHp;
+        if (hpGain > 0) {
+            player.hp += hpGain;
+            showToast(`💚 Max HP เพิ่ม! ฟื้นฟูเลือด ${hpGain} หน่วย`, "#0f0");
         }
 
         if (['saline', 'alcohol', 'plaster', 'gauze'].includes(itemId)) { 
@@ -2443,8 +2488,6 @@
             player.hp = Math.min(player.maxHp, player.hp + 7); 
             showToast(`💚 ฟื้นฟูเลือด 7 หน่วย`, "#0f0");
         }
-        
-        if (itemId === 'cpm') { player.cpmDebuffToApply++; }
 
         if (isDiscounted && index !== -1) {
             currentDiscountItems[index].bought = true;
@@ -2457,7 +2500,6 @@
             }
         }
         
-        player.applyPhaseModifiers(); 
         updateShopUI();
     }
 
@@ -2748,8 +2790,12 @@
         for(let key in player.activeStatuses) {
             if(player.activeStatuses[key] > 0) {
                 hasDebuff = true;
-                debuffHtml += `<div style="margin-bottom:4px; font-size:14px; color:#ff9999;">🦠 ${STATUS_NAMES[key]} (Lv.${player.activeStatuses[key]}/3)</div>`;
+                debuffHtml += `<div style="margin-bottom:4px; font-size:14px; color:#ff9999;">🦠 ${STATUS_NAMES[key]} (Lv.${player.activeStatuses[key]}/3) <span style="font-size:12px; color:#ccc;">(${STATUS_DESC[key]})</span></div>`;
             }
+        }
+        if (player.activeCpmDebuff > 0) {
+            hasDebuff = true;
+            debuffHtml += `<div style="margin-bottom:4px; font-size:14px; color:#ff9999;">💤 ง่วงนอน (Lv.${player.activeCpmDebuff}) <span style="font-size:12px; color:#ccc;">(ลดความเร็วเดิน ${player.activeCpmDebuff} หน่วย)</span></div>`;
         }
         if(!hasDebuff) debuffHtml += '<div style="color:#0f0; font-size:14px;">ไม่มีอาการป่วย</div>';
 
@@ -2793,9 +2839,11 @@
         let startX = canvas.width - 240;
         
         let debuffs = Object.keys(player.activeStatuses).filter(k => player.activeStatuses[k] > 0);
-        if(debuffs.length > 0) {
+        let cpmLvl = player.activeCpmDebuff;
+        
+        if(debuffs.length > 0 || cpmLvl > 0) {
             ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
-            ctx.fillRect(startX, startY, 220, 30 + (debuffs.length * 20));
+            ctx.fillRect(startX, startY, 220, 30 + (debuffs.length * 20) + (cpmLvl > 0 ? 20 : 0));
             ctx.fillStyle = '#FFD700'; ctx.font = 'bold 13px Arial';
             ctx.fillText("⚠️ อาการป่วย (กด TAB ดูรายละเอียด)", startX + 10, startY + 20);
             
@@ -2806,6 +2854,11 @@
                 ctx.fillText(`🦠 ${STATUS_NAMES[k]} Lv.${player.activeStatuses[k]}`, startX + 10, startY);
                 startY += 20;
             });
+            if(cpmLvl > 0) {
+                ctx.fillStyle = '#fff';
+                ctx.fillText(`💤 ง่วงนอน Lv.${cpmLvl}`, startX + 10, startY);
+                startY += 20;
+            }
         } else {
             ctx.fillStyle = 'rgba(0, 200, 0, 0.5)';
             ctx.fillRect(startX, startY, 220, 35);
@@ -2970,14 +3023,14 @@
 <script>
 /* ---- Character customization (gender, face, skin, hair, outfit) for the main menu ---- */
 window.playerGender = window.playerGender || 'male';
-window.playerCustomization = window.playerCustomization || { face: 'normal', skin: 'fair', hair: 'default', outfit: 'doctor' };
+window.playerCustomization = window.playerCustomization || { face: 'normal', skin: 'fair', hair: 'default', outfit: 'white' };
 
 const CUSTOM_OPTIONS = {
     gender: [ { id: 'male', label: '👨 ชาย' }, { id: 'female', label: '👩 หญิง' } ],
     face:   [ { id: 'normal', label: '🙂 ปกติ' }, { id: 'happy', label: '😄 ยิ้ม' }, { id: 'cool', label: '😎 คูล' } ],
     skin:   [ { id: 'fair', label: 'ผิวขาว' }, { id: 'tan', label: 'ผิวแทน' }, { id: 'deep', label: 'ผิวเข้ม' } ],
     hair:   [ { id: 'default', label: 'ปกติ' }, { id: 'long', label: 'ยาว' }, { id: 'bald', label: 'ล้าน' } ],
-    outfit: [ { id: 'doctor', label: '🥼 หมอ' }, { id: 'nurse', label: '💗 พยาบาล' }, { id: 'scrub', label: '🩺 สครับ' } ]
+    outfit: [ { id: 'white', label: '🥼 สีขาว' }, { id: 'pink', label: '💗 สีชมพู' }, { id: 'blue', label: '🩺 สีฟ้า' } ]
 };
 
 function drawPlayerSpriteOn(canvasEl, gender, custom){
@@ -3043,9 +3096,6 @@ function closeCustomizeModal(){
     if(m) m.classList.remove('active');
 }
 
-/* ---- Persistence: local always works; best-effort sync to Supabase if a
-   'customization'/'gender' column exists on the players table (silently
-   ignored otherwise, matching the pattern used elsewhere in this file). ---- */
 function saveCustomization(){
     try{
         if (typeof currentUser !== 'undefined' && currentUser && currentUser.username) {
