@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V3.5a</title>
+    <title>First Aid Survivor V3.5</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -55,7 +55,9 @@
         @keyframes pulse-red { 0% { box-shadow: 0 0 5px rgba(255,85,85,0.5); } 50% { box-shadow: 0 0 20px rgba(255,85,85,1); } 100% { box-shadow: 0 0 5px rgba(255,85,85,0.5); } }
 
         .btn-action-group { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
-        .btn-quick-buy { background: #e67e22; font-size: 14px; padding: 8px 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; min-height: 65px; box-sizing: border-box; width: 100%;}
+        .btn-quick-buy { background: #e67e22 !important; color: #fff !important; font-size: 14px; padding: 8px 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; min-height: 65px; box-sizing: border-box; width: 100%; border: 3px solid #000 !important; }
+        .btn-quick-buy.active-buy { background: #27ae60 !important; border-color: #000 !important; }
+        
         .btn-next { background: #1b5e20; color: #fff; font-size: 18px; padding: 15px; border-radius: 8px; }
         .btn-catalog { background: linear-gradient(90deg, #7b1fa2, #2196F3); color: #fff; font-size: 18px; padding: 12px; border-radius: 8px; }
         .btn-reroll { background: #FFD700; color: #222; font-size: 16px; padding: 12px; border-radius: 8px; margin: 0 auto; display: block; width: 350px; }
@@ -257,24 +259,23 @@
 
         #gameLogoCanvas{ width:100px !important; height:100px !important; image-rendering:pixelated; image-rendering:crisp-edges; margin-bottom:4px; }
 
-        /* ---- Fix #2: Pharmacy phase action buttons must keep their own semantic colors ---- */
+        /* ---- Pharmacy phase action buttons must keep their own semantic colors ---- */
         .btn-reroll { background: var(--pw-gold) !important; color: #2b2118 !important; }
         .btn-catalog { background: linear-gradient(90deg, #7b1fa2, #2196F3) !important; color: #fff !important; }
         .btn-surrender { background: #000 !important; color: #fff !important; border: 3px solid #2196F3 !important; }
         .btn-info { background: #2196F3 !important; color: #fff !important; }
         .btn-next { background: #1b5e20 !important; color: #fff !important; }
-        /* keep the 3 bottom buttons perfectly symmetric (no leftover default button margin) */
         .btn-action-group .btn-surrender,
         .btn-action-group .btn-info,
         .btn-action-group .btn-next { margin: 0 !important; }
 
-        /* ---- Fix #1: full-shop search bar + category filters stay on one row ---- */
+        /* ---- full-shop search bar + category filters stay on one row ---- */
         #fullShopModal .shop-search-row { display: flex !important; gap: 10px; align-items: center; width: 100%; flex-wrap: nowrap; }
         #shopSearchInput { flex: 1 1 220px !important; min-width: 140px; }
         #shopCatFilters { flex: 0 1 auto; flex-wrap: nowrap !important; overflow-x: auto; padding-bottom: 2px; }
         #shopCatFilters button { white-space: nowrap; flex-shrink: 0; }
 
-        /* ---- Fix #5: theme the character customization popup to match the rest of the game ---- */
+        /* ---- theme the character customization popup to match the rest of the game ---- */
         .custom-modal { background: rgba(8,6,4,0.92) !important; }
         .custom-panel {
             background: var(--pw-panel) !important;
@@ -286,7 +287,7 @@
         .custom-opt-btn { background: var(--pw-panelDark) !important; border: 2px solid #000 !important; color: var(--pw-parch) !important; }
         .custom-opt-btn.selected { background: var(--pw-mintDark) !important; border-color: var(--pw-gold) !important; color: #0c1310 !important; box-shadow: 0 0 8px var(--pw-gold); }
 
-        /* ---- Fix #3: themed confirm popup for "surrender" ---- */
+        /* ---- themed confirm popup for "surrender" ---- */
         .confirm-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
         .confirm-modal.active { display: flex; }
         .confirm-panel { background: var(--pw-panel) !important; border: 3px solid var(--pw-gold) !important; box-shadow: inset 0 0 0 2px #4a3826, 0 10px 40px rgba(0,0,0,0.7) !important; border-radius: 12px; padding: 30px; width: 420px; max-width: 90vw; text-align: center; }
@@ -589,7 +590,7 @@
         else { fallbackDraw(); }
     }
 
-    /* ================= PIXEL-ART SPRITE CACHE (arena stays plain black; only entity art is themed) ================= */
+    /* ================= PIXEL-ART SPRITE CACHE ================= */
     const SPRITE_CACHE = {};
     function getCachedSprite(key, lowW, lowH, drawFn) {
         if (SPRITE_CACHE[key]) return SPRITE_CACHE[key];
@@ -618,25 +619,25 @@
     function buildGermSprite(type) {
         const S = 24;
         return getCachedSprite('germ' + type, S, S, (c) => {
-            if (type === 1) { // spiky virus (pink)
+            if (type === 1) { 
                 c.fillStyle = '#FF6B9D'; c.fillRect(4, 7, 16, 12); c.fillRect(7, 4, 10, 18);
                 c.fillStyle = '#D9447C';
                 [[2, 2], [19, 2], [2, 19], [19, 19], [11, 0], [11, 21]].forEach(p => c.fillRect(p[0], p[1], 3, 3));
                 ditherPx(c, 4, 7, 16, 12, '#D9447C', 0.15);
                 c.fillStyle = '#FFF'; c.fillRect(7, 10, 5, 5); c.fillRect(13, 10, 5, 5);
                 c.fillStyle = '#1A130D'; c.fillRect(8, 12, 3, 3); c.fillRect(14, 12, 3, 3);
-            } else if (type === 2) { // toxic amoeba (green)
+            } else if (type === 2) { 
                 c.fillStyle = '#8BC34A';
                 c.fillRect(3, 8, 18, 11); c.fillRect(6, 4, 12, 5); c.fillRect(4, 18, 5, 4); c.fillRect(15, 18, 5, 4);
                 ditherPx(c, 3, 8, 18, 11, '#5E8C2A', 0.2);
                 c.fillStyle = '#1A130D'; c.fillRect(7, 11, 3, 3); c.fillRect(14, 12, 3, 3);
-            } else if (type === 3) { // fast bacteria capsule (purple)
+            } else if (type === 3) { 
                 c.fillStyle = '#9B6BFF'; c.fillRect(3, 8, 17, 8);
                 c.fillStyle = '#6E42C4'; c.fillRect(3, 8, 3, 8); c.fillRect(17, 8, 3, 8); c.fillRect(20, 10, 3, 3);
                 ditherPx(c, 3, 8, 17, 8, '#6E42C4', 0.18);
                 c.fillStyle = '#FFF'; c.fillRect(9, 9, 5, 5);
                 c.fillStyle = '#1A130D'; c.fillRect(11, 10, 3, 3);
-            } else if (type === 4) { // tank mold (teal)
+            } else if (type === 4) { 
                 c.fillStyle = '#4A9B8E'; c.fillRect(4, 4, 16, 16);
                 ditherPx(c, 4, 4, 16, 16, '#2F6D63', 0.2);
                 c.fillStyle = '#6BB8AB';
@@ -666,8 +667,6 @@
                 c.fillStyle = '#4FBE96'; c.fillRect(1, 7, 10, 1);
                 c.fillStyle = '#FFFFFF'; c.fillRect(2, 4, 3, 2);
             } else {
-                // Same beam shape as the normal bullet, just re-colored orange for crits
-                // (keep it a beam instead of turning into a circle)
                 c.fillStyle = 'rgba(255,179,71,0.35)'; c.fillRect(0, 3, 16, 10);
                 c.fillStyle = '#FFB347'; c.fillRect(1, 5, 14, 6);
                 c.fillStyle = '#C9762A'; c.fillRect(1, 9, 14, 2);
@@ -702,6 +701,7 @@
             }
         });
     }
+    
     const SKIN_TONES = { fair: '#F1C7A3', tan: '#D9A066', deep: '#8B5A2B' };
     const OUTFIT_THEMES = {
         doctor: { coat: '#F3F6F8', coatShade: '#D2D2D2', trim: '#3FA184', badge: '#FFD866' },
@@ -726,11 +726,15 @@
 
             const drawFace = (cx, cy, eyeY) => {
                 if (custom.face === 'cool') {
-                    c.fillStyle = '#1A130D'; c.fillRect(cx - 4, eyeY, 9, 2); // sunglasses bar
+                    c.fillStyle = '#1A130D';
+                    c.fillRect(cx - 5, eyeY, 10, 1); 
+                    c.fillRect(cx - 4, eyeY + 1, 3, 2); 
+                    c.fillRect(cx + 1, eyeY + 1, 3, 2); 
                 } else if (custom.face === 'happy') {
                     c.strokeStyle = '#1A130D'; c.lineWidth = 1;
                     c.beginPath(); c.arc(cx - 2.5, eyeY + 1, 1.5, Math.PI, 0); c.stroke();
                     c.beginPath(); c.arc(cx + 2.5, eyeY + 1, 1.5, Math.PI, 0); c.stroke();
+                    c.beginPath(); c.arc(cx, eyeY + 2.5, 1.5, 0, Math.PI); c.stroke(); 
                 } else {
                     c.fillStyle = '#1A130D'; c.fillRect(cx - 4, eyeY, 3, 2); c.fillRect(cx + 1, eyeY, 3, 2);
                 }
@@ -743,12 +747,18 @@
                     c.fillStyle = '#33465A'; c.fillRect(6, 20, 3, 6); c.fillRect(11, 20, 3, 6);
                 }
                 c.fillStyle = shoe; c.fillRect(5, 25, 4, 2); c.fillRect(11, 25, 4, 2);
+                
                 c.fillStyle = coat; c.fillRect(4, 10, 12, 11);
-                if (dir === 'down') { c.fillStyle = coatShade; c.fillRect(4, 10, 3, 11); }
-                c.fillStyle = trim; c.fillRect(9, 10, 2, 11);
-                if (dir === 'down') { c.fillStyle = badge; c.fillRect(6, 13, 2, 3); }
+                
+                if (dir === 'down') { 
+                    c.fillStyle = coatShade; c.fillRect(4, 10, 3, 11); 
+                    c.fillStyle = trim; c.fillRect(9, 10, 2, 11); 
+                    c.fillStyle = badge; c.fillRect(6, 13, 2, 3); 
+                }
+                
                 c.fillStyle = coat; c.fillRect(1, 12, 3, 7); c.fillRect(16, 12, 3, 7);
                 c.fillStyle = skin; c.beginPath(); c.arc(10, 6, 6, 0, Math.PI * 2); c.fill();
+                
                 if (dir === 'down') {
                     if (!isBald) {
                         c.fillStyle = hairColor; c.beginPath(); c.arc(10, 4, 6, Math.PI, 0); c.fill();
@@ -772,13 +782,25 @@
                 c.fillStyle = coat; c.fillRect(13, 12, 4, 6);
                 c.fillStyle = skin; c.beginPath(); c.arc(11, 6, 6, 0, Math.PI * 2); c.fill();
                 c.fillRect(15, 6, 2, 2);
+                
                 if (!isBald) {
                     c.fillStyle = hairColor; c.beginPath(); c.arc(10, 4, 6, Math.PI, 0); c.fill();
                     if (isFemale || isLongHair) { c.fillRect(4, 4, 3, 12); }
                     if (isFemale) { c.fillStyle = bow; c.fillRect(13, 1, 3, 2); }
                     if (!isFemale && !isLongHair) c.fillRect(5, 4, 2, 4);
                 }
-                c.fillStyle = '#1A130D'; c.fillRect(13, 6, 2, 2);
+                
+                if (custom.face === 'cool') {
+                    c.fillStyle = '#1A130D';
+                    c.fillRect(11, 6, 6, 1); 
+                    c.fillRect(13, 7, 3, 2); 
+                } else if (custom.face === 'happy') {
+                    c.strokeStyle = '#1A130D'; c.lineWidth = 1;
+                    c.beginPath(); c.arc(13.5, 7, 1.5, Math.PI, 0); c.stroke();
+                    c.beginPath(); c.arc(13.5, 8.5, 1.5, 0, Math.PI/2); c.stroke();
+                } else {
+                    c.fillStyle = '#1A130D'; c.fillRect(13, 6, 2, 2);
+                }
             }
         });
     }
@@ -2015,33 +2037,33 @@
         if (btnAirX) {
             if (player.inv.air_x > 0) {
                 btnAirX.innerHTML = `<span style="font-weight:bold;">🚀 Air-X <span style="color:#0f0;">[✅]</span></span><span style="font-size:12px; color:#eee; margin-top:2px;">ปืน 3 แฉก (ทำงานแล้ว)</span>`;
-                btnAirX.style.backgroundColor = "#27ae60";
+                btnAirX.classList.add('active-buy');
             } else {
                 btnAirX.innerHTML = `<span style="font-weight:bold;">🚀 ซื้อด่วน Air-X ($${priceAx})</span><span style="font-size:12px; color:#eee; margin-top:2px;">ปืน 3 แฉก (1 เฟส)</span>`;
-                btnAirX.style.backgroundColor = "#e67e22";
+                btnAirX.classList.remove('active-buy');
             }
         }
         if (btnRabit) {
             if (player.inv.flying_rabit > 0) {
                 btnRabit.innerHTML = `<span style="font-weight:bold;">🚀 Flying Rabit <span style="color:#0f0;">[✅]</span></span><span style="font-size:12px; color:#eee; margin-top:2px;">กระสุนทะลุ (ทำงานแล้ว)</span>`;
-                btnRabit.style.backgroundColor = "#27ae60";
+                btnRabit.classList.add('active-buy');
             } else {
                 btnRabit.innerHTML = `<span style="font-weight:bold;">🚀 ซื้อด่วน Flying Rabit ($${priceFr})</span><span style="font-size:12px; color:#eee; margin-top:2px;">กระสุนทะลุศัตรู (1 เฟส)</span>`;
-                btnRabit.style.backgroundColor = "#e67e22";
+                btnRabit.classList.remove('active-buy');
             }
         }
         if (btnCounter) {
             if (player.activeCounterpain) {
                 btnCounter.innerHTML = `<span style="font-weight:bold;">❄️ Counterpain <span style="color:#0f0;">[✅]</span></span><span style="font-size:12px; color:#eee; margin-top:2px;">ออร่าสโลว์ (ทำงานแล้ว)</span>`;
-                btnCounter.style.backgroundColor = "#27ae60";
+                btnCounter.classList.add('active-buy');
             } else {
                 btnCounter.innerHTML = `<span style="font-weight:bold;">❄️ ซื้อด่วน Counterpain ($${priceCp})</span><span style="font-size:12px; color:#eee; margin-top:2px;">ออร่าสโลว์ (1 เฟส)</span>`;
-                btnCounter.style.backgroundColor = "#e67e22";
+                btnCounter.classList.remove('active-buy');
             }
         }
         if (btnDress) {
             btnDress.innerHTML = `<span style="font-weight:bold;">🩹 ซื้อด่วน Dressing Set ($${priceDs})</span><span style="font-size:12px; color:#eee; margin-top:2px;">Heal 7 HP</span>`;
-            btnDress.style.backgroundColor = "#e67e22";
+            btnDress.classList.remove('active-buy');
         }
         if (btnNext) {
             let nextPh = currentPhase + 1;
@@ -2271,28 +2293,21 @@
         });
     }
 
-    // 🗂️ ระบบเรนเดอร์ Catalog แบบ List แนวนอน แบ่งหมวดหมู่+เรียงตามโรค
     function renderFullShop(filterText = '') {
         const container = document.getElementById('fullShopList'); 
         if(!container) return;
         container.innerHTML = ''; 
         
-        // น้ำหนักสำหรับการเรียงลำดับ Category
         const catWeight = { attack: 1, defense: 2, economy: 3, heal: 4 };
 
         let sortedItems = ITEMS_DB.map((item, idx) => ({ item, idx })).sort((a, b) => {
-            // 1. เรียงตามหมวดหมู่ (Category)
             if (catWeight[a.item.category] !== catWeight[b.item.category]) {
                 return catWeight[a.item.category] - catWeight[b.item.category];
             }
-            // หมวดฟื้นฟู (heal) ใช้ลำดับตายตัวตามที่กำหนดไว้ใน ITEMS_DB (saline, plaster, alcohol, gauze, dressing set)
             if (a.item.category === 'heal') return a.idx - b.idx;
-
-            // 2. เรียงตามโรคที่รักษา (Cures) เพื่อให้ตัวรักษาโรคเดียวกันอยู่ติดกัน
             if (a.item.cures < b.item.cures) return -1;
             if (a.item.cures > b.item.cures) return 1;
             
-            // 3. เรียงตามตัวอักษร
             return a.item.name.localeCompare(b.item.name);
         }).map(x => x.item);
 
