@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V3.6</title>
+    <title>First Aid Survivor V3.7</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -379,20 +379,85 @@
             <button class="tab-btn active-tab" id="btn-tab-basic" onclick="showHtpTab('basic')">วิธีเล่น</button>
             <button class="tab-btn" id="btn-tab-enemy" onclick="showHtpTab('enemy')">มอนสเตอร์</button>
             <button class="tab-btn" id="btn-tab-shop" onclick="showHtpTab('shop')">ยาในร้านค้า</button>
+            <button class="tab-btn" id="btn-tab-debuff" onclick="showHtpTab('debuff')">อาการป่วย</button>
             <button class="tab-btn" id="btn-tab-upg" onclick="showHtpTab('upg')">อัปเกรด</button>
         </div>
+        
         <div id="tab-basic" class="htp-content active-content">
-            <h3 style="color:#2196F3; margin-top:0;">🎮 วิธีการเล่นเบื้องต้น</h3>
-            <ul style="font-size: 16px;">
-                <li>ใช้ปุ่ม <strong>W, A, S, D</strong> เพื่อบังคับทิศทางตัวละคร</li>
-                <li>ตัวละครจะโจมตีอัตโนมัติใส่ศัตรูที่อยู่ใกล้ที่สุด</li>
-                <li>เป้าหมายคือต้อง <strong>เอาชีวิตรอดให้ครบ 30 วินาที</strong> เพื่อผ่านด่าน (Phase)</li>
-                <li>กด <strong>TAB</strong> เพื่อดูสถานะไอเทมและอาการป่วยระหว่างเล่น</li>
+            <h3 style="color:#2196F3; margin-top:0;">🎮 วิธีการเล่นเบื้องต้น (Basics)</h3>
+            <ul style="font-size: 14px; line-height: 1.8;">
+                <li><strong>การเคลื่อนที่:</strong> ใช้ปุ่ม <code>W, A, S, D</code> เพื่อบังคับทิศทางตัวละคร</li>
+                <li><strong>การโจมตี:</strong> ตัวละครจะยิงอัตโนมัติใส่ศัตรูที่อยู่ใกล้ที่สุด</li>
+                <li><strong>เป้าหมาย:</strong> เอาชีวิตรอดให้ครบ <code>30 วินาที</code> เพื่อเคลียร์ด่าน (Phase)</li>
+                <li><strong>ของดรอป:</strong> 
+                    <ul>
+                        <li>🟡 <strong>เหรียญทอง:</strong> ใช้สำหรับซื้อยาและไอเทมในร้านค้า (Pharmacy)</li>
+                        <li>💎 <strong>เพชรสีฟ้า:</strong> ใช้สำหรับอัปเกรดสถานะตัวละครแบบถาวรในหน้า Main Menu</li>
+                        <li>🧲 <strong>แม่เหล็ก:</strong> ดูดไอเทมทั้งหมดในหน้าจอเป็นเวลา 1.5 วินาที</li>
+                    </ul>
+                </li>
+                <li><strong>หน้าต่างสถานะ:</strong> กด <code>TAB</code> ค้างไว้ระหว่างเล่นเพื่อดูสถานะตัวละครและอาการป่วย</li>
             </ul>
         </div>
-        <div id="tab-enemy" class="htp-content"><p>สเกลความยากทวีคูณ เฟส 12+ จะเริ่มมีมินิบอสโผล่มากวนใจ</p></div>
-        <div id="tab-shop" class="htp-content"><p>ร้านค้ารูปแบบใหม่! ไอเทมถูกจัดเป็นหมวดหมู่ (โจมตี, ป้องกัน, หาเงิน, ฟื้นฟู) สามารถกด ❤️ เพื่อจัดเก็บเป็นรายการโปรดได้</p></div>
-        <div id="tab-upg" class="htp-content"><p>เก็บเพชรเพื่อพัฒนาตัวละครถาวร สามารถปลด Max HP, ATK, DEF, SPD และคริติคอลได้!</p></div>
+        
+        <div id="tab-enemy" class="htp-content">
+            <h3 style="color:#ff5555; margin-top:0;">👹 ข้อมูลมอนสเตอร์ (Enemies)</h3>
+            <ul style="font-size: 14px; line-height: 1.8; list-style:none; padding:0;">
+                <li>🧟 <strong>Type 1 (ซอมบี้เดินชน):</strong> เดินเข้าหาตรงๆ แจกอาการป่วยระยะประชิด</li>
+                <li>🤮 <strong>Type 2 (ซอมบี้พ่นพิษ):</strong> ยิงกระสุนพิษจากระยะไกล แจกอาการป่วยเมื่อกระสุนโดนตัว</li>
+                <li>🏃 <strong>Type 3 (ซอมบี้วิ่งไว):</strong> เริ่มโผล่เฟส 4 เคลื่อนที่เร็วมาก แจกตาแดงและแผลสดประชิด</li>
+                <li>🛡️ <strong>Type 4 (ซอมบี้แทงค์):</strong> ถึกและโจมตีแรง ยิงกระสุนพิษระยะไกลที่แจกแผลในปาก</li>
+                <li>👑 <strong>Boss & Mini-Boss:</strong> ปรากฏตัวในเฟสบอส (3,5,7,9,10+) และมินิบอสจะเริ่มสมทบตั้งแต่เฟส 12 เป็นต้นไป โจมตีเป็นวงกว้างและการโจมตีทุกชนิด <strong>"สุ่มติดทุกสถานะ 100%"</strong></li>
+            </ul>
+        </div>
+        
+        <div id="tab-shop" class="htp-content">
+            <h3 style="color:#4CAF50; margin-top:0;">🛒 ร้านขายยาและไอเทม (Shop & Items)</h3>
+            <p style="font-size: 14px; line-height: 1.6;">
+                <strong>หมวดหมู่ไอเทม:</strong><br>
+                🔴 <span style="color:#ff5555">สายโจมตี:</span> เน้นเพิ่ม ATK, ยิงไว, คริติคอล, และลูกเล่นปืน (ชิ่ง/ทะลุ)<br>
+                🔵 <span style="color:#448AFF">สายป้องกัน:</span> เน้นเพิ่ม DEF, Max HP, สปีด และการเอาตัวรอด<br>
+                🟡 <span style="color:#FFD700">สายหาเงิน:</span> เน้นฟาร์มเหรียญ ดูดไอเทม ดรอปแม่เหล็ก<br>
+                💚 <span style="color:#4CAF50">สายฟื้นฟู:</span> อุปกรณ์ทำแผล ช่วยฮีล HP โดยตรง
+            </p>
+            <p style="font-size: 14px; line-height: 1.6;">
+                <strong>ระบบคอมโบ:</strong> ซื้ออุปกรณ์ทำแผลให้ครบคู่ จะได้รับโบนัส <code>+Max HP ถาวร</code><br>
+                ชุด 1: Saline + Plaster (+6 HP) | ชุด 2: Alcohol + Gauze (+6 HP) | ชุด 3: Dressing + Betadine (+7 HP)<br>
+                <em>สะสมครบ 3 ชุด รับเพิ่มอีก +15 HP!</em>
+            </p>
+            <p style="font-size: 14px;"><strong>รายการโปรด:</strong> กดปุ่ม ❤️ หน้าไอเทมในแคตตาล็อก เพื่อปักหมุดไว้บนสุด</p>
+        </div>
+
+        <div id="tab-debuff" class="htp-content">
+            <h3 style="color:#ff9800; margin-top:0;">🦠 อาการป่วย (Diseases & Cures)</h3>
+            <div style="font-size: 13px; line-height: 1.6; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>🤕 <strong>ปวดหัว:</strong> ลดจำนวนกระสุน <em>(แก้ด้วย Tylenol, Ponstan)</em></div>
+                <div>🤧 <strong>ภูมิแพ้:</strong> ลดการหลบหลีก <em>(แก้ด้วย CPM, Telfast)</em></div>
+                <div>🤢 <strong>ปวดท้อง:</strong> ลดความเร็วเดิน <em>(แก้ด้วย Carbon, Air-X, Rabbit)</em></div>
+                <div>💪 <strong>ปวดกล้ามเนื้อ:</strong> ลดความเร็วเดิน <em>(แก้ด้วย Ponstan, Counterpain)</em></div>
+                <div>🔴 <strong>ผื่นแพ้:</strong> มอนไม่ตกเหรียญ <em>(แก้ด้วย Cardamine, Systral)</em></div>
+                <div>🎈 <strong>ผื่นบวม:</strong> สุ่มเกิด Elite <em>(แก้ด้วย Golden Cup)</em></div>
+                <div>👄 <strong>แผลในปาก:</strong> ลด Max HP <em>(แก้ด้วย Oral Paste)</em></div>
+                <div>👁️ <strong>ตาแดง:</strong> หมอกดำบังจอ <em>(แก้ด้วย Eye Lotion, Drop)</em></div>
+                <div>🗣️ <strong>เจ็บคอ:</strong> ลดความเร็วยิง <em>(แก้ด้วย Gumgig, Apache)</em></div>
+                <div>🩸 <strong>แผลสด:</strong> โดนดาเมจแรงขึ้น <em>(แก้ด้วย Betadine)</em></div>
+                <div>🔥 <strong>น้ำร้อนลวก:</strong> เลือดลดเรื่อยๆ <em>(แก้ด้วย Silver Cream)</em></div>
+                <div style="grid-column: span 2; margin-top: 10px; color:#ff5555;">⚠️ <strong>หมายเหตุ:</strong> หากมีอาการป่วย การซื้อยาที่ตรงกับโรคจะรักษาอาการนั้นทันที (1 สแต็กต่อ 1 ชิ้น) และจะไม่ได้ผลบัฟระดับต่อไปจนกว่าโรคจะหายขาด</div>
+            </div>
+        </div>
+        
+        <div id="tab-upg" class="htp-content">
+            <h3 style="color:#9c27b0; margin-top:0;">💎 การอัปเกรดถาวร (Upgrades)</h3>
+            <p style="font-size: 14px; line-height: 1.8;">
+                ใช้ <strong>เพชร</strong> ที่ดรอปจากมอนสเตอร์ (โอกาส 5%) มาอัปเกรดสถานะตั้งต้นให้เก่งขึ้นตลอดกาล:<br>
+                ❤️ <strong>Max HP:</strong> เพิ่มขีดจำกัดเลือด (อัปได้ 40 ขั้น)<br>
+                ⚔️ <strong>Attack:</strong> เพิ่มความแรงพื้นฐาน (อัปได้ 10 ขั้น)<br>
+                🛡️ <strong>ภูมิคุ้มกัน:</strong> เพิ่มโอกาสหลบหลีก (อัปได้ 50 ขั้น)<br>
+                👟 <strong>Speed:</strong> เพิ่มความเร็วการเดิน (อัปได้ 3 ขั้น)<br>
+                🎯 <strong>Critical:</strong> เพิ่มโอกาสคริติคอล (อัปได้ 5 ขั้น)
+            </p>
+        </div>
+        
         <button onclick="switchScreen('menuScreen')" style="background-color: #777; padding: 15px 40px; font-size: 18px;">กลับสู่เมนูหลัก</button>
     </div>
 
@@ -886,10 +951,6 @@
         heal: { text: "💚 ฟื้นฟู", class: "heal" }
     };
 
-    const hpMap12 = [1, 1, 2, 2, 3, 4, 5, 8, 9, 10]; 
-    const hpMap3  = [0, 0, 0, 1, 2, 2, 3, 4, 6, 8];
-    const hpMap4  = [0, 0, 0, 5, 6, 7, 9, 9, 10, 13];
-
     function getDynamicCost(itemId, phase) {
         if (['air_x', 'flying_rabit', 'counterpain'].includes(itemId)) {
             return Math.floor(20 + (phase * 1.5));
@@ -945,6 +1006,18 @@
         let searchInput = document.getElementById('shopSearchInput');
         renderFullShop(searchInput ? searchInput.value : '');
     }
+
+    // Login screen inputs Enter key handler
+    document.addEventListener('DOMContentLoaded', () => {
+        ['username', 'pincode', 'fullname'].forEach(id => {
+            let el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('keydown', e => {
+                    if (e.key === 'Enter') handleLogin();
+                });
+            }
+        });
+    });
 
     window.addEventListener('keydown', e => {
         let k = e.key.toLowerCase();
@@ -1095,11 +1168,10 @@
             let oldScore = cur ? cur.max_score : 0;
             if (Number(score) > Number(oldScore)) { 
                 try { 
-                    await supabaseClient.from('leaderboards').upsert({ 
-                        username: currentUser.username, 
+                    await supabaseClient.from('leaderboards').update({ 
                         max_score: Number(score), 
                         max_phase: Number(currentPhase) 
-                    }); 
+                    }).eq('username', currentUser.username); 
                 } catch(e){} 
             } 
         } catch(e){}
@@ -2025,14 +2097,14 @@
         let statusHtml = ""; let hasStatus = false;
         for (let key in player.statuses) {
             if (player.statuses[key] > 0) { 
-                statusHtml += `<div style="margin-bottom: 5px;"><strong style="color:#ff5555;">${STATUS_NAMES[key]} [Lv.${player.statuses[key]}/3]</strong><span style="font-size:12px; color:#ff9999; margin-left:5px;">(${STATUS_DESC[key]})</span></div>`; 
+                statusHtml += `<div style="margin-bottom: 5px;"><strong style="color:#ff5555;">${STATUS_NAMES[key]} [Lv.${player.statuses[key]}/3]</strong><span class="has-tooltip" style="width:16px; height:16px; line-height:16px; font-size:11px; margin-left:5px;">ℹ️<span class="tooltip-text">${STATUS_DESC[key]}</span></span></div>`; 
                 hasStatus = true; 
             }
         }
         
         let cpmLvl = player.cpmDebuffToApply;
         if (cpmLvl > 0) {
-            statusHtml += `<div style="margin-bottom: 5px;"><strong style="color:#ff5555;">ง่วงนอน [Lv.${cpmLvl}]</strong><span style="font-size:12px; color:#ff9999; margin-left:5px;">(ลดความเร็วเดิน ${cpmLvl} หน่วย)</span></div>`; 
+            statusHtml += `<div style="margin-bottom: 5px;"><strong style="color:#ff5555;">ง่วงนอน [Lv.${cpmLvl}]</strong><span class="has-tooltip" style="width:16px; height:16px; line-height:16px; font-size:11px; margin-left:5px;">ℹ️<span class="tooltip-text">ลดความเร็วเดิน ${cpmLvl} หน่วย</span></span></div>`; 
             hasStatus = true; 
         }
 
@@ -2116,27 +2188,48 @@
         let nextPh = currentPhase + 1;
         document.getElementById('info-phase-num').innerText = nextPh;
         
-        let html = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
+        let enemiesPreview = [];
         
         let typesToSpawn = [1];
         if (nextPh >= 4) typesToSpawn.push(2, 3, 4);
         else typesToSpawn.push(2); 
-        
-        let isBoss = (nextPh === 3 || nextPh === 5 || nextPh === 7 || nextPh === 9 || nextPh >= 10);
-        if (isBoss) typesToSpawn.push(5);
 
         typesToSpawn.forEach(t => {
-            let e = new Enemy(t, nextPh);
-            let mName = t === 1 ? 'ซอมบี้เดินชน (Type 1)' :
-                        t === 2 ? 'ซอมบี้พ่นพิษ (Type 2)' :
-                        t === 3 ? 'ซอมบี้วิ่งไว (Type 3)' :
-                        t === 4 ? 'ซอมบี้แทงค์ (Type 4)' : 'บอส (Boss)';
+            enemiesPreview.push(new Enemy(t, nextPh));
+        });
 
-            let iconSrc = (t === 5 ? buildBossSprite() : buildGermSprite(t)).toDataURL();
+        let isBoss = (nextPh === 3 || nextPh === 5 || nextPh === 7 || nextPh === 9 || nextPh >= 10);
+        if (isBoss) {
+            let boss = new Enemy(5, nextPh); boss.bossName = "👹 บอส (Boss)";
+            enemiesPreview.push(boss);
+        }
+        if (nextPh >= 12) {
+            let mb1 = new Enemy(5, nextPh);
+            mb1.bossName = "👿 มินิบอส 1 (Mini-Boss)";
+            mb1.hp = Math.floor(mb1.hp * 0.6); mb1.maxHp = Math.floor(mb1.maxHp * 0.6); mb1.atk = Math.floor(mb1.atk * 0.7);
+            enemiesPreview.push(mb1);
+        }
+        if (nextPh >= 20) {
+            let mb2 = new Enemy(5, nextPh);
+            mb2.bossName = "👿 มินิบอส 2 (Mini-Boss)";
+            mb2.hp = Math.floor(mb2.hp * 0.6); mb2.maxHp = Math.floor(mb2.maxHp * 0.6); mb2.atk = Math.floor(mb2.atk * 0.7);
+            enemiesPreview.push(mb2);
+        }
+
+        let html = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
+        
+        enemiesPreview.forEach(e => {
+            let mName = e.bossName || (e.type === 1 ? '🧟 ซอมบี้เดินชน (Type 1)' :
+                        e.type === 2 ? '🤮 ซอมบี้พ่นพิษ (Type 2)' :
+                        e.type === 3 ? '🏃 ซอมบี้วิ่งไว (Type 3)' :
+                        '🛡️ ซอมบี้แทงค์ (Type 4)');
+
+            let iconSrc = (e.type === 5 ? buildBossSprite() : buildGermSprite(e.type)).toDataURL();
             
-            let formatChance = (arr) => arr.map(a => `${STATUS_NAMES[a.id]} (${Math.round(a.chance*100)}%)`).join(', ') || '-';
-            let meleeDis = t === 5 ? 'สุ่มติดทุกสถานะ 100% (ครั้งละ 2 อาการ)' : formatChance(e.meleeAilments);
-            let rangedDis = t === 5 ? 'สุ่มติดทุกสถานะ 100% (ครั้งละ 2 อาการ)' : formatChance(e.rangedAilments);
+            let formatChance = (arr) => arr.length ? arr.map(a => `${STATUS_NAMES[a.id]} (${Math.round(a.chance*100)}%)`).join(', ') : '-';
+            
+            let meleeDis = e.type === 5 ? 'สุ่มติดทุกสถานะ 100% (ครั้งละ 2 อาการ)' : formatChance(e.meleeAilments);
+            let rangedDis = e.type === 5 ? 'สุ่มติดทุกสถานะ 100% (ครั้งละ 2 อาการ)' : formatChance(e.rangedAilments);
 
             html += `<div style="background: rgba(0,0,0,0.5); border:1px solid #555; padding:12px; border-radius:8px; display:flex; gap:10px;">
                 <img src="${iconSrc}" style="width:32px; height:32px; image-rendering:pixelated; flex-shrink:0; margin-top:2px;">
@@ -2299,16 +2392,17 @@
 
                 let curesArr = item.cures.split(',');
                 let isCureNeeded = false;
-                let cureLabel = "";
+                let activeCures = [];
                 if(item.cures !== 'hp') {
                     curesArr.forEach(cure => {
                         if (player.statuses[cure] > 0) {
                             isCureNeeded = true;
-                            cureLabel = STATUS_NAMES[cure];
+                            activeCures.push(STATUS_NAMES[cure]);
                         }
                     });
                 }
                 let highlightClass = isCureNeeded ? "highlight-cure" : "";
+                let cureLabel = activeCures.join(', ');
                 let cureBadge = isCureNeeded ? `<div style="position:absolute; top:4px; left:4px; background:#ff5555; color:#fff; font-size:11px; font-weight:bold; padding:3px 6px; border-radius:4px; z-index:2; border: 1px solid #fff;">รักษา ${cureLabel}</div>` : "";
 
                 container.innerHTML += `
@@ -2363,17 +2457,18 @@
                 let tag = TAG_MAP[item.category];
                 
                 let isCureNeeded = false;
-                let cureLabel = "";
+                let activeCures = [];
                 if(item.cures !== 'hp') {
                     curesArr.forEach(cure => {
                         if (player.statuses[cure] > 0) {
                             isCureNeeded = true;
-                            cureLabel = STATUS_NAMES[cure];
+                            activeCures.push(STATUS_NAMES[cure]);
                         }
                     });
                 }
                 let rowBorder = isCureNeeded ? 'border-left-color: #ff5555; box-shadow: inset 2px 0 15px rgba(255,85,85,0.2);' : '';
                 let dCost = getDynamicCost(item.id, currentPhase);
+                let cureLabel = activeCures.join(', ');
                 let cureBadge = isCureNeeded ? `<span style="background:#ff5555; color:#fff; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px; margin-left:8px; border:1px solid #ff9999;">✅ แนะนำ (รักษา ${cureLabel})</span>` : "";
 
                 html += `
@@ -2453,7 +2548,6 @@
         coins -= price; 
         
         let oldMaxHp = player.maxHp;
-
         let oldInv = player.inv[itemId];
         
         if (player.inv[itemId] < itemDef.maxStack || itemDef.cures === 'hp') {
@@ -2776,95 +2870,6 @@
 
         enemies = enemies.filter(e => e.hp > 0);
         drops.forEach(d => d.update(dt)); drops = drops.filter(d => d.active);
-    }
-
-    // 📋 เรนเดอร์เมนู TAB แบบละเอียด (หยุดเวลาชั่วคราวขณะโชว์) เรียงเลย์เอาต์ใหม่!
-    function renderTabMenu() {
-        if(gameState !== 'PLAYING') return;
-        let menu = document.getElementById('hudTabMenu');
-        menu.classList.add('active');
-        
-        // --- 1. Right Bottom: DEBUFFS ---
-        let debuffHtml = '<h3 style="color:#ff5555; margin-top:0; border-bottom:1px solid #555; padding-bottom:5px;">⚠️ อาการป่วย</h3>';
-        let hasDebuff = false;
-        for(let key in player.activeStatuses) {
-            if(player.activeStatuses[key] > 0) {
-                hasDebuff = true;
-                debuffHtml += `<div style="margin-bottom:4px; font-size:14px; color:#ff9999;">🦠 ${STATUS_NAMES[key]} (Lv.${player.activeStatuses[key]}/3) <span style="font-size:12px; color:#ccc;">(${STATUS_DESC[key]})</span></div>`;
-            }
-        }
-        if (player.activeCpmDebuff > 0) {
-            hasDebuff = true;
-            debuffHtml += `<div style="margin-bottom:4px; font-size:14px; color:#ff9999;">💤 ง่วงนอน (Lv.${player.activeCpmDebuff}) <span style="font-size:12px; color:#ccc;">(ลดความเร็วเดิน ${player.activeCpmDebuff} หน่วย)</span></div>`;
-        }
-        if(!hasDebuff) debuffHtml += '<div style="color:#0f0; font-size:14px;">ไม่มีอาการป่วย</div>';
-
-        // --- 2. Right Top: BUFFS ---
-        let buffHtml = '<h3 style="color:#4CAF50; margin-top:0; border-bottom:1px solid #555; padding-bottom:5px;">💊 ยาและไอเทม</h3>';
-        let hasBuff = false;
-        for(let key in player.inv) {
-            if(player.inv[key] > 0) {
-                let item = ITEMS_DB.find(i=>i.id === key);
-                if(!item) continue;
-                hasBuff = true;
-                let maxStr = item.maxStack === 99 ? '∞' : item.maxStack;
-                buffHtml += `<div style="margin-bottom:4px; font-size:14px; color:#a5d6a7;">✔️ ${item.name} (${player.inv[key]}/${maxStr})</div>`;
-            }
-        }
-        if(!hasBuff) buffHtml += '<div style="color:#aaa; font-size:14px;">กระเป๋าว่างเปล่า</div>';
-
-        document.getElementById('hudTabDebuff').innerHTML = debuffHtml;
-        document.getElementById('hudTabBuff').innerHTML = buffHtml;
-        
-        // --- 3. Left: STATS ---
-        let dodgePerc = Math.min(70, Math.floor(player.def * 0.7));
-        document.getElementById('hudTabStats').innerHTML = `
-            <h3 style="color:#00bcd4; margin-top:0; border-bottom:1px solid #555; padding-bottom:5px;">📊 สเตตัสตัวละคร</h3>
-            <div style="display:flex; flex-direction:column; gap:12px; margin-top: 15px;">
-                <div style="font-size:16px;">❤️ <strong>HP:</strong> <span style="color:#0f0;">${Math.ceil(player.hp)} / ${player.maxHp}</span></div>
-                <div style="font-size:16px;">⚔️ <strong>ATK:</strong> ${player.atk}</div>
-                <div style="font-size:16px;">🎯 <strong>คริติคอล:</strong> ${Math.floor(player.critChance*100)}% (x${player.critDamage.toFixed(2)})</div>
-                <div style="font-size:16px;">🛡️ <strong>DEF:</strong> ${player.def} <span style="color:#aaa; font-size:14px;">(หลบหลีก ${dodgePerc}%)</span></div>
-                <div style="font-size:16px;">👟 <strong>SPD:</strong> ${player.spd}</div>
-                <div style="font-size:16px;">🔫 <strong>ความเร็วยิง:</strong> ${(1/player.fireRate).toFixed(1)} นัด/วิ</div>
-                <div style="font-size:16px;">🔥 <strong>จำนวนกระสุน:</strong> ${player.bulletCount} นัด/ยิง</div>
-                <div style="font-size:16px;">🧲 <strong>ระยะเก็บเหรียญ:</strong> +${Math.round(player.magnetRange)}</div>
-            </div>
-        `;
-    }
-
-    // 🎯 โชว์ HUD แบบย่อ (Mini HUD มุมขวา) ระหว่างเล่นปกติ
-    function drawCompactHUD(ctx) {
-        let startY = 80;
-        let startX = canvas.width - 240;
-        
-        let debuffs = Object.keys(player.activeStatuses).filter(k => player.activeStatuses[k] > 0);
-        let cpmLvl = player.activeCpmDebuff;
-        
-        if(debuffs.length > 0 || cpmLvl > 0) {
-            ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
-            ctx.fillRect(startX, startY, 220, 30 + (debuffs.length * 20) + (cpmLvl > 0 ? 20 : 0));
-            ctx.fillStyle = '#FFD700'; ctx.font = 'bold 13px Arial';
-            ctx.fillText("⚠️ อาการป่วย (กด TAB ดูรายละเอียด)", startX + 10, startY + 20);
-            
-            startY += 40;
-            ctx.font = '13px Arial';
-            debuffs.forEach(k => {
-                ctx.fillStyle = '#fff';
-                ctx.fillText(`🦠 ${STATUS_NAMES[k]} Lv.${player.activeStatuses[k]}`, startX + 10, startY);
-                startY += 20;
-            });
-            if(cpmLvl > 0) {
-                ctx.fillStyle = '#fff';
-                ctx.fillText(`💤 ง่วงนอน Lv.${cpmLvl}`, startX + 10, startY);
-                startY += 20;
-            }
-        } else {
-            ctx.fillStyle = 'rgba(0, 200, 0, 0.5)';
-            ctx.fillRect(startX, startY, 220, 35);
-            ctx.fillStyle = '#fff'; ctx.font = 'bold 13px Arial';
-            ctx.fillText("✅ สุขภาพปกติ (กด TAB ดูบัฟ)", startX + 10, startY + 22);
-        }
     }
 
     function draw() {
