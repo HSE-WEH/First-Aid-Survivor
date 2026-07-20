@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V3.8</title>
+    <title>First Aid Survivor V3.9</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -293,7 +293,6 @@
     <div id="topBar" class="top-bar">
         <span id="tb-name">Player: ---</span>
         <span>
-            <!-- 🔹 ซ่อนหลอด Energy ไว้ -->
             <span id="tb-energy" style="display: none;">Energy: -/5</span>
             <span id="tb-energy-timer" style="display: none; color: #ffeb3b; margin-left: 5px;"></span>
         </span>
@@ -390,7 +389,7 @@
                 <li><strong>ของดรอป:</strong> 
                     <ul>
                         <li>🟡 <strong>เหรียญทอง:</strong> ใช้สำหรับซื้อยาและไอเทมในร้านค้า (Pharmacy)</li>
-                        <li>💎 <strong>เพชรสีฟ้า:</strong> ใช้สำหรับอัปเกรดสถานะตัวละครแบบถาวรในหน้า Main Menu</li>
+                        <li>💎 <strong>เพชรสีฟ้า:</strong> ดรอปสูงสุด 50 เม็ด/วัน ใช้สำหรับอัปเกรดสถานะตัวละครถาวร</li>
                         <li>🧲 <strong>แม่เหล็ก:</strong> ดูดไอเทมทั้งหมดในหน้าจอเป็นเวลา 1.5 วินาที</li>
                     </ul>
                 </li>
@@ -400,13 +399,12 @@
         
         <div id="tab-enemy" class="htp-content">
             <h3 style="color:#ff5555; margin-top:0;">👹 ข้อมูลมอนสเตอร์ (Enemies)</h3>
-            <!-- 🔹 ใช้รูปแทน Emoji -->
             <ul style="font-size: 14px; line-height: 1.8; list-style:none; padding:0;">
                 <li><img id="htp-icon-t1" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>Type 1 (เชื้อโรคหนาม):</strong> เดินเข้าหาตรงๆ แจกอาการป่วยระยะประชิด</li>
                 <li><img id="htp-icon-t2" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>Type 2 (เชื้อโรคพิษ):</strong> ยิงกระสุนพิษจากระยะไกล แจกอาการป่วยเมื่อกระสุนโดนตัว</li>
                 <li><img id="htp-icon-t3" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>Type 3 (แมลงพิษ):</strong> เริ่มโผล่เฟส 4 เคลื่อนที่เร็วมาก แจกตาแดงและแผลสดประชิด</li>
                 <li><img id="htp-icon-t4" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>Type 4 (ไวรัส):</strong> ถึกและโจมตีแรง ยิงกระสุนพิษระยะไกลที่แจกแผลในปาก</li>
-                <li><img id="htp-icon-boss" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>Boss & Mini-Boss (เชื้อโรคร้าย):</strong> ปรากฏตัวในเฟสบอส (3,5,7,9,10+) และมินิบอสจะเริ่มสมทบตั้งแต่เฟส 12 และ 15 เป็นต้นไป โจมตีเป็นวงกว้างและการโจมตีทุกชนิด <strong>"สุ่มติดทุกสถานะ 100%"</strong></li>
+                <li><img id="htp-icon-boss" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>Boss & Mini-Boss (เชื้อโรคร้ายกาจ):</strong> ปรากฏตัวในเฟสบอส (3,5,7,9,10+) และมินิบอสจะเริ่มสมทบตั้งแต่เฟส 12 และ 15 เป็นต้นไป โจมตีเป็นวงกว้างและการโจมตีทุกชนิด <strong>"สุ่มติดทุกสถานะ 100%"</strong></li>
             </ul>
         </div>
         
@@ -437,7 +435,7 @@
                 <div>🔴 <strong>ผื่นแพ้:</strong> มอนไม่ตกเหรียญ <em>(แก้ด้วย Cardamine, Systral)</em></div>
                 <div>🎈 <strong>ผื่นบวม:</strong> สุ่มเกิด Elite <em>(แก้ด้วย Golden Cup)</em></div>
                 <div>👄 <strong>แผลในปาก:</strong> ลด Max HP <em>(แก้ด้วย Oral Paste)</em></div>
-                <div>👁️ <strong>ตาแดง:</strong> หมอกดำบังจอ <em>(แก้ด้วย Eye Lotion, Drop)</em></div>
+                <div>👁️ <strong>ตาแดง:</strong> หมอกดำบังจอ/ยิงพลาด <em>(แก้ด้วย Eye Lotion, Drop)</em></div>
                 <div>🗣️ <strong>เจ็บคอ:</strong> ลดความเร็วยิง <em>(แก้ด้วย Gumgig, Apache)</em></div>
                 <div>🩸 <strong>แผลสด:</strong> โดนดาเมจแรงขึ้น <em>(แก้ด้วย Betadine)</em></div>
                 <div>🔥 <strong>น้ำร้อนลวก:</strong> เลือดลดเรื่อยๆ <em>(แก้ด้วย Silver Cream)</em></div>
@@ -469,7 +467,7 @@
             <div class="upg-row"><span style="font-size: 18px;">⚔️ <strong>Attack</strong> (+<span id="upg-lvl-atk">0</span>/10)</span><button id="btn-upg-atk" onclick="buyUpgrade('atk')">อัปเกรด</button></div>
             <div class="upg-row"><span style="font-size: 18px;">🛡️ <strong>ภูมิคุ้มกัน</strong> (+<span id="upg-lvl-def">0</span>/50)</span><button id="btn-upg-def" onclick="buyUpgrade('def')">อัปเกรด</button></div>
             <div class="upg-row"><span style="font-size: 18px;">👟 <strong>Speed</strong> (+<span id="upg-lvl-spd">0</span>/3)</span><button id="btn-upg-spd" onclick="buyUpgrade('spd')">อัปเกรด</button></div>
-            <div class="upg-row"><span style="font-size: 18px;">🎯 <strong>Critical</strong> (+<span id="upg-lvl-crit">0</span>/5)</span><button id="btn-upg-crit" onclick="buyUpgrade('crit')">อัปเกรด</button></div>
+            <div class="upg-row"><span style="font-size: 18px;">🎯 <strong>Critical</strong> (+<span id="upg-lvl-crit">0</span>%/5%)</span><button id="btn-upg-crit" onclick="buyUpgrade('crit')">อัปเกรด</button></div>
         </div>
         <button onclick="switchScreen('menuScreen')" style="margin-top: 30px; background-color: #777; padding: 15px 40px; font-size: 18px;">กลับสู่เมนูหลัก</button>
     </div>
@@ -739,21 +737,30 @@
         });
     }
     function buildDropSprite(kind) {
-        const S = 14;
+        const S = 18; // Increased slightly for better rendering of details
         return getCachedSprite('drop_' + kind, S, S, (c) => {
             if (kind === 'coin') {
-                c.fillStyle = '#FFD866'; c.beginPath(); c.arc(7, 7, 6, 0, Math.PI * 2); c.fill();
-                c.strokeStyle = '#B5842A'; c.lineWidth = 1; c.stroke();
-                c.fillStyle = '#FFF3D0'; c.fillRect(5, 4, 2, 2);
+                c.fillStyle = '#FFD866'; c.beginPath(); c.arc(9, 9, 8, 0, Math.PI * 2); c.fill();
+                c.strokeStyle = '#B5842A'; c.lineWidth = 1.5; c.stroke();
+                c.fillStyle = '#B5842A';
+                c.font = 'bold 12px Arial'; c.textAlign = 'center'; c.textBaseline = 'middle';
+                c.fillText('$', 9, 10); // Draw '$' in the middle
+                c.fillStyle = '#FFF3D0'; c.fillRect(4, 4, 2, 2); // shine
             } else if (kind === 'diamond') {
                 c.fillStyle = '#7FE8C6'; c.beginPath();
-                c.moveTo(7, 1); c.lineTo(13, 7); c.lineTo(7, 13); c.lineTo(1, 7); c.closePath(); c.fill();
-                c.fillStyle = '#C8FFF0'; c.fillRect(5, 4, 3, 3);
+                c.moveTo(9, 2); c.lineTo(16, 9); c.lineTo(9, 16); c.lineTo(2, 9); c.closePath(); c.fill();
+                c.fillStyle = '#C8FFF0'; c.fillRect(6, 5, 3, 3);
                 c.strokeStyle = '#3FA184'; c.stroke();
             } else if (kind === 'magnet') {
-                c.fillStyle = '#FF6F5E'; c.fillRect(2, 2, 4, 9); c.fillRect(8, 2, 4, 9);
-                c.fillStyle = '#EFEFEF'; c.fillRect(2, 9, 4, 3); c.fillRect(8, 9, 4, 3);
-                c.strokeStyle = '#1A130D'; c.lineWidth = 1; c.strokeRect(2, 2, 4, 9); c.strokeRect(8, 2, 4, 9);
+                c.fillStyle = '#FF6F5E';
+                // U Shape body
+                c.fillRect(4, 3, 4, 6); // Left leg
+                c.fillRect(10, 3, 4, 6); // Right leg
+                c.fillRect(4, 9, 10, 4); // Bottom curve connector
+                // Silver tips
+                c.fillStyle = '#EFEFEF';
+                c.fillRect(4, 1, 4, 2);
+                c.fillRect(10, 1, 4, 2);
             }
         });
     }
@@ -894,10 +901,10 @@
         rash: "โอกาสมอนสเตอร์ไม่ดรอปเหรียญ 30/50/70%", 
         swelling: "สุ่มเกิดมอนสเตอร์ Elite ที่แข็งแกร่ง", 
         mouth_ulcer: "ลด Max HP 10/20/30", 
-        red_eye: "เกิดหมอกบดบังขอบจอ", 
-        sore_throat: "ลดความเร็วการยิง", 
+        red_eye: "เกิดหมอกบดบังขอบจอ และโอกาสยิงพลาด 10/20/30%", 
+        sore_throat: "ลดความเร็วการยิง 20/35/50%", 
         fresh_wound: "รับดาเมจแรงขึ้น 20/30/50%", 
-        scald: "เสียเลือด 1/3/4 ทุก 6 วินาที" 
+        scald: "เสียเลือด 1/3/6 ทุก 6 วินาที" 
     };
 
     const STATUS_NAMES = { 
@@ -914,23 +921,37 @@
         scald: "น้ำร้อนลวก" 
     };
 
+    const STATUS_SHORT = {
+        headache: "กระสุนลด",
+        allergy: "หลบหลีกลด",
+        stomach: "เดินช้า",
+        muscle_ache: "เดินช้า",
+        rash: "เงินไม่ดรอป",
+        swelling: "มอนเก่งขึ้น",
+        mouth_ulcer: "Max HP ลด",
+        red_eye: "จอเบลอ/ยิงวืด",
+        sore_throat: "ยิงช้า",
+        fresh_wound: "โดนตีแรงขึ้น",
+        scald: "เสียเลือด"
+    };
+
     const ITEMS_DB = [
-        { id: 'tylenol', category: 'attack', name: "Tylenol", cost: 30, cures: 'headache', maxStack: 6, short_desc: "รักษาปวดหัว | +ATK", desc: "+ATK 2, 4, 6, 8, 10, 12 ตามลำดับ" },
+        { id: 'tylenol', category: 'attack', name: "Tylenol", cost: 30, cures: 'headache', maxStack: 5, short_desc: "รักษาปวดหัว | +ATK", desc: "+ATK 2, 4, 6, 8, 10 ตามลำดับ" },
         { id: 'ponstan', category: 'attack', name: "Ponstan", cost: 30, cures: 'headache,muscle_ache', maxStack: 3, short_desc: "รักษาปวดหัว,ปวดกล้ามเนื้อ | +นัดกระสุน, +ATK", desc: "เพิ่มกระสุน 1 นัด และบวก ATK 1 แต้ม (ต่อ 1 สแต็ก)" },
         { id: 'air_x', category: 'attack', name: "Air-X", cost: 20, cures: 'stomach', maxStack: 1, short_desc: "รักษาปวดท้อง | กระสุน 3 แฉก", desc: "กางกระสุนออกเป็น 3 ทิศทาง<br>มีผลใช้งาน 1 เฟส" },
-        { id: 'flying_rabit', category: 'attack', name: "Flying Rabit", cost: 20, cures: 'stomach', maxStack: 1, short_desc: "รักษาปวดท้อง | กระสุนทะลุ", desc: "กระสุนพุ่งทะลุศัตรูไม่จำกัดจำนวน<br>มีผลใช้งาน 1 เฟส" },
-        { id: 'gumgig', category: 'attack', name: "Gumgig pean", cost: 30, cures: 'sore_throat', maxStack: 3, short_desc: "รักษาเจ็บคอ | ยิงไว, กระสุนชิ่ง, +ATK", desc: "ยิงไวขึ้น 10, 15, 30%<br>โอกาสชิ่ง 20, 25, 30% (กระสุนแตกออก 1, 2, 3 นัด)<br>บวกโบนัส +ATK 1, 2, 3" },
+        { id: 'flying_rabit', category: 'attack', name: "Flying Rabit", cost: 20, cures: 'stomach', maxStack: 1, short_desc: "รักษาปวดท้อง | กระสุนทะลุ", desc: "กระสุนทะลุศัตรูเพิ่มอีก 2 ตัว<br>มีผลใช้งาน 1 เฟส" },
+        { id: 'gumgig', category: 'attack', name: "Gumgig pean", cost: 30, cures: 'sore_throat', maxStack: 3, short_desc: "รักษาเจ็บคอ | ยิงไว, กระสุนสโลว์มอน, +ATK", desc: "ยิงไวขึ้น 10, 15, 25%<br>กระสุนทำให้มอนสเตอร์เดินช้าลง -1, -1.5, -2 หน่วย<br>บวกโบนัส +ATK 1, 2, 3" },
         { id: 'eye_lotion', category: 'attack', name: "Eye lotion", cost: 30, cures: 'red_eye', maxStack: 3, short_desc: "รักษาตาแดง | เพิ่มโอกาสคริติคอล", desc: "โอกาสโจมตีติดคริติคอลเพิ่มขึ้น 10%, 20%, 30%" },
-        { id: 'apache', category: 'attack', name: "Apache", cost: 30, cures: 'sore_throat', maxStack: 3, short_desc: "รักษาเจ็บคอ | ยิงไว, สตั้น, +ATK", desc: "ยิงไวขึ้น 10, 15, 30%<br>โอกาสทำให้ศัตรูชะงัก 5, 10, 20%<br>บวกโบนัส +ATK 1, 2, 3" },
-        { id: 'eye_drop', category: 'attack', name: "Eye Drop", cost: 30, cures: 'red_eye', maxStack: 3, short_desc: "รักษาตาแดง | เพิ่มความแรงคริติคอล", desc: "เพิ่มความรุนแรงคริติคอลเป็น x1.75, x2.0, x2.5" },
+        { id: 'apache', category: 'attack', name: "Apache", cost: 30, cures: 'sore_throat', maxStack: 3, short_desc: "รักษาเจ็บคอ | ยิงไว, สตั้น, +ATK", desc: "ยิงไวขึ้น 10, 15, 25%<br>โอกาสทำให้ศัตรูชะงัก 5, 10, 20%<br>บวกโบนัส +ATK 1, 2, 3" },
+        { id: 'eye_drop', category: 'attack', name: "Eye Drop", cost: 30, cures: 'red_eye', maxStack: 3, short_desc: "รักษาตาแดง | เพิ่มความแรงคริติคอล", desc: "เพิ่มความรุนแรงคริติคอลเป็น x1.75, x2.5, x3.0" },
 
-        { id: 'cpm', category: 'defense', name: "CPM", cost: 20, cures: 'allergy', maxStack: 3, short_desc: "รักษาภูมิแพ้ | +DEF, -SPD", desc: "เพิ่มพลังป้องกัน 15, 25, 35<br><span style='color:#ff5555'>ผลข้างเคียง: ติดดีบัฟง่วงนอน (ลด Spd 1 ต่อสแต็ก)</span>" },
+        { id: 'cpm', category: 'defense', name: "CPM", cost: 20, cures: 'allergy', maxStack: 3, short_desc: "รักษาภูมิแพ้ | +DEF, ผลข้างเคียงง่วงนอน", desc: "เพิ่มพลังป้องกัน 15, 25, 35<br><span style='color:#ff5555'>ผลข้างเคียง: มีอาการง่วงนอน (1 เฟส) ลดความเร็วเดิน 1 หน่วย ต่อสแต็ก</span>" },
         { id: 'telfast', category: 'defense', name: "Telfast", cost: 15, cures: 'allergy', maxStack: 3, short_desc: "รักษาภูมิแพ้ | +DEF", desc: "เพิ่มพลังป้องกัน 5, 10, 15" },
         { id: 'carbon', category: 'defense', name: "Carbon", cost: 15, cures: 'stomach', maxStack: 3, short_desc: "รักษาปวดท้อง | +ความเร็วเดิน", desc: "เพิ่มความเร็วการเดิน 1, 2, 3 หน่วย" },
-        { id: 'counterpain', category: 'defense', name: "Counterpain Cool", cost: 20, cures: 'muscle_ache', maxStack: 3, short_desc: "รักษาปวดกล้ามเนื้อ | ออร่าสโลว์ & ทำดาเมจ", desc: "กางออร่าลดความเร็วศัตรู -1, -1.5, -2 หน่วย<br>และทำดาเมจ 1.5, 2.5, 3.5 ทุก 0.5 วินาที<br>(กดใช้งานมีผล 1 เฟส สแต็กยังคงอยู่)" },
+        { id: 'counterpain', category: 'defense', name: "Counterpain Cool", cost: 20, cures: 'muscle_ache', maxStack: 3, short_desc: "รักษาปวดกล้ามเนื้อ | ออร่าสโลว์ & ทำดาเมจ", desc: "กางออร่าลดความเร็วศัตรู -1, -1.5, -2 หน่วย<br>และทำดาเมจ 2, 3, 4 ทุกๆ 1 วินาที<br>(กดใช้งานมีผล 1 เฟส สแต็กยังคงอยู่)" },
         { id: 'silver_cream', category: 'defense', name: "Silver cream", cost: 30, cures: 'scald', maxStack: 3, short_desc: "รักษาน้ำร้อนลวก | ฮีลอัตโนมัติ", desc: "ฟื้นฟู HP 5%, 7%, 10% ของ Max HP<br>ทุกๆ 4 วินาทีอัตโนมัติ" },
         { id: 'betadine', category: 'defense', name: "Betadine", cost: 30, cures: 'fresh_wound', maxStack: 3, short_desc: "รักษาแผลสด | +Max HP", desc: "เพิ่มขีดจำกัด HP สูงสุด +10, +16, +21 หน่วย" },
-        { id: 'oral_paste', category: 'defense', name: "Oral paste", cost: 30, cures: 'mouth_ulcer', maxStack: 3, short_desc: "รักษาแผลในปาก | กระสุนระเบิดหมู่, +Max HP", desc: "กระสุนระเบิดทำดาเมจหมู่วงกว้าง 6, 14, 25 พิกเซล<br>เพิ่ม Max HP +5, +8, +15 หน่วย" },
+        { id: 'oral_paste', category: 'defense', name: "Oral paste", cost: 30, cures: 'mouth_ulcer', maxStack: 3, short_desc: "รักษาแผลในปาก | กระสุนระเบิดหมู่, +Max HP", desc: "กระสุนระเบิดทำดาเมจหมู่วงกว้าง 15, 25, 35 พิกเซล<br>เพิ่ม Max HP +5, +8, +15 หน่วย" },
 
         { id: 'cardamine', category: 'economy', name: "Cardamine", cost: 30, cures: 'rash', maxStack: 3, short_desc: "รักษาผื่นแพ้ | โบนัสเหรียญจบด่าน", desc: "รับโบนัสเหรียญฟรีก่อนเข้าร้านค้า +20, +30, +45 เหรียญ" },
         { id: 'golden_cup', category: 'economy', name: "Golden Cup Blam", cost: 30, cures: 'swelling', maxStack: 3, short_desc: "รักษาผื่นบวม | ดูดเหรียญ, +แม่เหล็ก", desc: "ขยายรัศมีการดูดเหรียญให้กว้างขึ้น<br>และเพิ่มโอกาสดรอปแม่เหล็ก +5%, +5%, +10%" },
@@ -1096,7 +1117,7 @@
             let lpThai = new Date(lp.getTime() + (lp.getTimezoneOffset() * 60000) + (3600000 * 7));
             if (lpThai.getDate() !== thaiNow.getDate() || lpThai.getMonth() !== thaiNow.getMonth()) {
                 currentUser.daily_energy = 5; 
-                currentUser.daily_diamonds = 0; // 🔹 รีเซ็ตเพชรรายวัน
+                currentUser.daily_diamonds = 0; 
                 currentUser.last_played_at = new Date().toISOString();
                 updateTopBar(); 
                 try { supabaseClient.from('players').update({ daily_energy: 5, last_played_at: currentUser.last_played_at }).eq('username', currentUser.username).then(()=>{}).catch(()=>{}); } catch(e){}
@@ -1203,9 +1224,9 @@
     }
 
     function getUpgradeCost(stat, lvl) {
-        if (stat === 'hp') return lvl < 20 ? 2 : 4; 
-        if (stat === 'atk') return 4;
-        if (stat === 'def') return lvl < 20 ? 2 : (lvl < 40 ? 4 : 6);
+        if (stat === 'hp') return lvl < 20 ? 2 : 3; 
+        if (stat === 'atk') return 30;
+        if (stat === 'def') return lvl < 25 ? 2 : 4;
         if (stat === 'spd') return 30; 
         if (stat === 'crit') return 20;
         return Infinity;
@@ -1249,7 +1270,7 @@
 
         let critLvl = currentUser.upgraded_crit || 0; 
         let lblCrit = document.getElementById('upg-lvl-crit');
-        if(lblCrit) lblCrit.innerText = critLvl;
+        if(lblCrit) lblCrit.innerText = (critLvl * 1);
         let btnCrit = document.getElementById('btn-upg-crit');
         if(btnCrit){
             if (critLvl >= 5) { btnCrit.innerText = 'MAX'; btnCrit.disabled = true; } else { let cost = getUpgradeCost('crit', critLvl); btnCrit.innerHTML = `อัปเกรด (💎 <span style="color:cyan;">${cost}</span>)`; btnCrit.disabled = (currentUser.diamonds < cost); }
@@ -1359,7 +1380,7 @@
             this.maxHp = Math.max(1, this.baseMaxHp + this.bonusMaxHp + betadineHp + opHp - hpPenalty);
             if (this.hp > this.maxHp) this.hp = this.maxHp;
 
-            this.explodeRadius = [0, 6, 14, 25][opLv] || 0;
+            this.explodeRadius = [0, 15, 25, 35][opLv] || 0;
 
             let defPenLv = Math.min(this.activeStatuses.allergy, 3);
             let defPenalty = [0, 25, 50, 100][defPenLv] || 0;
@@ -1380,15 +1401,15 @@
             let throatPen = [0, 0.20, 0.35, 0.50][throatPenLv] || 0;
 
             let gumLv = Math.min(this.inv.gumgig, 3);
-            let gumBuff = [0, 0.10, 0.15, 0.30][gumLv] || 0;
+            let gumBuff = [0, 0.10, 0.15, 0.25][gumLv] || 0;
 
             let apaLv = Math.min(this.inv.apache, 3);
-            let apaBuff = [0, 0.10, 0.15, 0.30][apaLv] || 0;
+            let apaBuff = [0, 0.10, 0.15, 0.25][apaLv] || 0;
             
             this.fireRate = this.baseFireRate * (1 + throatPen) * (1 - gumBuff) * (1 - apaBuff);
             this.fireRate = Math.max(0.1, this.fireRate); 
 
-            let tyLv = Math.min(this.inv.tylenol, 6);
+            let tyLv = Math.min(this.inv.tylenol, 5); // Tylenol max stack is 5 now
             let tyAtk = tyLv * 2; 
             let ponstanLv = Math.min(this.inv.ponstan, 3);
             
@@ -1401,7 +1422,7 @@
             this.critChance = this.baseCritChance + ([0, 0.10, 0.20, 0.30][eyeLv] || 0);
 
             let eyeDropLv = Math.min(this.inv.eye_drop, 3);
-            this.critDamage = [1.5, 1.75, 2.0, 2.5][eyeDropLv] || 1.5;
+            this.critDamage = [1.5, 1.75, 2.5, 3.0][eyeDropLv] || 1.5;
 
             let cupLv = Math.min(this.inv.golden_cup, 3);
             this.magnetRange = (cupLv * 60) + (this.magnetBonusRange || 0);
@@ -1434,7 +1455,7 @@
                 if (this.scaldTimer <= 0) {
                     this.scaldTimer = 6.0;
                     let scaldLv = Math.min(this.activeStatuses.scald, 3);
-                    let dmg = [0, 1, 3, 4][scaldLv];
+                    let dmg = [0, 1, 3, 6][scaldLv];
                     if (this.hp > 1) {
                         this.hp = Math.max(1, this.hp - dmg);
                         showToast(`🔥 น้ำร้อนลวก! เสียเลือด ${dmg}`, "#ff5555");
@@ -1475,7 +1496,7 @@
 
             this.fireTimer -= dt;
             if (this.fireTimer <= 0 && enemies.length > 0) {
-                let missChance = [0, 0.15, 0.25, 0.40][this.activeStatuses.red_eye] || 0;
+                let missChance = [0, 0.10, 0.20, 0.30][this.activeStatuses.red_eye] || 0;
                 if (Math.random() >= missChance) {
                     this.shootNearest();
                 }
@@ -1533,11 +1554,10 @@
             }
             if (nearest) {
                 let angle = Math.atan2(nearest.y - this.y, nearest.x - this.x);
-                let isPierce = (this.inv.flying_rabit > 0);
+                let pierceCount = (this.inv.flying_rabit > 0) ? 2 : 0; // ทะลุได้ 2 ตัว
                 
                 let gumLv = Math.min(this.inv.gumgig, 3);
-                let bounceChance = [0, 0.20, 0.25, 0.30][gumLv] || 0; 
-                let bounceCount = gumLv; 
+                let slowAmt = [0, 1, 1.5, 2][gumLv] || 0; 
                 
                 let apaLv = Math.min(this.inv.apache, 3);
                 let stunChance = [0, 0.05, 0.10, 0.20][apaLv] || 0;
@@ -1551,7 +1571,7 @@
                         
                         let isCrit = Math.random() < this.critChance;
                         let finalAtk = isCrit ? this.atk * this.critDamage : this.atk;
-                        bullets.push(new Bullet(bx, by, actualAngle, finalAtk, 6, isPierce, isCrit, bounceChance, stunChance, this.explodeRadius, bounceCount));
+                        bullets.push(new Bullet(bx, by, actualAngle, finalAtk, 6, pierceCount, isCrit, slowAmt, stunChance, this.explodeRadius));
                     }
                 };
 
@@ -1635,7 +1655,9 @@
             this.shootTimer = 0; this.bossPattern = 0; 
             this.spawnDelay = 0.3; 
             this.stunTimer = 0;
-            this.cpDamageTimer = 0.5;
+            this.slowTimer = 0;
+            this.slowAmt = 0;
+            this.cpDamageTimer = 1.0;
             this.deadProcessed = false;
             
             const hpMap12 = [1, 1, 2, 2, 3, 4, 5, 8, 9, 10]; 
@@ -1653,7 +1675,7 @@
                 if (phase >= 10) atkAdd = 4 + (loop * 2); 
                 this.atk = 1 + atkAdd;
 
-                this.spd = 2; // 🔹 อัปเดตความเร็วตามคำสั่ง 
+                this.spd = 2; 
                 this.size = 20; 
                 
                 if (type === 1) {
@@ -1687,7 +1709,7 @@
                 let spd = 3.5;
                 if (phase >= 4 && phase <= 9) spd = 3.5 + (phase - 4) * 0.4;
                 if (phase >= 10) spd = 3.5 + (5 * 0.4); 
-                this.spd = spd; // ความเร็วคงเดิม 3.5
+                this.spd = spd;
 
                 this.size = 18; 
                 this.meleeAilments = [
@@ -1707,7 +1729,7 @@
                 this.atk = 5 + atkAdd;
                 this.rangedAtk = 3 + atkAdd;
                 
-                this.spd = 1.5; // 🔹 อัปเดตความเร็วตามคำสั่ง 
+                this.spd = 1.5; 
                 this.size = 25; 
                 this.meleeAilments = [
                     {id: 'headache', chance: 0.4}, {id: 'allergy', chance: 0.4}, 
@@ -1749,11 +1771,16 @@
             }
 
             let currentSpd = this.spd;
+            if (this.slowTimer > 0) {
+                this.slowTimer -= dt;
+                currentSpd = Math.max(0.5, currentSpd - this.slowAmt);
+            }
+
             if (player.activeCounterpain) {
                 let cpLv = Math.min(player.inv.counterpain, 3);
                 let cpRange = [0, 180, 250, 320][cpLv] || 0;
                 let cpSlow = [0, 1, 1.5, 2][cpLv] || 0;
-                let cpDmg = [0, 1.5, 2.5, 3.5][cpLv] || 0;
+                let cpDmg = [0, 2, 3, 4][cpLv] || 0;
                 if (cpRange > 0) {
                     let pDist = Math.hypot(player.x - this.x, player.y - this.y);
                     if (pDist < cpRange + this.size) {
@@ -1762,10 +1789,10 @@
                         this.cpDamageTimer -= dt;
                         if (this.cpDamageTimer <= 0) {
                             this.hp -= cpDmg;
-                            this.cpDamageTimer = 0.5;
+                            this.cpDamageTimer = 1.0;
                         }
                     } else {
-                        this.cpDamageTimer = 0.5;
+                        this.cpDamageTimer = 1.0;
                     }
                 }
             }
@@ -1836,15 +1863,13 @@
     }
 
     class Bullet {
-        constructor(x, y, angle, atk, size, pierce, isCrit, bounceChance, stunChance, explodeRadius, bounceCount=1) {
+        constructor(x, y, angle, atk, size, pierceCount, isCrit, slowAmt, stunChance, explodeRadius) {
             this.x = x; this.y = y; this.angle = angle; this.atk = atk; 
-            this.spd = 12; this.size = size; this.pierce = pierce; 
+            this.spd = 12; this.size = size; this.pierceCount = pierceCount; 
             this.active = true; this.hitList = []; this.isCrit = isCrit;
-            this.bounceChance = bounceChance;
+            this.slowAmt = slowAmt;
             this.stunChance = stunChance;
             this.explodeRadius = explodeRadius;
-            this.bounces = 1;
-            this.bounceCount = bounceCount;
         }
         update(dt, enemiesList, explosionsList, newSpawnsList) {
             this.x += Math.cos(this.angle) * this.spd * 60 * dt; this.y += Math.sin(this.angle) * this.spd * 60 * dt;
@@ -1861,11 +1886,15 @@
                     if (this.stunChance > 0 && Math.random() < this.stunChance) {
                         e.stunTimer = 0.4;
                     }
+                    if (this.slowAmt > 0) {
+                        e.slowTimer = 2.0; 
+                        e.slowAmt = this.slowAmt;
+                    }
 
                     if (this.explodeRadius > 0) {
                         explosionsList.push({x: this.x, y: this.y, radius: this.explodeRadius, life: 0.15, maxLife: 0.15});
                         for (let other of enemiesList) {
-                            if (other === e || other.hp <= 0 || other.spawnDelay > 0) continue;
+                            if (other === e || other.hp <= 0 || other.spawnDelay > 0) continue; 
                             let dEx = Math.hypot(other.x - this.x, other.y - this.y);
                             if (dEx <= this.explodeRadius + other.size) {
                                 other.hp -= this.atk;
@@ -1873,27 +1902,11 @@
                         }
                     }
 
-                    let willBounce = (this.bounces > 0 && Math.random() < this.bounceChance);
-
-                    if (willBounce) {
-                        let potentialTargets = enemiesList.filter(other => other !== e && other.hp > 0 && other.spawnDelay <= 0 && !this.hitList.includes(other));
-                        potentialTargets.sort((a, b) => Math.hypot(a.x - this.x, a.y - this.y) - Math.hypot(b.x - this.x, b.y - this.y));
-                        
-                        let targets = potentialTargets.slice(0, this.bounceCount);
-                        targets.forEach(target => {
-                            let newAngle = Math.atan2(target.y - this.y, target.x - this.x);
-                            let newBullet = new Bullet(this.x, this.y, newAngle, this.atk, this.size, this.pierce, this.isCrit, 0, this.stunChance, this.explodeRadius, 0);
-                            newBullet.bounces = 0; 
-                            newBullet.hitList = [...this.hitList]; 
-                            newSpawnsList.push(newBullet);
-                        });
-                        this.bounces = 0; 
-                    }
-
-                    if (!this.pierce) {
+                    if (this.pierceCount <= 0) {
                         this.active = false;
                         break;
                     }
+                    this.pierceCount--;
                 }
             }
         }
@@ -1929,7 +1942,7 @@
     }
 
     class ItemDrop {
-        constructor(x, y, type) { this.x = x; this.y = y; this.type = type; this.size = type === 'coin' ? 8 : 10; this.active = true; }
+        constructor(x, y, type) { this.x = x; this.y = y; this.type = type; this.size = type === 'coin' ? 12 : 12; this.active = true; }
         update(dt) {
             if (player.isDead) return;
             let dist = Math.hypot(player.x - this.x, player.y - this.y);
@@ -2149,14 +2162,14 @@
         let statusHtml = ""; let hasStatus = false;
         for (let key in player.statuses) {
             if (player.statuses[key] > 0) { 
-                statusHtml += `<div style="margin-bottom: 5px;"><strong style="color:#ff5555;">${STATUS_NAMES[key]} [Lv.${player.statuses[key]}/3]</strong><span class="has-tooltip" style="width:16px; height:16px; line-height:16px; font-size:11px; margin-left:5px;">ℹ️<span class="tooltip-text">${STATUS_DESC[key]}</span></span></div>`; 
+                statusHtml += `<div style="margin-bottom: 5px;"><strong style="color:#ff5555;">${STATUS_NAMES[key]} [Lv.${player.statuses[key]}/3] - ${STATUS_SHORT[key]}</strong><span class="has-tooltip" style="width:16px; height:16px; line-height:16px; font-size:11px; margin-left:5px;">ℹ️<span class="tooltip-text">${STATUS_DESC[key]}</span></span></div>`; 
                 hasStatus = true; 
             }
         }
         
         let cpmLvl = player.cpmDebuffToApply;
         if (cpmLvl > 0) {
-            statusHtml += `<div style="margin-bottom: 5px;"><strong style="color:#ff5555;">ง่วงนอน [Lv.${cpmLvl}]</strong><span class="has-tooltip" style="width:16px; height:16px; line-height:16px; font-size:11px; margin-left:5px;">ℹ️<span class="tooltip-text">ลดความเร็วเดิน ${cpmLvl} หน่วย</span></span></div>`; 
+            statusHtml += `<div style="margin-bottom: 5px;"><strong style="color:#ff5555;">ง่วงนอน [Lv.${cpmLvl}] - เดินช้า</strong><span class="has-tooltip" style="width:16px; height:16px; line-height:16px; font-size:11px; margin-left:5px;">ℹ️<span class="tooltip-text">ลดความเร็วเดิน ${cpmLvl} หน่วย</span></span></div>`; 
             hasStatus = true; 
         }
 
@@ -2252,7 +2265,7 @@
 
         let isBoss = (nextPh === 3 || nextPh === 5 || nextPh === 7 || nextPh === 9 || nextPh >= 10);
         if (isBoss) {
-            let boss = new Enemy(5, nextPh); boss.bossName = "บอส (Boss)";
+            let boss = new Enemy(5, nextPh); boss.bossName = "เชื้อโรคร้ายกาจ (Boss)";
             enemiesPreview.push(boss);
         }
         if (nextPh >= 12) {
@@ -2261,7 +2274,6 @@
             mb1.hp = Math.floor(mb1.hp * 0.6); mb1.maxHp = Math.floor(mb1.maxHp * 0.6); mb1.atk = Math.floor(mb1.atk * 0.7);
             enemiesPreview.push(mb1);
         }
-        // 🔹 เปลี่ยนมินิบอสตัวที่ 2 เป็นเฟส 15
         if (nextPh >= 15) {
             let mb2 = new Enemy(5, nextPh);
             mb2.bossName = "มินิบอส 2 (Mini-Boss)";
@@ -2272,7 +2284,6 @@
         let html = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
         
         enemiesPreview.forEach(e => {
-            // 🔹 อัปเดตชื่อ Type
             let mName = e.bossName || (e.type === 1 ? 'เชื้อโรคหนาม (Type 1)' :
                         e.type === 2 ? 'เชื้อโรคพิษ (Type 2)' :
                         e.type === 3 ? 'แมลงพิษ (Type 3)' :
@@ -2748,7 +2759,7 @@
             // 👹 ระบบบอส และ มินิบอสเฟสหลังๆ
             if (!bossSpawnedThisPhase && (currentPhase === 3 || currentPhase === 5 || currentPhase === 7 || currentPhase === 9 || currentPhase >= 10)) {
                 let boss = new Enemy(5, currentPhase);
-                boss.bossName = "BOSS";
+                boss.bossName = "เชื้อโรคร้ายกาจ (Boss)";
                 let edge = Math.floor(Math.random() * 4);
                 if (edge === 0) { boss.x = Math.random() * canvas.width; boss.y = -50; }
                 else if (edge === 1) { boss.x = canvas.width + 50; boss.y = Math.random() * canvas.height; }
@@ -2758,7 +2769,7 @@
                 
                 if (currentPhase >= 12) {
                     let miniBoss = new Enemy(5, currentPhase);
-                    miniBoss.bossName = "MINI-BOSS 1";
+                    miniBoss.bossName = "มินิบอส 1 (Mini-Boss)";
                     miniBoss.hp *= 0.6; miniBoss.maxHp *= 0.6;
                     miniBoss.atk *= 0.7; miniBoss.size *= 0.8;
                     
@@ -2773,10 +2784,9 @@
                     enemies.push(miniBoss);
                 }
 
-                // 🔹 มินิบอสตัวที่ 2 ย้ายมาเป็นเฟส 15
                 if (currentPhase >= 15) {
                     let miniBoss2 = new Enemy(5, currentPhase);
-                    miniBoss2.bossName = "MINI-BOSS 2";
+                    miniBoss2.bossName = "มินิบอส 2 (Mini-Boss)";
                     miniBoss2.hp *= 0.6; miniBoss2.maxHp *= 0.6;
                     miniBoss2.atk *= 0.7; miniBoss2.size *= 0.8;
                     
@@ -2819,7 +2829,6 @@
             else if (edge === 2) { baseX = Math.random() * canvas.width; baseY = canvas.height - offset; }
             else { baseX = offset; baseY = Math.random() * canvas.height; }
 
-            // 🔹 กระจายตัวมอนสเตอร์ให้กว้างขึ้น เพื่อป้องกันการโดนเป่ารวดเดียวด้วยกระสุนทะลุ
             if (enemies.length < 200) {
                 for(let i=0; i<groupSize; i++) {
                     let type = 1; let rand = Math.random();
@@ -2884,7 +2893,6 @@
             if (e.hp <= 0 && !e.deadProcessed) {
                 e.deadProcessed = true;
                 
-                // 🔹 อัปเดตการคิดคะแนน Score + (Phase * 1.5)
                 let baseScore = e.isBoss ? 100 : 10;
                 score += Math.floor(baseScore + (currentPhase * 1.5));
                 
@@ -2924,7 +2932,6 @@
                     if(Math.random() < baseMagnet + gcMagnetBonus) drops.push(new ItemDrop(e.x - 10, e.y - 10, 'magnet')); 
                 }
 
-                // 🔹 ระบบดรอปเพชร (Max 50/วัน, บอสออกแน่นอน 100%, ทั่วไปลดเหลือ 2%)
                 currentUser.daily_diamonds = currentUser.daily_diamonds || 0;
                 if (currentUser.daily_diamonds < 50) {
                     if (e.isBoss) {
@@ -3032,7 +3039,7 @@
             
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             ctx.fillRect(barX, barY, barWidth, 25); 
-            ctx.fillStyle = boss.bossName === "BOSS" ? '#ff3333' : '#ff9900'; 
+            ctx.fillStyle = boss.bossName === "เชื้อโรคร้ายกาจ (Boss)" ? '#ff3333' : '#ff9900'; 
             ctx.fillRect(barX, barY, barWidth * (boss.hp / boss.maxHp), 25); 
             
             ctx.fillStyle = 'white';
