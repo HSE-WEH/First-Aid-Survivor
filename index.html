@@ -1027,6 +1027,8 @@
             if (!showTabMenu) {
                 showTabMenu = true;
                 renderTabMenu();
+                let hm = document.getElementById('hudTabMenu');
+                if (hm) hm.classList.add('active');
             }
         }
         
@@ -2007,6 +2009,50 @@
         }
     }
 
+    function renderTabMenu() {
+        // ---------------- 📊 สถานะหลัก ----------------
+        let statsBox = document.getElementById('hudTabStats');
+        if (statsBox) {
+            statsBox.innerHTML = `
+                <h3 style="color:#4CAF50; margin-top:0;">📊 ค่าสถานะ</h3>
+                <div class="upg-row"><span>❤️ HP</span><strong>${Math.ceil(player.hp)} / ${Math.ceil(player.maxHp)}</strong></div>
+                <div class="upg-row"><span>⚔️ ATK</span><strong>${player.atk}</strong></div>
+                <div class="upg-row"><span>🛡️ DEF</span><strong>${player.def}</strong></div>
+                <div class="upg-row"><span>🏃 SPD</span><strong>${player.spd}</strong></div>
+                <div class="upg-row"><span>🔫 กระสุน/นัด</span><strong>${player.bulletCount}</strong></div>
+                <div class="upg-row"><span>⏱️ อัตรายิง</span><strong>${player.fireRate.toFixed(2)}</strong></div>
+                <div class="upg-row"><span>🎯 คริติคอล</span><strong>${(player.critChance * 100).toFixed(0)}% (x${player.critDamage})</strong></div>
+                <div class="upg-row"><span>🧲 รัศมีแม่เหล็ก</span><strong>${Math.round(player.magnetRange)}</strong></div>
+            `;
+        }
+
+        // ---------------- 💊 บัฟที่ถืออยู่ (จากไอเทม) ----------------
+        let buffBox = document.getElementById('hudTabBuff');
+        if (buffBox) {
+            let rows = '';
+            for (let key in player.inv) {
+                if (player.inv[key] > 0) {
+                    let item = ITEMS_DB.find(i => i.id === key);
+                    if (!item) continue;
+                    rows += `<div class="upg-row"><span>${item.name}</span><strong style="color:#4CAF50;">x${player.inv[key]}</strong></div>`;
+                }
+            }
+            buffBox.innerHTML = `<h3 style="color:#2196F3; margin-top:0;">💊 ไอเทม/บัฟที่ถือ</h3>${rows || '<p style="color:#777;">ยังไม่มีไอเทม</p>'}`;
+        }
+
+        // ---------------- 🤒 อาการป่วย (ดีบัฟ) ----------------
+        let debuffBox = document.getElementById('hudTabDebuff');
+        if (debuffBox) {
+            let rows = '';
+            for (let key in player.activeStatuses) {
+                if (player.activeStatuses[key] > 0) {
+                    rows += `<div class="upg-row"><span>${STATUS_NAMES[key] || key}</span><strong style="color:#ff5555;">Lv.${player.activeStatuses[key]}</strong></div>`;
+                }
+            }
+            debuffBox.innerHTML = `<h3 style="color:#ff5555; margin-top:0;">🤒 อาการป่วยปัจจุบัน</h3>${rows || '<p style="color:#777;">ไม่มีอาการป่วย</p>'}`;
+        }
+    }
+
     let bagBoxCollapsed = false;
     function toggleBagBox() {
         bagBoxCollapsed = !bagBoxCollapsed;
@@ -2873,33 +2919,27 @@
     }
 
     function drawCompactHUD(ctx) {
-        // Compact HUD: player HP bar + core stats, drawn top-right.
-        let barW = 220, barH = 18;
-        let barX = canvas.width - barW - 20, barY = 20;
-
+        // Small hint bar telling the player to hold TAB for full status — positioned
+        // below the DOM top bar (40px tall) so it never overlaps it.
+        let text = '⌨️ กด [TAB] ค้างไว้เพื่อดูสถานะ';
         ctx.save();
-        ctx.fillStyle = 'rgba(0,0,0,0.6)';
-        ctx.fillRect(barX - 10, barY - 10, barW + 20, barH + 60);
+        ctx.font = 'bold 13px Arial';
+        let textW = ctx.measureText(text).width;
+        let padX = 10, padY = 6;
+        let boxW = textW + padX * 2, boxH = 24;
+        let boxX = canvas.width - boxW - 15, boxY = 50;
 
-        // HP bar
-        let hpPct = Math.max(0, player.hp / player.maxHp);
-        ctx.fillStyle = '#552222';
-        ctx.fillRect(barX, barY, barW, barH);
-        ctx.fillStyle = hpPct > 0.3 ? '#4CAF50' : '#ff5555';
-        ctx.fillRect(barX, barY, barW * hpPct, barH);
-        ctx.strokeStyle = '#fff';
-        ctx.strokeRect(barX, barY, barW, barH);
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(boxX, boxY, boxW, boxH, 6) : ctx.rect(boxX, boxY, boxW, boxH);
+        ctx.fill();
+        ctx.stroke();
 
         ctx.fillStyle = '#fff';
-        ctx.font = 'bold 13px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(`HP ${Math.ceil(player.hp)} / ${Math.ceil(player.maxHp)}`, barX + barW / 2, barY + 13);
-
-        // Core stats line
         ctx.textAlign = 'left';
-        ctx.font = '12px Arial';
-        ctx.fillText(`ATK ${player.atk}  DEF ${player.def}  SPD ${player.spd}`, barX, barY + barH + 20);
-        ctx.fillText(`CRIT ${(player.critChance * 100).toFixed(0)}%  x${player.critDamage}`, barX, barY + barH + 38);
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, boxX + padX, boxY + boxH / 2 + 1);
         ctx.restore();
     }
 
