@@ -2872,6 +2872,37 @@
         drops.forEach(d => d.update(dt)); drops = drops.filter(d => d.active);
     }
 
+    function drawCompactHUD(ctx) {
+        // Compact HUD: player HP bar + core stats, drawn top-right.
+        let barW = 220, barH = 18;
+        let barX = canvas.width - barW - 20, barY = 20;
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.fillRect(barX - 10, barY - 10, barW + 20, barH + 60);
+
+        // HP bar
+        let hpPct = Math.max(0, player.hp / player.maxHp);
+        ctx.fillStyle = '#552222';
+        ctx.fillRect(barX, barY, barW, barH);
+        ctx.fillStyle = hpPct > 0.3 ? '#4CAF50' : '#ff5555';
+        ctx.fillRect(barX, barY, barW * hpPct, barH);
+        ctx.strokeStyle = '#fff';
+        ctx.strokeRect(barX, barY, barW, barH);
+
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 13px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`HP ${Math.ceil(player.hp)} / ${Math.ceil(player.maxHp)}`, barX + barW / 2, barY + 13);
+
+        // Core stats line
+        ctx.textAlign = 'left';
+        ctx.font = '12px Arial';
+        ctx.fillText(`ATK ${player.atk}  DEF ${player.def}  SPD ${player.spd}`, barX, barY + barH + 20);
+        ctx.fillText(`CRIT ${(player.critChance * 100).toFixed(0)}%  x${player.critDamage}`, barX, barY + barH + 38);
+        ctx.restore();
+    }
+
     function draw() {
         ctx.imageSmoothingEnabled = false;
         ctx.fillStyle = '#111'; ctx.fillRect(0, 0, canvas.width, canvas.height);
