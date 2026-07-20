@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V3.7</title>
+    <title>First Aid Survivor V3.8</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -109,7 +109,7 @@
         .htp-content { display: none; background: #333; padding: 25px; border-radius: 0 8px 8px 8px; text-align: left; width: 600px; height: 400px; overflow-y: auto; line-height: 1.6; margin-bottom: 15px; }
         .htp-content.active-content { display: block; }
 
-        /* MAIN MENU — uniform button size (same as GAME START) */
+        /* MAIN MENU */
         .menu-btn { font-size: 22px; padding: 18px 0; margin-bottom: 15px; border-radius: 10px; width: 340px; box-sizing: border-box; background-color: #444; }
 
         /* CHARACTER CUSTOMIZATION MODAL */
@@ -139,9 +139,7 @@
         ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #777; }
 
-        /* ======================================================================
-           PIXEL OFFICE / GERM THEME — applies to UI chrome
-           ====================================================================== */
+        /* PIXEL OFFICE / GERM THEME */
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
         :root{
@@ -246,7 +244,6 @@
 
         #fullShopModal, #nextPhaseModal, .hud-tab-menu { background: rgba(8,6,4,0.97) !important; }
 
-        /* ---- explicitly protect gameplay visuals ---- */
         #game-container { background-color:#000 !important; }
         #gameCanvas { background:#000 !important; }
         .top-bar { background: rgba(0,0,0,0.85) !important; border-bottom: 3px solid var(--pw-mintDark) !important; }
@@ -296,8 +293,9 @@
     <div id="topBar" class="top-bar">
         <span id="tb-name">Player: ---</span>
         <span>
-            <span id="tb-energy">Energy: -/5</span>
-            <span id="tb-energy-timer" style="color: #ffeb3b; margin-left: 5px;"></span>
+            <!-- 🔹 ซ่อนหลอด Energy ไว้ -->
+            <span id="tb-energy" style="display: none;">Energy: -/5</span>
+            <span id="tb-energy-timer" style="display: none; color: #ffeb3b; margin-left: 5px;"></span>
         </span>
         <button onclick="logout()" style="padding: 5px 15px; font-size: 12px; background-color: #f44336;">Logout</button>
     </div>
@@ -402,12 +400,13 @@
         
         <div id="tab-enemy" class="htp-content">
             <h3 style="color:#ff5555; margin-top:0;">👹 ข้อมูลมอนสเตอร์ (Enemies)</h3>
+            <!-- 🔹 ใช้รูปแทน Emoji -->
             <ul style="font-size: 14px; line-height: 1.8; list-style:none; padding:0;">
-                <li>🧟 <strong>Type 1 (ซอมบี้เดินชน):</strong> เดินเข้าหาตรงๆ แจกอาการป่วยระยะประชิด</li>
-                <li>🤮 <strong>Type 2 (ซอมบี้พ่นพิษ):</strong> ยิงกระสุนพิษจากระยะไกล แจกอาการป่วยเมื่อกระสุนโดนตัว</li>
-                <li>🏃 <strong>Type 3 (ซอมบี้วิ่งไว):</strong> เริ่มโผล่เฟส 4 เคลื่อนที่เร็วมาก แจกตาแดงและแผลสดประชิด</li>
-                <li>🛡️ <strong>Type 4 (ซอมบี้แทงค์):</strong> ถึกและโจมตีแรง ยิงกระสุนพิษระยะไกลที่แจกแผลในปาก</li>
-                <li>👑 <strong>Boss & Mini-Boss:</strong> ปรากฏตัวในเฟสบอส (3,5,7,9,10+) และมินิบอสจะเริ่มสมทบตั้งแต่เฟส 12 เป็นต้นไป โจมตีเป็นวงกว้างและการโจมตีทุกชนิด <strong>"สุ่มติดทุกสถานะ 100%"</strong></li>
+                <li><img id="htp-icon-t1" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>Type 1 (เชื้อโรคหนาม):</strong> เดินเข้าหาตรงๆ แจกอาการป่วยระยะประชิด</li>
+                <li><img id="htp-icon-t2" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>Type 2 (เชื้อโรคพิษ):</strong> ยิงกระสุนพิษจากระยะไกล แจกอาการป่วยเมื่อกระสุนโดนตัว</li>
+                <li><img id="htp-icon-t3" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>Type 3 (แมลงพิษ):</strong> เริ่มโผล่เฟส 4 เคลื่อนที่เร็วมาก แจกตาแดงและแผลสดประชิด</li>
+                <li><img id="htp-icon-t4" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>Type 4 (ไวรัส):</strong> ถึกและโจมตีแรง ยิงกระสุนพิษระยะไกลที่แจกแผลในปาก</li>
+                <li><img id="htp-icon-boss" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>Boss & Mini-Boss (เชื้อโรคร้าย):</strong> ปรากฏตัวในเฟสบอส (3,5,7,9,10+) และมินิบอสจะเริ่มสมทบตั้งแต่เฟส 12 และ 15 เป็นต้นไป โจมตีเป็นวงกว้างและการโจมตีทุกชนิด <strong>"สุ่มติดทุกสถานะ 100%"</strong></li>
             </ul>
         </div>
         
@@ -449,7 +448,7 @@
         <div id="tab-upg" class="htp-content">
             <h3 style="color:#9c27b0; margin-top:0;">💎 การอัปเกรดถาวร (Upgrades)</h3>
             <p style="font-size: 14px; line-height: 1.8;">
-                ใช้ <strong>เพชร</strong> ที่ดรอปจากมอนสเตอร์ (โอกาส 5%) มาอัปเกรดสถานะตั้งต้นให้เก่งขึ้นตลอดกาล:<br>
+                ใช้ <strong>เพชร</strong> ที่ดรอปจากมอนสเตอร์ มาอัปเกรดสถานะตั้งต้นให้เก่งขึ้นตลอดกาล:<br>
                 ❤️ <strong>Max HP:</strong> เพิ่มขีดจำกัดเลือด (อัปได้ 40 ขั้น)<br>
                 ⚔️ <strong>Attack:</strong> เพิ่มความแรงพื้นฐาน (อัปได้ 10 ขั้น)<br>
                 🛡️ <strong>ภูมิคุ้มกัน:</strong> เพิ่มโอกาสหลบหลีก (อัปได้ 50 ขั้น)<br>
@@ -1017,6 +1016,17 @@
                 });
             }
         });
+        
+        // Populate HTP Icons after Load
+        setTimeout(() => {
+            try {
+                document.getElementById('htp-icon-t1').src = buildGermSprite(1).toDataURL();
+                document.getElementById('htp-icon-t2').src = buildGermSprite(2).toDataURL();
+                document.getElementById('htp-icon-t3').src = buildGermSprite(3).toDataURL();
+                document.getElementById('htp-icon-t4').src = buildGermSprite(4).toDataURL();
+                document.getElementById('htp-icon-boss').src = buildBossSprite().toDataURL();
+            } catch(e) {}
+        }, 500);
     });
 
     window.addEventListener('keydown', e => {
@@ -1085,7 +1095,9 @@
             let lp = new Date(currentUser.last_played_at);
             let lpThai = new Date(lp.getTime() + (lp.getTimezoneOffset() * 60000) + (3600000 * 7));
             if (lpThai.getDate() !== thaiNow.getDate() || lpThai.getMonth() !== thaiNow.getMonth()) {
-                currentUser.daily_energy = 5; currentUser.last_played_at = new Date().toISOString();
+                currentUser.daily_energy = 5; 
+                currentUser.daily_diamonds = 0; // 🔹 รีเซ็ตเพชรรายวัน
+                currentUser.last_played_at = new Date().toISOString();
                 updateTopBar(); 
                 try { supabaseClient.from('players').update({ daily_energy: 5, last_played_at: currentUser.last_played_at }).eq('username', currentUser.username).then(()=>{}).catch(()=>{}); } catch(e){}
             }
@@ -1119,6 +1131,7 @@
                 if (existing.pin_code !== pinStr) { msgEl.innerText = "PIN ไม่ถูกต้อง"; btn.innerText = "Login / Register"; btn.disabled = false; return; }
                 currentUser = existing;
                 if (currentUser.upgraded_crit === undefined) currentUser.upgraded_crit = 0; 
+                if (currentUser.daily_diamonds === undefined) currentUser.daily_diamonds = 0;
             } else {
                 if (document.getElementById('fullname').style.display === 'none') {
                     document.getElementById('fullname').style.display = 'block'; 
@@ -1133,6 +1146,7 @@
                 if (insErr) throw insErr; 
                 currentUser = newP;
                 if (currentUser.upgraded_crit === undefined) currentUser.upgraded_crit = 0;
+                currentUser.daily_diamonds = 0;
                 
                 try { await supabaseClient.from('leaderboards').insert([{ username: userStr, max_score: 0, max_phase: 1 }]); }catch(e){}
                 document.getElementById('fullname').style.display = 'none'; document.getElementById('fullname').value = '';
@@ -1184,9 +1198,6 @@
         let adminTag = currentUser.is_admin ? ' <span style="color:#ffcc00; font-size:12px;">(Admin)</span>' : '';
         let tbName = document.getElementById('tb-name');
         if (tbName) tbName.innerHTML = `Player: ${currentUser.username}${adminTag}`;
-        let energyDisplay = currentUser.is_admin ? '∞' : currentUser.daily_energy;
-        let tbEnergy = document.getElementById('tb-energy');
-        if (tbEnergy) tbEnergy.innerText = `Energy: ${energyDisplay}/5`;
         let tbDiamonds = document.getElementById('menu-diamonds');
         if (tbDiamonds) tbDiamonds.innerText = currentUser.diamonds;
     }
@@ -1642,7 +1653,8 @@
                 if (phase >= 10) atkAdd = 4 + (loop * 2); 
                 this.atk = 1 + atkAdd;
 
-                this.spd = 2.5; this.size = 20; 
+                this.spd = 2; // 🔹 อัปเดตความเร็วตามคำสั่ง 
+                this.size = 20; 
                 
                 if (type === 1) {
                     this.meleeAilments = [
@@ -1675,7 +1687,7 @@
                 let spd = 3.5;
                 if (phase >= 4 && phase <= 9) spd = 3.5 + (phase - 4) * 0.4;
                 if (phase >= 10) spd = 3.5 + (5 * 0.4); 
-                this.spd = spd;
+                this.spd = spd; // ความเร็วคงเดิม 3.5
 
                 this.size = 18; 
                 this.meleeAilments = [
@@ -1695,7 +1707,8 @@
                 this.atk = 5 + atkAdd;
                 this.rangedAtk = 3 + atkAdd;
                 
-                this.spd = 2.5; this.size = 25; 
+                this.spd = 1.5; // 🔹 อัปเดตความเร็วตามคำสั่ง 
+                this.size = 25; 
                 this.meleeAilments = [
                     {id: 'headache', chance: 0.4}, {id: 'allergy', chance: 0.4}, 
                     {id: 'muscle_ache', chance: 0.4}, {id: 'fresh_wound', chance: 0.4}
@@ -1982,8 +1995,6 @@
     function startGame() {
         try {
             if (gameState === 'PLAYING') return; 
-            if (!currentUser.is_admin && currentUser.daily_energy <= 0) { showToast("พลังงานหมด!", "#ff5555"); return; }
-            if (!currentUser.is_admin) currentUser.daily_energy -= 1; 
             
             currentUser.last_played_at = new Date().toISOString(); 
             updateTopBar();
@@ -2010,7 +2021,6 @@
     }
 
     function renderTabMenu() {
-        // ---------------- 📊 สถานะหลัก ----------------
         let statsBox = document.getElementById('hudTabStats');
         if (statsBox) {
             statsBox.innerHTML = `
@@ -2026,7 +2036,6 @@
             `;
         }
 
-        // ---------------- 💊 บัฟที่ถืออยู่ (จากไอเทม) ----------------
         let buffBox = document.getElementById('hudTabBuff');
         if (buffBox) {
             let rows = '';
@@ -2040,7 +2049,6 @@
             buffBox.innerHTML = `<h3 style="color:#2196F3; margin-top:0;">💊 ไอเทม/บัฟที่ถือ</h3>${rows || '<p style="color:#777;">ยังไม่มีไอเทม</p>'}`;
         }
 
-        // ---------------- 🤒 อาการป่วย (ดีบัฟ) ----------------
         let debuffBox = document.getElementById('hudTabDebuff');
         if (debuffBox) {
             let rows = '';
@@ -2067,7 +2075,6 @@
     }
 
     function syncInventoryUI() {
-        // ---------------- 🎒 กระเป๋ายา (current buffs owned) ----------------
         let bagHtml = `<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">`;
         let hasAnyItem = false;
         for (let key in player.inv) {
@@ -2088,7 +2095,6 @@
         let bagDets = document.getElementById('bag-details');
         if (bagDets) bagDets.innerHTML = bagHtml;
 
-        // ---------------- 💊 คอมโบทำแผล ----------------
         let isSet1 = player.inv.saline > 0 && player.inv.plaster > 0;
         let isSet2 = player.inv.alcohol > 0 && player.inv.gauze > 0;
         let isSet3 = player.inv.dressing_set > 0 && player.inv.betadine > 0;
@@ -2246,18 +2252,19 @@
 
         let isBoss = (nextPh === 3 || nextPh === 5 || nextPh === 7 || nextPh === 9 || nextPh >= 10);
         if (isBoss) {
-            let boss = new Enemy(5, nextPh); boss.bossName = "👹 บอส (Boss)";
+            let boss = new Enemy(5, nextPh); boss.bossName = "บอส (Boss)";
             enemiesPreview.push(boss);
         }
         if (nextPh >= 12) {
             let mb1 = new Enemy(5, nextPh);
-            mb1.bossName = "👿 มินิบอส 1 (Mini-Boss)";
+            mb1.bossName = "มินิบอส 1 (Mini-Boss)";
             mb1.hp = Math.floor(mb1.hp * 0.6); mb1.maxHp = Math.floor(mb1.maxHp * 0.6); mb1.atk = Math.floor(mb1.atk * 0.7);
             enemiesPreview.push(mb1);
         }
-        if (nextPh >= 20) {
+        // 🔹 เปลี่ยนมินิบอสตัวที่ 2 เป็นเฟส 15
+        if (nextPh >= 15) {
             let mb2 = new Enemy(5, nextPh);
-            mb2.bossName = "👿 มินิบอส 2 (Mini-Boss)";
+            mb2.bossName = "มินิบอส 2 (Mini-Boss)";
             mb2.hp = Math.floor(mb2.hp * 0.6); mb2.maxHp = Math.floor(mb2.maxHp * 0.6); mb2.atk = Math.floor(mb2.atk * 0.7);
             enemiesPreview.push(mb2);
         }
@@ -2265,10 +2272,11 @@
         let html = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
         
         enemiesPreview.forEach(e => {
-            let mName = e.bossName || (e.type === 1 ? '🧟 ซอมบี้เดินชน (Type 1)' :
-                        e.type === 2 ? '🤮 ซอมบี้พ่นพิษ (Type 2)' :
-                        e.type === 3 ? '🏃 ซอมบี้วิ่งไว (Type 3)' :
-                        '🛡️ ซอมบี้แทงค์ (Type 4)');
+            // 🔹 อัปเดตชื่อ Type
+            let mName = e.bossName || (e.type === 1 ? 'เชื้อโรคหนาม (Type 1)' :
+                        e.type === 2 ? 'เชื้อโรคพิษ (Type 2)' :
+                        e.type === 3 ? 'แมลงพิษ (Type 3)' :
+                        'ไวรัส (Type 4)');
 
             let iconSrc = (e.type === 5 ? buildBossSprite() : buildGermSprite(e.type)).toDataURL();
             
@@ -2765,7 +2773,8 @@
                     enemies.push(miniBoss);
                 }
 
-                if (currentPhase >= 20) {
+                // 🔹 มินิบอสตัวที่ 2 ย้ายมาเป็นเฟส 15
+                if (currentPhase >= 15) {
                     let miniBoss2 = new Enemy(5, currentPhase);
                     miniBoss2.bossName = "MINI-BOSS 2";
                     miniBoss2.hp *= 0.6; miniBoss2.maxHp *= 0.6;
@@ -2810,6 +2819,7 @@
             else if (edge === 2) { baseX = Math.random() * canvas.width; baseY = canvas.height - offset; }
             else { baseX = offset; baseY = Math.random() * canvas.height; }
 
+            // 🔹 กระจายตัวมอนสเตอร์ให้กว้างขึ้น เพื่อป้องกันการโดนเป่ารวดเดียวด้วยกระสุนทะลุ
             if (enemies.length < 200) {
                 for(let i=0; i<groupSize; i++) {
                     let type = 1; let rand = Math.random();
@@ -2827,8 +2837,8 @@
                     }
                     
                     let e = new Enemy(type, currentPhase);
-                    e.x = baseX + (Math.random() * 60 - 30);
-                    e.y = baseY + (Math.random() * 60 - 30);
+                    e.x = baseX + (Math.random() * 150 - 75);
+                    e.y = baseY + (Math.random() * 150 - 75);
                     enemies.push(e);
                 }
             }
@@ -2873,9 +2883,12 @@
         enemies.forEach(e => {
             if (e.hp <= 0 && !e.deadProcessed) {
                 e.deadProcessed = true;
-                score += (e.isBoss ? 100 : (e.isElite ? 30 : 10));
-                let dropCoin = true;
                 
+                // 🔹 อัปเดตการคิดคะแนน Score + (Phase * 1.5)
+                let baseScore = e.isBoss ? 100 : 10;
+                score += Math.floor(baseScore + (currentPhase * 1.5));
+                
+                let dropCoin = true;
                 let dropRate = 1.0;
                 if (currentPhase >= 8) dropRate = 0.5;
                 else if (currentPhase >= 4) dropRate = 0.7;
@@ -2909,7 +2922,18 @@
                     let gcMagnetBonus = [0, 0.05, 0.05, 0.10][gcLv] || 0;
                     let baseMagnet = 0.05;
                     if(Math.random() < baseMagnet + gcMagnetBonus) drops.push(new ItemDrop(e.x - 10, e.y - 10, 'magnet')); 
-                    if(Math.random() < 0.05) drops.push(new ItemDrop(e.x + 10, e.y + 10, 'diamond')); 
+                }
+
+                // 🔹 ระบบดรอปเพชร (Max 50/วัน, บอสออกแน่นอน 100%, ทั่วไปลดเหลือ 2%)
+                currentUser.daily_diamonds = currentUser.daily_diamonds || 0;
+                if (currentUser.daily_diamonds < 50) {
+                    if (e.isBoss) {
+                        drops.push(new ItemDrop(e.x + 10, e.y + 10, 'diamond'));
+                        currentUser.daily_diamonds++;
+                    } else if (Math.random() < 0.02) {
+                        drops.push(new ItemDrop(e.x + 10, e.y + 10, 'diamond'));
+                        currentUser.daily_diamonds++;
+                    }
                 }
             }
         });
@@ -2919,8 +2943,6 @@
     }
 
     function drawCompactHUD(ctx) {
-        // Small hint bar telling the player to hold TAB for full status — positioned
-        // below the DOM top bar (40px tall) so it never overlaps it.
         let text = '⌨️ กด [TAB] ค้างไว้เพื่อดูสถานะ';
         ctx.save();
         ctx.font = 'bold 13px Arial';
@@ -3023,7 +3045,7 @@
 </script>
 
 <script>
-/* ---- Cute pixel mascot logo for the login screen (self-contained, does not touch game logic) ---- */
+/* ---- Cute pixel mascot logo for the login screen ---- */
 (function drawGameLogo(){
     function run(){
         try{
@@ -3032,47 +3054,38 @@
             const ctx = canvas.getContext('2d');
             ctx.imageSmoothingEnabled = false;
 
-            // draw at low internal resolution then blow up crisp (pixel-art technique)
             const lowW = 24, lowH = 24, scale = 4;
             const off = document.createElement('canvas');
             off.width = lowW; off.height = lowH;
             const o = off.getContext('2d');
             o.imageSmoothingEnabled = false;
 
-            // soft ground shadow
             o.fillStyle = 'rgba(0,0,0,0.25)';
             o.beginPath(); o.ellipse(12,22,7,2,0,0,Math.PI*2); o.fill();
 
-            // capsule body (mint top half / cream bottom half, like a medicine pill)
             o.fillStyle = '#7FE8C6';
             o.beginPath(); o.arc(12,10,8,Math.PI,0); o.fill();
             o.fillRect(4,10,16,6);
             o.fillStyle = '#FFF6E4';
             o.beginPath(); o.arc(12,16,8,0,Math.PI); o.fill();
             o.fillRect(4,10,16,1);
-            // outline
             o.strokeStyle = '#1A130D'; o.lineWidth = 1;
             o.beginPath(); o.arc(12,10,8,Math.PI,0); o.moveTo(4,10); o.lineTo(4,16);
             o.arc(12,16,8,0,Math.PI); o.moveTo(20,10); o.lineTo(20,16); o.stroke();
 
-            // shading dither
             o.fillStyle = '#4FBE96';
             [[6,6],[18,6],[7,9],[17,9]].forEach(p=>o.fillRect(p[0],p[1],1,1));
 
-            // cross badge on chest
             o.fillStyle = '#FF6F5E';
             o.fillRect(10,12,4,1); o.fillRect(11,11,2,3);
 
-            // little arms
             o.fillStyle = '#7FE8C6';
             o.fillRect(2,11,3,3); o.fillRect(19,11,3,3);
             o.strokeStyle = '#1A130D'; o.strokeRect(2,11,3,3); o.strokeRect(19,11,3,3);
 
-            // little feet
             o.fillStyle = '#4FBE96';
             o.fillRect(7,21,4,2); o.fillRect(13,21,4,2);
 
-            // face: big cute eyes + blush + smile
             o.fillStyle = '#1A130D';
             o.fillRect(8,9,2,3); o.fillRect(14,9,2,3);
             o.fillStyle = '#FFFFFF';
@@ -3082,13 +3095,12 @@
             o.strokeStyle = '#1A130D'; o.lineWidth = 1;
             o.beginPath(); o.moveTo(9,15); o.quadraticCurveTo(12,17,15,15); o.stroke();
 
-            // nurse-cap sparkle on top
             o.fillStyle = '#FFD866';
             o.fillRect(11,1,2,2);
 
             ctx.clearRect(0,0,canvas.width,canvas.height);
             ctx.drawImage(off,0,0,lowW,lowH,(canvas.width-lowW*scale)/2,4,lowW*scale,lowH*scale);
-        }catch(e){ /* fail silently — logo is decorative only */ }
+        }catch(e){ }
     }
     if(document.readyState === 'loading'){
         document.addEventListener('DOMContentLoaded', run);
@@ -3097,7 +3109,7 @@
 </script>
 
 <script>
-/* ---- Character customization (gender, face, skin, hair, outfit) for the main menu ---- */
+/* ---- Character customization ---- */
 window.playerGender = window.playerGender || 'male';
 window.playerCustomization = window.playerCustomization || { face: 'normal', skin: 'fair', hair: 'default', outfit: 'white' };
 
@@ -3117,7 +3129,7 @@ function drawPlayerSpriteOn(canvasEl, gender, custom){
         ctx2.clearRect(0,0,canvasEl.width,canvasEl.height);
         const sp = buildPlayerSprite(gender, 'down', custom);
         drawCachedSprite(ctx2, sp, canvasEl.width/2, canvasEl.height/2, 42);
-    }catch(e){ /* fail silently — preview is decorative only */ }
+    }catch(e){ }
 }
 
 function drawCharPreview(){
@@ -3204,7 +3216,6 @@ function loadCustomizationForCurrentUser(){
     drawCharPreview();
 }
 
-/* ---- Mini avatars on the leaderboard ---- */
 async function attachLeaderboardAvatars(usernames){
     try{
         const { data, error } = await supabaseClient.from('players').select('username, gender, customization').in('username', usernames);
@@ -3218,7 +3229,7 @@ async function attachLeaderboardAvatars(usernames){
                 el.innerHTML = `<img class="lb-avatar" src="${sp.toDataURL()}">`;
             }catch(e){}
         });
-    }catch(e){ /* customization/gender columns may not exist yet — fail silently */ }
+    }catch(e){ }
 }
 
 function initCharSelector(){
