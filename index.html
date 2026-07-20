@@ -2713,6 +2713,12 @@
         currentPhase++; phaseTimer = 30; bossSpawnedThisPhase = false;
         enemies.length = 0; bullets.length = 0; enemyBullets.length = 0; drops.length = 0; explosions = [];
         
+        // 🔹 ดึงตัวละครกลับมาจุดกึ่งกลางจอเสมอเมื่อเริ่มเฟสใหม่
+        if (player) {
+            player.x = canvas.width / 2;
+            player.y = canvas.height / 2;
+        }
+        
         // 💤 โอนดีบัฟง่วงนอนจากร้านค้าเข้าสู่ตัวผู้เล่นจริง
         player.activeCpmDebuff = player.cpmDebuffToApply;
         player.cpmDebuffToApply = 0;
