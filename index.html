@@ -752,15 +752,37 @@
                 c.fillStyle = '#C8FFF0'; c.fillRect(6, 5, 3, 3);
                 c.strokeStyle = '#3FA184'; c.stroke();
             } else if (kind === 'magnet') {
+                // 1. ลงสีพื้นตัวแม่เหล็ก (สีแดง)
                 c.fillStyle = '#FF6F5E';
-                // U Shape body
-                c.fillRect(4, 3, 4, 6); // Left leg
-                c.fillRect(10, 3, 4, 6); // Right leg
-                c.fillRect(4, 9, 10, 4); // Bottom curve connector
-                // Silver tips
+                c.fillRect(4, 3, 4, 6);   // ขาซ้าย
+                c.fillRect(10, 3, 4, 6);  // ขาขวา
+                c.fillRect(4, 9, 10, 4);  // ฐานโค้งด้านล่าง
+
+                // 2. ลงสีปลายแม่เหล็ก (สีเงิน)
                 c.fillStyle = '#EFEFEF';
                 c.fillRect(4, 1, 4, 2);
                 c.fillRect(10, 1, 4, 2);
+
+                // 3. วาดเส้นขอบรอบนอกตัว U แบบ Pixel-perfect
+                c.strokeStyle = '#1A130D'; // สีดำ/น้ำตาลเข้ม
+                c.lineWidth = 1;
+                c.beginPath();
+                c.moveTo(3.5, 0.5);   // เริ่มซ้ายบน
+                c.lineTo(8.5, 0.5);   // ไปขอบในขาซ้าย
+                c.lineTo(8.5, 8.5);   // วาดร่องตัว U ตรงกลาง
+                c.lineTo(9.5, 8.5);   // วาดก้นร่องตัว U
+                c.lineTo(9.5, 0.5);   // วาดขึ้นขอบในขาขวา
+                c.lineTo(14.5, 0.5);  // ไปขอบบนขวา
+                c.lineTo(14.5, 13.5); // ลงมาขอบขวาล่างสุด
+                c.lineTo(3.5, 13.5);  // ลากไปซ้ายล่าง
+                c.closePath();        // กลับจุดเริ่มต้น (ลากขอบซ้ายขึ้นไป)
+                c.stroke();
+
+                // 4. วาดเส้นคั่นระหว่างปลายสีเงินกับสีแดง
+                c.beginPath();
+                c.moveTo(3.5, 2.5); c.lineTo(8.5, 2.5);  // คั่นข้างซ้าย
+                c.moveTo(9.5, 2.5); c.lineTo(14.5, 2.5); // คั่นข้างขวา
+                c.stroke();
             }
         });
     }
@@ -1406,7 +1428,8 @@
             let apaLv = Math.min(this.inv.apache, 3);
             let apaBuff = [0, 0.10, 0.15, 0.25][apaLv] || 0;
             
-            this.fireRate = this.baseFireRate * (1 + throatPen) * (1 - gumBuff) * (1 - apaBuff);
+            let totalFireRateBuff = Math.min(0.9, gumBuff + apaBuff);
+            this.fireRate = this.baseFireRate * (1 + throatPen) * (1 - totalFireRateBuff);
             this.fireRate = Math.max(0.1, this.fireRate); 
 
             let tyLv = Math.min(this.inv.tylenol, 5); // Tylenol max stack is 5 now
@@ -1565,7 +1588,7 @@
                 let fireBulletStream = (spreadAngle) => {
                     let actualAngle = angle + spreadAngle;
                     for(let i=0; i < this.bulletCount; i++) {
-                        let offsetDist = -i * 25; 
+                        let offsetDist = -i * 55; 
                         let bx = this.x + Math.cos(actualAngle) * offsetDist;
                         let by = this.y + Math.sin(actualAngle) * offsetDist;
                         
