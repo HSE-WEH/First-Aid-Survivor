@@ -23,7 +23,7 @@
         /* ================= Modern Shop UI Layout ================= */
         .shop-layout { display: flex; flex-direction: row; width: 90vw; height: 85vh; max-width: 1400px; background: rgba(20, 20, 20, 0.95); border: 2px solid #4CAF50; border-radius: 12px; box-shadow: 0 0 30px rgba(76, 175, 80, 0.3); overflow: hidden; }
         .shop-left { width: 35%; border-right: 2px solid #333; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: rgba(0, 0, 0, 0.4); }
-        .shop-right { width: 65%; padding: 30px; display: flex; flex-direction: column; background: rgba(30, 30, 30, 0.5); position: relative; }
+        .shop-right { width: 65%; padding: 30px; display: flex; flex-direction: column; background: rgba(30, 30, 30, 0.5); position: relative; overflow-y: auto; }
         
         .stat-badge { background: rgba(0,0,0,0.6); padding: 12px; border-radius: 8px; border: 1px solid #555; display: flex; justify-content: space-between; font-size: 15px; }
         .stat-badge strong { color: #fff; }
@@ -54,7 +54,7 @@
         .highlight-cure { border: 2px solid #ff5555 !important; box-shadow: 0 0 15px rgba(255, 85, 85, 0.8) !important; animation: pulse-red 1.5s infinite; }
         @keyframes pulse-red { 0% { box-shadow: 0 0 5px rgba(255,85,85,0.5); } 50% { box-shadow: 0 0 20px rgba(255,85,85,1); } 100% { box-shadow: 0 0 5px rgba(255,85,85,0.5); } }
 
-        .btn-action-group { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
+        .btn-action-group { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; flex-shrink: 0; }
         .btn-quick-buy { background: #e67e22 !important; color: #fff !important; font-size: 14px; padding: 8px 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; min-height: 65px; box-sizing: border-box; width: 100%; border: 3px solid #000 !important; }
         .btn-quick-buy.active-buy { background: #27ae60 !important; border-color: #000 !important; }
         
