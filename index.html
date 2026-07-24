@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V4.0 (photo item)</title>
+    <title>First Aid Survivor V4.0 </title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -108,6 +108,12 @@
         .tab-btn.active-tab { background-color: #2196F3; }
         .htp-content { display: none; background: #333; padding: 25px; border-radius: 0 8px 8px 8px; text-align: left; width: 600px; height: 400px; overflow-y: auto; line-height: 1.6; margin-bottom: 15px; }
         .htp-content.active-content { display: block; }
+        .htp-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px; }
+        .htp-card { background:#222; border-left: 4px solid #555; border-radius: 8px; padding: 12px 14px; }
+        .htp-card-title { font-size:22px; margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+        .htp-card-title img { width:28px; height:28px; image-rendering:pixelated; flex-shrink:0; }
+        .htp-card-body { color:#ccc; line-height:1.5; font-size:13px; }
+        .htp-chip { display:inline-flex; align-items:center; gap:5px; background:#2a2a2a; border:1px solid #555; border-radius:20px; padding:5px 12px; font-size:12px; margin:3px; }
 
         /* MAIN MENU */
         .menu-btn { font-size: 22px; padding: 18px 0; margin-bottom: 15px; border-radius: 10px; width: 340px; box-sizing: border-box; background-color: #444; }
@@ -463,7 +469,7 @@ function toggleSound() {
         </span>
         <div>
             <button class="btn-sound-toggle" onclick="toggleSound()" style="padding: 5px 10px; font-size: 14px; background-color: #555; margin-right: 10px;">🔊</button>
-            <button onclick="logout()" style="padding: 5px 15px; font-size: 12px; background-color: #f44336;">Logout</button>
+            <button onclick="logout()" style="padding: 5px 15px; font-size: 12px; background-color: #f44336;">ออกจากระบบ</button>
         </div>
     </div>
     
@@ -476,13 +482,13 @@ function toggleSound() {
         <input type="text" id="username" placeholder="Username (English only)" pattern="[A-Za-z0-9]+" required style="width: 250px; padding: 15px;">
         <input type="password" id="pincode" placeholder="PIN" required style="width: 250px; padding: 15px;">
         <input type="text" id="fullname" placeholder="Full Name (สำหรับผู้เล่นใหม่)" style="display: none; width: 250px; padding: 15px;">
-        <button onclick="handleLogin()" id="btnLogin" style="width: 270px; padding: 15px; font-size: 18px; margin-top: 15px;">Login / Register</button>
+        <button onclick="handleLogin()" id="btnLogin" style="width: 270px; padding: 15px; font-size: 18px; margin-top: 15px;">เข้าสู่ระบบ / สมัครสมาชิก</button>
         <p id="login-msg" style="color: #ff5555; font-size: 16px; margin-top: 15px;"></p>
     </div>
 
     <!-- Main Menu -->
     <div id="menuScreen" class="screen">
-        <h2 style="font-size: 48px; margin-bottom: 20px; color: #fff;">MAIN MENU</h2>
+        <h2 style="font-size: 48px; margin-bottom: 20px; color: #fff;">เมนูหลัก</h2>
         <button onclick="startGame()" class="menu-btn" style="font-size: 26px; padding: 20px 0; background-color: #2196F3;">🔥 GAME START</button>
         <button onclick="switchScreen('howToPlayScreen'); showHtpTab('basic'); SFX.play('click');" class="menu-btn">📖 ข้อมูลเกม & คู่มือ</button>
         <button onclick="switchScreen('leaderboardScreen'); SFX.play('click');" class="menu-btn">🏆 Leader Board</button>
@@ -549,35 +555,57 @@ function toggleSound() {
         </div>
         
         <div id="tab-basic" class="htp-content active-content">
-            <h3 style="color:#2196F3; margin-top:0;">🎮 วิธีการเล่นเบื้องต้น (Basics)</h3>
-            <ul style="font-size: 14px; line-height: 1.8;">
-                <li><strong>การเคลื่อนที่:</strong> ใช้ปุ่ม <code>W, A, S, D</code> เพื่อบังคับทิศทางตัวละคร</li>
-                <li><strong>การโจมตี:</strong> ตัวละครจะยิงอัตโนมัติใส่ศัตรูที่อยู่ใกล้ที่สุด</li>
-                <li><strong>เป้าหมาย:</strong> เอาชีวิตรอดให้ครบ <code>30 วินาที</code> เพื่อเคลียร์ด่าน (Phase)</li>
-                <li><strong>ของดรอป:</strong> 
-                    <ul>
-                        <li>🟡 <strong>เหรียญทอง:</strong> ใช้สำหรับซื้อยาและไอเทมในร้านค้า (Pharmacy)</li>
-                        <li>💎 <strong>เพชรสีฟ้า:</strong> ดรอปสูงสุด 50 เม็ด/วัน ใช้สำหรับอัปเกรดสถานะตัวละครถาวร</li>
-                        <li>🧲 <strong>แม่เหล็ก:</strong> ดูดไอเทมทั้งหมดในหน้าจอเป็นเวลา 1.5 วินาที</li>
-                    </ul>
-                </li>
-                <li><strong>หน้าต่างสถานะ:</strong> กด <code>TAB</code> ค้างไว้ระหว่างเล่นเพื่อดูสถานะตัวละครและอาการป่วย</li>
-            </ul>
+            <h3 style="color:#2196F3; margin-top:0;">🎮 ระบบต่างๆ ในเกม (ภาพรวมแบบเร็ว)</h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px;">
+                <div style="background:#222; border-left: 4px solid #2196F3; border-radius: 8px; padding: 12px 14px;">
+                    <div style="font-size:22px; margin-bottom:4px;">🕹️ การเคลื่อนที่</div>
+                    <div style="color:#ccc; line-height:1.5;">ใช้ปุ่ม <code>W A S D</code> หรือ <code>ปุ่มลูกศร</code> เดินหลบศัตรู</div>
+                </div>
+                <div style="background:#222; border-left: 4px solid #ff5555; border-radius: 8px; padding: 12px 14px;">
+                    <div style="font-size:22px; margin-bottom:4px;">🎯 การโจมตี</div>
+                    <div style="color:#ccc; line-height:1.5;">ยิงใส่ศัตรูใกล้สุดให้อัตโนมัติ ไม่ต้องกดยิงเอง</div>
+                </div>
+                <div style="background:#222; border-left: 4px solid #FFD700; border-radius: 8px; padding: 12px 14px;">
+                    <div style="font-size:22px; margin-bottom:4px;">⏱️ เป้าหมายแต่ละด่าน</div>
+                    <div style="color:#ccc; line-height:1.5;">รอดให้ครบ <code>30 วินาที</code> ต่อเฟส แล้วเข้าร้านค้าอัตโนมัติ</div>
+                </div>
+                <div style="background:#222; border-left: 4px solid #4CAF50; border-radius: 8px; padding: 12px 14px;">
+                    <div style="font-size:22px; margin-bottom:4px;">📊 เช็กสถานะตัวเอง</div>
+                    <div style="color:#ccc; line-height:1.5;">กดค้าง <code>TAB</code> ดูค่าพลังและอาการป่วยปัจจุบัน</div>
+                </div>
+                <div style="background:#222; border-left: 4px solid #9c27b0; border-radius: 8px; padding: 12px 14px;">
+                    <div style="font-size:22px; margin-bottom:4px;">💰 ของดรอปจากศัตรู</div>
+                    <div style="color:#ccc; line-height:1.5;">🟡 เหรียญซื้อยา &nbsp; 💎 เพชรอัปเกรด &nbsp; 🧲 แม่เหล็กดูดของ</div>
+                </div>
+                <div style="background:#222; border-left: 4px solid #ff9800; border-radius: 8px; padding: 12px 14px;">
+                    <div style="font-size:22px; margin-bottom:4px;">🦠 อาการป่วย</div>
+                    <div style="color:#ccc; line-height:1.5;">โดนโจมตีจะติดอาการป่วย ต้องซื้อยาที่ตรงโรคมารักษา (ดูรายละเอียดในแท็บ "อาการป่วย")</div>
+                </div>
+                <div style="background:#222; border-left: 4px solid #4CAF50; border-radius: 8px; padding: 12px 14px;">
+                    <div style="font-size:22px; margin-bottom:4px;">🛒 ร้านค้า</div>
+                    <div style="color:#ccc; line-height:1.5;">จบเฟสแล้วซื้อยาเพิ่มพลัง แบ่งเป็น 4 สาย: โจมตี ป้องกัน หาเงิน ฟื้นฟู (ดูรายละเอียดในแท็บ "ยาในร้านค้า")</div>
+                </div>
+                <div style="background:#222; border-left: 4px solid #00bcd4; border-radius: 8px; padding: 12px 14px;">
+                    <div style="font-size:22px; margin-bottom:4px;">💎 อัปเกรดถาวร</div>
+                    <div style="color:#ccc; line-height:1.5;">เอาเพชรที่เก็บได้ไปอัปเกรดค่าพลังตั้งต้นให้เก่งขึ้นตลอดกาล (ดูรายละเอียดในแท็บ "อัปเกรด")</div>
+                </div>
+            </div>
         </div>
+
         
         <div id="tab-enemy" class="htp-content">
-            <h3 style="color:#ff5555; margin-top:0;">👹 ข้อมูลมอนสเตอร์ (Enemies)</h3>
+            <h3 style="color:#ff5555; margin-top:0;">👹 ข้อมูลมอนสเตอร์</h3>
             <ul style="font-size: 14px; line-height: 1.8; list-style:none; padding:0;">
-                <li><img id="htp-icon-t1" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>Type 1 (เชื้อโรคหนาม):</strong> เดินเข้าหาตรงๆ แจกอาการป่วยระยะประชิด</li>
-                <li><img id="htp-icon-t2" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>Type 2 (เชื้อโรคพิษ):</strong> ยิงกระสุนพิษจากระยะไกล แจกอาการป่วยเมื่อกระสุนโดนตัว</li>
-                <li><img id="htp-icon-t3" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>Type 3 (แมลงพิษ):</strong> เริ่มโผล่เฟส 4 เคลื่อนที่เร็วมาก แจกตาแดงและแผลสดประชิด</li>
-                <li><img id="htp-icon-t4" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>Type 4 (ไวรัส):</strong> ถึกและโจมตีแรง ยิงกระสุนพิษระยะไกลที่แจกแผลในปาก</li>
-                <li><img id="htp-icon-boss" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>Boss & Mini-Boss (เชื้อโรคร้ายกาจ):</strong> ปรากฏตัวในเฟสบอส (3,5,7,9,10+) และมินิบอสจะเริ่มสมทบตั้งแต่เฟส 12 และ 15 เป็นต้นไป โจมตีเป็นวงกว้างและการโจมตีทุกชนิด <strong>"สุ่มติดทุกสถานะ 100%"</strong></li>
+                <li><img id="htp-icon-t1" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>เชื้อโรคหนาม:</strong> เดินเข้าหาตรงๆ แจกอาการป่วยระยะประชิด</li>
+                <li><img id="htp-icon-t2" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>เชื้อโรคพิษ:</strong> ยิงกระสุนพิษจากระยะไกล แจกอาการป่วยเมื่อกระสุนโดนตัว</li>
+                <li><img id="htp-icon-t3" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>แมลงพิษ:</strong> เริ่มโผล่เฟส 4 เคลื่อนที่เร็วมาก แจกตาแดงและแผลสดประชิด</li>
+                <li><img id="htp-icon-t4" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>ไวรัส:</strong> ถึกและโจมตีแรง ยิงกระสุนพิษระยะไกลที่แจกแผลในปาก</li>
+                <li><img id="htp-icon-boss" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>บอสและมินิบอส (เชื้อโรคร้ายกาจ):</strong> ปรากฏตัวในเฟสบอส (3,5,7,9,10+) และมินิบอสจะเริ่มสมทบตั้งแต่เฟส 12 และ 15 เป็นต้นไป โจมตีเป็นวงกว้างและการโจมตีทุกชนิด <strong>"สุ่มติดทุกสถานะ 100%"</strong></li>
             </ul>
         </div>
         
         <div id="tab-shop" class="htp-content">
-            <h3 style="color:#4CAF50; margin-top:0;">🛒 ร้านขายยาและไอเทม (Shop & Items)</h3>
+            <h3 style="color:#4CAF50; margin-top:0;">🛒 ร้านขายยาและไอเทม</h3>
             <p style="font-size: 14px; line-height: 1.6;">
                 <strong>หมวดหมู่ไอเทม:</strong><br>
                 🔴 <span style="color:#ff5555">สายโจมตี:</span> เน้นเพิ่ม ATK, ยิงไว, คริติคอล, และลูกเล่นปืน (ชิ่ง/ทะลุ)<br>
@@ -594,7 +622,7 @@ function toggleSound() {
         </div>
 
         <div id="tab-debuff" class="htp-content">
-            <h3 style="color:#ff9800; margin-top:0;">🦠 อาการป่วย (Diseases & Cures)</h3>
+            <h3 style="color:#ff9800; margin-top:0;">🦠 อาการป่วยและวิธีรักษา</h3>
             <div style="font-size: 13px; line-height: 1.6; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>🤕 <strong>ปวดหัว:</strong> ลดจำนวนกระสุน <em>(แก้ด้วย Tylenol, Ponstan)</em></div>
                 <div>🤧 <strong>ภูมิแพ้:</strong> ลดการหลบหลีก <em>(แก้ด้วย CPM, Telfast)</em></div>
@@ -612,7 +640,7 @@ function toggleSound() {
         </div>
         
         <div id="tab-upg" class="htp-content">
-            <h3 style="color:#9c27b0; margin-top:0;">💎 การอัปเกรดถาวร (Upgrades)</h3>
+            <h3 style="color:#9c27b0; margin-top:0;">💎 การอัปเกรดถาวร</h3>
             <p style="font-size: 14px; line-height: 1.8;">
                 ใช้ <strong>เพชร</strong> ที่ดรอปจากมอนสเตอร์ มาอัปเกรดสถานะตั้งต้นให้เก่งขึ้นตลอดกาล:<br>
                 ❤️ <strong>Max HP:</strong> เพิ่มขีดจำกัดเลือด (อัปได้ 40 ขั้น)<br>
@@ -628,7 +656,7 @@ function toggleSound() {
 
     <!-- Upgrade Screen -->
     <div id="upgradeScreen" class="screen">
-        <h2 style="font-size: 36px; margin-bottom: 10px;">Permanent Upgrades</h2>
+        <h2 style="font-size: 36px; margin-bottom: 10px;">อัปเกรดถาวร</h2>
         <p style="font-size: 20px; margin-bottom: 20px;">เพชรที่มี: <span id="upg-diamonds" style="color: cyan; font-weight: bold; font-size: 24px;">0</span> 💎</p>
         <div style="background: rgba(40,40,40,0.9); padding: 30px; border-radius: 12px; width: 500px; border: 2px solid #4CAF50;">
             <div class="upg-row"><span style="font-size: 18px;">❤️ <strong>Max HP</strong> (+<span id="upg-lvl-hp">0</span>/40)</span><button id="btn-upg-hp" onclick="buyUpgrade('hp'); SFX.play('click');">อัปเกรด</button></div>
@@ -643,15 +671,15 @@ function toggleSound() {
     <!-- Leaderboard -->
     <div id="leaderboardScreen" class="screen">
         <h2 style="font-size: 36px;">🏆 Leader Board (Top 10)</h2>
-        <div id="leaderboardList" style="background: #333; padding: 20px; border-radius: 8px; width: 500px; max-height: 400px; overflow-y: auto; margin: 20px 0; font-size: 18px; border: 2px solid #FFD700;">Loading...</div>
+        <div id="leaderboardList" style="background: #333; padding: 20px; border-radius: 8px; width: 500px; max-height: 400px; overflow-y: auto; margin: 20px 0; font-size: 18px; border: 2px solid #FFD700;">กำลังโหลด...</div>
         <button onclick="switchScreen('menuScreen'); SFX.play('click');" style="background-color: #777; padding: 15px 40px; font-size: 18px;">กลับสู่เมนูหลัก</button>
     </div>
     
     <!-- Game Over Screen -->
     <div id="gameOverScreen" class="screen">
-        <h1 style="font-size: 80px; color: #ff5555; margin-bottom: 20px;">GAME OVER</h1>
-        <h2 id="go-phase" style="color: white; font-size: 30px;">Phase Reached: 1</h2>
-        <h2 id="go-score" style="color: yellow; font-size: 30px; margin-bottom: 40px;">Score: 0</h2>
+        <h1 style="font-size: 80px; color: #ff5555; margin-bottom: 20px;">จบเกม</h1>
+        <h2 id="go-phase" style="color: white; font-size: 30px;">ไปถึงเฟส: 1</h2>
+        <h2 id="go-score" style="color: yellow; font-size: 30px; margin-bottom: 40px;">คะแนน: 0</h2>
         <button onclick="switchScreen('menuScreen'); SFX.play('click');" style="font-size: 24px; padding: 15px 40px; background-color: #2196F3;">กลับสู่เมนูหลัก</button>
     </div>
 
@@ -660,10 +688,10 @@ function toggleSound() {
         <div class="shop-layout">
             
             <div class="shop-left">
-                <h3 style="margin: 0; color: #4CAF50; border-bottom: 2px solid #555; padding-bottom: 10px;">📊 Player Status</h3>
+                <h3 style="margin: 0; color: #4CAF50; border-bottom: 2px solid #555; padding-bottom: 10px;">📊 สถานะผู้เล่น</h3>
                 
                 <div class="stat-badge"><span style="color:#0f0;">❤️ Max HP</span> <strong id="shop-hp-stat">0/0</strong></div>
-                <div class="stat-badge"><span style="color:#ff5555;">⚔️ Attack</span> <strong id="shop-atk-stat">0</strong></div>
+                <div class="stat-badge"><span style="color:#ff5555;">⚔️ พลังโจมตี</span> <strong id="shop-atk-stat">0</strong></div>
                 <div class="stat-badge"><span style="color:#aaa;">🛡️ ภูมิคุ้มกัน</span> <strong id="shop-def-stat">0 (หลบ 0%)</strong></div>
                 <div class="stat-badge"><span style="color:#55ccff;">👟 Speed</span> <strong id="shop-spd-stat">0</strong></div>
                 <div class="stat-badge"><span style="color:#ff9800;">🎯 Critical</span> <strong id="shop-crit-stat">0% | x1.5</strong></div>
@@ -688,7 +716,7 @@ function toggleSound() {
 
             <div class="shop-right">
                 <div class="shop-right-header">
-                    <h1 style="margin:0; font-size: 32px;">Phase <span id="shop-phase-num" style="color: #4CAF50;"></span> - Pharmacy</h1>
+                    <h1 style="margin:0; font-size: 32px;">เฟส <span id="shop-phase-num" style="color: #4CAF50;"></span> - ร้านขายยา</h1>
                     <div style="text-align: right; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 1px solid #FFD700;">
                         <h2 style="margin:0; color: yellow; display: inline-block;">💰 <span id="shop-coins">0</span></h2>
                         <span style="font-size: 16px; margin-left: 15px; color: cyan;">💎 <span id="shop-diamonds">0</span></span>
@@ -726,7 +754,7 @@ function toggleSound() {
                 <div id="fullShopModal">
                     <div style="width: 100%; display: flex; flex-direction: column; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; margin-bottom: 15px; gap: 15px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h2 style="margin: 0; color: #4CAF50; font-size: 24px;">🛒 แคตตาล็อกยาทั้งหมด (Shop)</h2>
+                            <h2 style="margin: 0; color: #4CAF50; font-size: 24px;">🛒 แคตตาล็อกยาทั้งหมด</h2>
                             <div style="display: flex; align-items: center; gap: 20px;">
                                 <h3 style="margin:0; color: yellow;">เงิน: 💰 <span id="full-shop-coins">0</span></h3>
                                 <button onclick="toggleFullShop(false); SFX.play('click');" style="background-color: #f44336; padding: 8px 20px; font-size: 14px;">ปิด (X)</button>
@@ -1386,7 +1414,7 @@ const ITEM_ICONS = {
             
             if (existing) {
                 document.getElementById('fullname').style.display = 'none';
-                if (existing.pin_code !== pinStr) { msgEl.innerText = "PIN ไม่ถูกต้อง"; btn.innerText = "Login / Register"; btn.disabled = false; return; }
+                if (existing.pin_code !== pinStr) { msgEl.innerText = "PIN ไม่ถูกต้อง"; btn.innerText = "เข้าสู่ระบบ / สมัครสมาชิก"; btn.disabled = false; return; }
                 currentUser = existing;
                 if (currentUser.upgraded_crit === undefined) currentUser.upgraded_crit = 0; 
                 if (currentUser.daily_diamonds === undefined) currentUser.daily_diamonds = 0;
@@ -1418,7 +1446,7 @@ const ITEM_ICONS = {
             updateEnergyTimer(); msgEl.innerText = ""; updateTopBar(); await loadLeaderboard(); 
             switchScreen('menuScreen'); gameState = 'MENU';
         } catch (err) { console.error(err); msgEl.innerText = "ล้มเหลว: " + (err.message || err.details || "กรุณาเช็ค Console (F12)"); }
-        btn.disabled = false; btn.innerText = "Login / Register";
+        btn.disabled = false; btn.innerText = "เข้าสู่ระบบ / สมัครสมาชิก";
     }
 
     async function loadLeaderboard() {
@@ -2481,7 +2509,7 @@ const ITEM_ICONS = {
             }
         }
         if (btnDress) {
-            btnDress.innerHTML = `<span style="font-weight:bold;">🩹 ซื้อด่วน Dressing Set ($${priceDs})</span><span style="font-size:12px; color:#eee; margin-top:2px;">Heal 7 HP</span>`;
+            btnDress.innerHTML = `<span style="font-weight:bold;">🩹 ซื้อด่วน Dressing Set ($${priceDs})</span><span style="font-size:12px; color:#eee; margin-top:2px;">ฮีล 7 หน่วย</span>`;
             btnDress.classList.remove('active-buy');
         }
         if (btnNext) {
@@ -2529,13 +2557,13 @@ const ITEM_ICONS = {
         }
         if (nextPh >= 12) {
             let mb1 = new Enemy(5, nextPh);
-            mb1.bossName = "มินิบอส 1 (Mini-Boss)";
+            mb1.bossName = "มินิบอส 1";
             mb1.hp = Math.floor(mb1.hp * 0.6); mb1.maxHp = Math.floor(mb1.maxHp * 0.6); mb1.atk = Math.floor(mb1.atk * 0.7);
             enemiesPreview.push(mb1);
         }
         if (nextPh >= 15) {
             let mb2 = new Enemy(5, nextPh);
-            mb2.bossName = "มินิบอส 2 (Mini-Boss)";
+            mb2.bossName = "มินิบอส 2";
             mb2.hp = Math.floor(mb2.hp * 0.6); mb2.maxHp = Math.floor(mb2.maxHp * 0.6); mb2.atk = Math.floor(mb2.atk * 0.7);
             enemiesPreview.push(mb2);
         }
@@ -2543,10 +2571,10 @@ const ITEM_ICONS = {
         let html = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
         
         enemiesPreview.forEach(e => {
-            let mName = e.bossName || (e.type === 1 ? 'เชื้อโรคหนาม (Type 1)' :
-                        e.type === 2 ? 'เชื้อโรคพิษ (Type 2)' :
-                        e.type === 3 ? 'แมลงพิษ (Type 3)' :
-                        'ไวรัส (Type 4)');
+            let mName = e.bossName || (e.type === 1 ? 'เชื้อโรคหนาม' :
+                        e.type === 2 ? 'เชื้อโรคพิษ' :
+                        e.type === 3 ? 'แมลงพิษ' :
+                        'ไวรัส');
 
             let iconSrc = (e.type === 5 ? buildBossSprite() : buildGermSprite(e.type)).toDataURL();
             
@@ -2711,7 +2739,7 @@ const ITEM_ICONS = {
         container.innerHTML = ''; 
         currentDiscountItems.forEach((item, index) => {
             if (item.bought) {
-                container.innerHTML += `<div class="shop-card sold"><h2>SOLD OUT</h2></div>`;
+                container.innerHTML += `<div class="shop-card sold"><h2>ขายหมด</h2></div>`;
             } else {
                 let isMax = item.maxStack !== 99 && player.inv[item.id] >= item.maxStack;
                 let maxBadge = isMax ? `<span class="max-badge">MAX</span>` : "";
@@ -2977,8 +3005,8 @@ const ITEM_ICONS = {
         SFX.stopBGM();
         SFX.play('gameover');
         
-        let gp = document.getElementById('go-phase'); if(gp) gp.innerText = `Phase Reached: ${currentPhase}`;
-        let gs = document.getElementById('go-score'); if(gs) gs.innerText = `Score: ${score}`;
+        let gp = document.getElementById('go-phase'); if(gp) gp.innerText = `ไปถึงเฟส: ${currentPhase}`;
+        let gs = document.getElementById('go-score'); if(gs) gs.innerText = `คะแนน: ${score}`;
         
         switchScreen('gameOverScreen');
 
@@ -3045,7 +3073,7 @@ const ITEM_ICONS = {
                 
                 if (currentPhase >= 12) {
                     let miniBoss = new Enemy(5, currentPhase);
-                    miniBoss.bossName = "มินิบอส 1 (Mini-Boss)";
+                    miniBoss.bossName = "มินิบอส 1";
                     miniBoss.hp *= 0.6; miniBoss.maxHp *= 0.6;
                     miniBoss.atk *= 0.7; miniBoss.size *= 0.8;
                     
@@ -3062,7 +3090,7 @@ const ITEM_ICONS = {
 
                 if (currentPhase >= 15) {
                     let miniBoss2 = new Enemy(5, currentPhase);
-                    miniBoss2.bossName = "มินิบอส 2 (Mini-Boss)";
+                    miniBoss2.bossName = "มินิบอส 2";
                     miniBoss2.hp *= 0.6; miniBoss2.maxHp *= 0.6;
                     miniBoss2.atk *= 0.7; miniBoss2.size *= 0.8;
                     
