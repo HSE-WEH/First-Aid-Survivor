@@ -291,7 +291,26 @@
         .confirm-btn-row { display: flex; gap: 15px; margin-top: 22px; }
         .btn-confirm-yes { flex: 1; background: var(--pw-coral) !important; color: #2b0f0a !important; }
         .btn-confirm-no { flex: 1; background: var(--pw-mintDark) !important; color: #0c1310 !important; }
+
+        /* ================= How-to-Play Info Cards ================= */
+        .htp-card-list { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+        .htp-card { background: #222; border: 1px solid #3a3a3a; border-left: 5px solid #555; border-radius: 10px; padding: 14px 16px; display: flex; gap: 14px; align-items: flex-start; text-align: left; }
+        .htp-card-icon { width: 44px; height: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.35); border-radius: 8px; }
+        .htp-card-icon img { width: 34px; height: 34px; image-rendering: pixelated; object-fit: contain; }
+        .htp-card-body { flex: 1; min-width: 0; }
+        .htp-card-title { font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; }
+        .htp-card-desc { font-size: 13px; color: #ccc; line-height: 1.5; }
+        .htp-card-tag { display: inline-block; font-size: 10px; font-weight: bold; padding: 2px 7px; border-radius: 4px; margin-bottom: 6px; }
+        .htp-card-tag.attack { background: rgba(255, 82, 82, 0.2); color: #ff5252; border: 1px solid #ff5252; }
+        .htp-card-tag.defense { background: rgba(68, 138, 255, 0.2); color: #448AFF; border: 1px solid #448AFF; }
+        .htp-card-tag.economy { background: rgba(255, 215, 0, 0.2); color: #FFD700; border: 1px solid #FFD700; }
+        .htp-card-tag.heal { background: rgba(76, 175, 80, 0.2); color: #4CAF50; border: 1px solid #4CAF50; }
+        .htp-card.enemy-card { border-left-color: #ff5555; }
+        .htp-card.debuff-card { border-left-color: #ff9800; }
+        .htp-card.upg-card { border-left-color: #9c27b0; }
+        .htp-card-sub { font-size: 12px; color: #FFD700; margin-top: 4px; }
     </style>
+
 </head>
 <body>
 
@@ -548,7 +567,7 @@ function toggleSound() {
         <h2 style="font-size: 32px; margin-bottom: 20px;">คู่มือข้อมูลเกม</h2>
         <div style="display: flex; gap: 2px;">
             <button class="tab-btn active-tab" id="btn-tab-basic" onclick="showHtpTab('basic'); SFX.play('click');">วิธีเล่น</button>
-            <button class="tab-btn" id="btn-tab-enemy" onclick="showHtpTab('enemy'); SFX.play('click');">มอนสเตอร์</button>
+            <button class="tab-btn" id="btn-tab-enemy" onclick="showHtpTab('enemy'); SFX.play('click');">เชื้อโรค</button>
             <button class="tab-btn" id="btn-tab-shop" onclick="showHtpTab('shop'); SFX.play('click');">ยาในร้านค้า</button>
             <button class="tab-btn" id="btn-tab-debuff" onclick="showHtpTab('debuff'); SFX.play('click');">อาการป่วย</button>
             <button class="tab-btn" id="btn-tab-upg" onclick="showHtpTab('upg'); SFX.play('click');">อัปเกรด</button>
@@ -567,14 +586,14 @@ function toggleSound() {
                 </div>
                 <div style="background:#222; border-left: 4px solid #FFD700; border-radius: 8px; padding: 12px 14px;">
                     <div style="font-size:22px; margin-bottom:4px;">⏱️ เป้าหมายแต่ละด่าน</div>
-                    <div style="color:#ccc; line-height:1.5;">รอดให้ครบ <code>30 วินาที</code> ต่อเฟส แล้วเข้าร้านค้าอัตโนมัติ</div>
+                    <div style="color:#ccc; line-height:1.5;">รอดให้ครบ <code>30 วินาที</code> ต่อด่าน แล้วเข้าร้านค้าอัตโนมัติ</div>
                 </div>
                 <div style="background:#222; border-left: 4px solid #4CAF50; border-radius: 8px; padding: 12px 14px;">
                     <div style="font-size:22px; margin-bottom:4px;">📊 เช็กสถานะตัวเอง</div>
                     <div style="color:#ccc; line-height:1.5;">กดค้าง <code>TAB</code> ดูค่าพลังและอาการป่วยปัจจุบัน</div>
                 </div>
                 <div style="background:#222; border-left: 4px solid #9c27b0; border-radius: 8px; padding: 12px 14px;">
-                    <div style="font-size:22px; margin-bottom:4px;">💰 ของดรอปจากศัตรู</div>
+                    <div style="font-size:22px; margin-bottom:4px;">💰 ของได้รับจากศัตรู</div>
                     <div style="color:#ccc; line-height:1.5;">🟡 เหรียญซื้อยา &nbsp; 💎 เพชรอัปเกรด &nbsp; 🧲 แม่เหล็กดูดของ</div>
                 </div>
                 <div style="background:#222; border-left: 4px solid #ff9800; border-radius: 8px; padding: 12px 14px;">
@@ -583,7 +602,7 @@ function toggleSound() {
                 </div>
                 <div style="background:#222; border-left: 4px solid #4CAF50; border-radius: 8px; padding: 12px 14px;">
                     <div style="font-size:22px; margin-bottom:4px;">🛒 ร้านค้า</div>
-                    <div style="color:#ccc; line-height:1.5;">จบเฟสแล้วซื้อยาเพิ่มพลัง แบ่งเป็น 4 สาย: โจมตี ป้องกัน หาเงิน ฟื้นฟู (ดูรายละเอียดในแท็บ "ยาในร้านค้า")</div>
+                    <div style="color:#ccc; line-height:1.5;">จบด่านแล้วซื้อยาเพิ่มพลัง แบ่งเป็น 4 สาย: โจมตี ป้องกัน หาเงิน ฟื้นฟู (ดูรายละเอียดในแท็บ "ยาในร้านค้า")</div>
                 </div>
                 <div style="background:#222; border-left: 4px solid #00bcd4; border-radius: 8px; padding: 12px 14px;">
                     <div style="font-size:22px; margin-bottom:4px;">💎 อัปเกรดถาวร</div>
@@ -594,61 +613,141 @@ function toggleSound() {
 
         
         <div id="tab-enemy" class="htp-content">
-            <h3 style="color:#ff5555; margin-top:0;">👹 ข้อมูลมอนสเตอร์</h3>
-            <ul style="font-size: 14px; line-height: 1.8; list-style:none; padding:0;">
-                <li><img id="htp-icon-t1" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>เชื้อโรคหนาม:</strong> เดินเข้าหาตรงๆ แจกอาการป่วยระยะประชิด</li>
-                <li><img id="htp-icon-t2" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>เชื้อโรคพิษ:</strong> ยิงกระสุนพิษจากระยะไกล แจกอาการป่วยเมื่อกระสุนโดนตัว</li>
-                <li><img id="htp-icon-t3" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>แมลงพิษ:</strong> เริ่มโผล่เฟส 4 เคลื่อนที่เร็วมาก แจกตาแดงและแผลสดประชิด</li>
-                <li><img id="htp-icon-t4" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>ไวรัส:</strong> ถึกและโจมตีแรง ยิงกระสุนพิษระยะไกลที่แจกแผลในปาก</li>
-                <li><img id="htp-icon-boss" style="width:22px; height:22px; image-rendering:pixelated; vertical-align:middle; margin-right:5px;"> <strong>บอสและมินิบอส (เชื้อโรคร้ายกาจ):</strong> ปรากฏตัวในเฟสบอส (3,5,7,9,10+) และมินิบอสจะเริ่มสมทบตั้งแต่เฟส 12 และ 15 เป็นต้นไป โจมตีเป็นวงกว้างและการโจมตีทุกชนิด <strong>"สุ่มติดทุกสถานะ 100%"</strong></li>
-            </ul>
+            <h3 style="color:#ff5555; margin-top:0;">👹 ข้อมูลเชื้อโรค</h3>
+            <div class="htp-card-list">
+                <div class="htp-card enemy-card">
+                    <div class="htp-card-icon"><img id="htp-icon-t1"></div>
+                    <div class="htp-card-body">
+                        <div class="htp-card-title">เชื้อโรคหนาม</div>
+                        <div class="htp-card-desc">เดินเข้าหาตรงๆ แจกอาการป่วยระยะประชิด</div>
+                    </div>
+                </div>
+                <div class="htp-card enemy-card">
+                    <div class="htp-card-icon"><img id="htp-icon-t2"></div>
+                    <div class="htp-card-body">
+                        <div class="htp-card-title">เชื้อโรคพิษ</div>
+                        <div class="htp-card-desc">ยิงกระสุนพิษจากระยะไกล แจกอาการป่วยเมื่อกระสุนโดนตัว</div>
+                    </div>
+                </div>
+                <div class="htp-card enemy-card">
+                    <div class="htp-card-icon"><img id="htp-icon-t3"></div>
+                    <div class="htp-card-body">
+                        <div class="htp-card-title">แมลงพิษ</div>
+                        <div class="htp-card-desc">เริ่มโผล่ด่าน 4 เคลื่อนที่เร็วมาก แจกตาแดงและแผลสดประชิด</div>
+                    </div>
+                </div>
+                <div class="htp-card enemy-card">
+                    <div class="htp-card-icon"><img id="htp-icon-t4"></div>
+                    <div class="htp-card-body">
+                        <div class="htp-card-title">ไวรัส</div>
+                        <div class="htp-card-desc">ถึกและโจมตีแรง ยิงกระสุนพิษระยะไกลที่แจกแผลในปาก</div>
+                    </div>
+                </div>
+                <div class="htp-card enemy-card" style="border-left-color:#FFD700;">
+                    <div class="htp-card-icon"><img id="htp-icon-boss"></div>
+                    <div class="htp-card-body">
+                        <div class="htp-card-title">บอสและมินิบอส (เชื้อโรคร้ายกาจ)</div>
+                        <div class="htp-card-desc">ปรากฏตัวในด่านบอส (3,5,7,9,10+) และมินิบอสจะเริ่มสมทบตั้งแต่ด่าน 12 และ 15 เป็นต้นไป โจมตีเป็นวงกว้างและการโจมตีทุกชนิด <strong>"สุ่มติดทุกสถานะ 100%"</strong></div>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <div id="tab-shop" class="htp-content">
             <h3 style="color:#4CAF50; margin-top:0;">🛒 ร้านขายยาและไอเทม</h3>
             <p style="font-size: 14px; line-height: 1.6;">
                 <strong>หมวดหมู่ไอเทม:</strong><br>
-                🔴 <span style="color:#ff5555">สายโจมตี:</span> เน้นเพิ่ม ATK, ยิงไว, คริติคอล, และลูกเล่นปืน (ชิ่ง/ทะลุ)<br>
-                🔵 <span style="color:#448AFF">สายป้องกัน:</span> เน้นเพิ่ม DEF, Max HP, สปีด และการเอาตัวรอด<br>
-                🟡 <span style="color:#FFD700">สายหาเงิน:</span> เน้นฟาร์มเหรียญ ดูดไอเทม ดรอปแม่เหล็ก<br>
-                💚 <span style="color:#4CAF50">สายฟื้นฟู:</span> อุปกรณ์ทำแผล ช่วยฮีล HP โดยตรง
+                🔴 <span style="color:#ff5555">สายโจมตี:</span> เน้นเพิ่ม พลังโจมตี, ยิงไว, โชค, และลูกเล่นปืน (ชิ่ง/ทะลุ)<br>
+                🔵 <span style="color:#448AFF">สายป้องกัน:</span> เน้นเพิ่ม ภูมิคุ้มกัน, พลังชีวิตสูงสุด, สปีด และการเอาตัวรอด<br>
+                🟡 <span style="color:#FFD700">สายหาเงิน:</span> เน้นค้นหาเหรียญ ดูดไอเทม ได้รับแม่เหล็ก<br>
+                💚 <span style="color:#4CAF50">สายฟื้นฟู:</span> อุปกรณ์ทำแผล ช่วยรักษา HP โดยตรง
             </p>
             <p style="font-size: 14px; line-height: 1.6;">
-                <strong>ระบบคอมโบ:</strong> ซื้ออุปกรณ์ทำแผลให้ครบคู่ จะได้รับโบนัส <code>+Max HP ถาวร</code><br>
+                <strong>ระบบคอมโบ:</strong> ซื้ออุปกรณ์ทำแผลให้ครบคู่ จะได้รับโบนัส <code>+พลังชีวิตสูงสุด ถาวร</code><br>
                 ชุด 1: Saline + Plaster (+6 HP) | ชุด 2: Alcohol + Gauze (+6 HP) | ชุด 3: Dressing + Betadine (+7 HP)<br>
                 <em>สะสมครบ 3 ชุด รับเพิ่มอีก +15 HP!</em>
             </p>
             <p style="font-size: 14px;"><strong>รายการโปรด:</strong> กดปุ่ม ❤️ หน้าไอเทมในแคตตาล็อก เพื่อปักหมุดไว้บนสุด</p>
+            <h3 style="color:#4CAF50; margin-top:20px;">💊 รายการยาทั้งหมด</h3>
+            <div id="htp-item-cards" class="htp-card-list"></div>
         </div>
 
         <div id="tab-debuff" class="htp-content">
             <h3 style="color:#ff9800; margin-top:0;">🦠 อาการป่วยและวิธีรักษา</h3>
-            <div style="font-size: 13px; line-height: 1.6; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>🤕 <strong>ปวดหัว:</strong> ลดจำนวนกระสุน <em>(แก้ด้วย Tylenol, Ponstan)</em></div>
-                <div>🤧 <strong>ภูมิแพ้:</strong> ลดการหลบหลีก <em>(แก้ด้วย CPM, Telfast)</em></div>
-                <div>🤢 <strong>ปวดท้อง:</strong> ลดความเร็วเดิน <em>(แก้ด้วย Carbon, Air-X, Rabbit)</em></div>
-                <div>💪 <strong>ปวดกล้ามเนื้อ:</strong> ลดความเร็วเดิน <em>(แก้ด้วย Ponstan, Counterpain)</em></div>
-                <div>🔴 <strong>ผื่นแพ้:</strong> มอนไม่ตกเหรียญ <em>(แก้ด้วย Cardamine, Systral)</em></div>
-                <div>🎈 <strong>ผื่นบวม:</strong> สุ่มเกิด Elite <em>(แก้ด้วย Golden Cup)</em></div>
-                <div>👄 <strong>แผลในปาก:</strong> ลด Max HP <em>(แก้ด้วย Oral Paste)</em></div>
-                <div>👁️ <strong>ตาแดง:</strong> หมอกดำบังจอ/ยิงพลาด <em>(แก้ด้วย Eye Lotion, Drop)</em></div>
-                <div>🗣️ <strong>เจ็บคอ:</strong> ลดความเร็วยิง <em>(แก้ด้วย Gumgig, Apache)</em></div>
-                <div>🩸 <strong>แผลสด:</strong> โดนดาเมจแรงขึ้น <em>(แก้ด้วย Betadine)</em></div>
-                <div>🔥 <strong>น้ำร้อนลวก:</strong> เลือดลดเรื่อยๆ <em>(แก้ด้วย Silver Cream)</em></div>
-                <div style="grid-column: span 2; margin-top: 10px; color:#ff5555;">⚠️ <strong>หมายเหตุ:</strong> หากมีอาการป่วย การซื้อยาที่ตรงกับโรคจะรักษาอาการนั้นทันที (1 สแต็กต่อ 1 ชิ้น) และจะไม่ได้ผลบัฟระดับต่อไปจนกว่าโรคจะหายขาด</div>
+            <div class="htp-card-list">
+                <div class="htp-card debuff-card">
+                    <div class="htp-card-icon" style="font-size:22px;">🤕</div>
+                    <div class="htp-card-body"><div class="htp-card-title">ปวดหัว</div><div class="htp-card-desc">ลดจำนวนกระสุน <em>(แก้ด้วย Tylenol, Ponstan)</em></div></div>
+                </div>
+                <div class="htp-card debuff-card">
+                    <div class="htp-card-icon" style="font-size:22px;">🤧</div>
+                    <div class="htp-card-body"><div class="htp-card-title">ภูมิแพ้</div><div class="htp-card-desc">ลดการหลบหลีก <em>(แก้ด้วย CPM, Telfast)</em></div></div>
+                </div>
+                <div class="htp-card debuff-card">
+                    <div class="htp-card-icon" style="font-size:22px;">🤢</div>
+                    <div class="htp-card-body"><div class="htp-card-title">ปวดท้อง</div><div class="htp-card-desc">ลดความเร็วเดิน <em>(แก้ด้วย Carbon, Air-X, Rabbit)</em></div></div>
+                </div>
+                <div class="htp-card debuff-card">
+                    <div class="htp-card-icon" style="font-size:22px;">💪</div>
+                    <div class="htp-card-body"><div class="htp-card-title">ปวดกล้ามเนื้อ</div><div class="htp-card-desc">ลดความเร็วเดิน <em>(แก้ด้วย Ponstan, Counterpain)</em></div></div>
+                </div>
+                <div class="htp-card debuff-card">
+                    <div class="htp-card-icon" style="font-size:22px;">🔴</div>
+                    <div class="htp-card-body"><div class="htp-card-title">ผื่นแพ้</div><div class="htp-card-desc">เชื้อโรคไม่ได้รับเหรียญ <em>(แก้ด้วย Cardamine, Systral)</em></div></div>
+                </div>
+                <div class="htp-card debuff-card">
+                    <div class="htp-card-icon" style="font-size:22px;">🎈</div>
+                    <div class="htp-card-body"><div class="htp-card-title">ผื่นบวม</div><div class="htp-card-desc">สุ่มเกิด Elite <em>(แก้ด้วย Golden Cup)</em></div></div>
+                </div>
+                <div class="htp-card debuff-card">
+                    <div class="htp-card-icon" style="font-size:22px;">👄</div>
+                    <div class="htp-card-body"><div class="htp-card-title">แผลในปาก</div><div class="htp-card-desc">ลด พลังชีวิตสูงสุด <em>(แก้ด้วย Oral Paste)</em></div></div>
+                </div>
+                <div class="htp-card debuff-card">
+                    <div class="htp-card-icon" style="font-size:22px;">👁️</div>
+                    <div class="htp-card-body"><div class="htp-card-title">ตาแดง</div><div class="htp-card-desc">หมอกดำบังจอ/ยิงพลาด <em>(แก้ด้วย Eye Lotion, Drop)</em></div></div>
+                </div>
+                <div class="htp-card debuff-card">
+                    <div class="htp-card-icon" style="font-size:22px;">🗣️</div>
+                    <div class="htp-card-body"><div class="htp-card-title">เจ็บคอ</div><div class="htp-card-desc">ลดความเร็วยิง <em>(แก้ด้วย Gumgig, Apache)</em></div></div>
+                </div>
+                <div class="htp-card debuff-card">
+                    <div class="htp-card-icon" style="font-size:22px;">🩸</div>
+                    <div class="htp-card-body"><div class="htp-card-title">แผลสด</div><div class="htp-card-desc">โดนความเสียหายแรงขึ้น <em>(แก้ด้วย Betadine)</em></div></div>
+                </div>
+                <div class="htp-card debuff-card">
+                    <div class="htp-card-icon" style="font-size:22px;">🔥</div>
+                    <div class="htp-card-body"><div class="htp-card-title">น้ำร้อนลวก</div><div class="htp-card-desc">เลือดลดเรื่อยๆ <em>(แก้ด้วย Silver Cream)</em></div></div>
+                </div>
+                <div style="margin-top: 6px; color:#ff5555; font-size:13px;">⚠️ <strong>หมายเหตุ:</strong> หากมีอาการป่วย การซื้อยาที่ตรงกับโรคจะรักษาอาการนั้นทันที (1 ระดับต่อ 1 ชิ้น) และจะไม่ได้ผลบัฟระดับต่อไปจนกว่าโรคจะหายขาด</div>
             </div>
         </div>
         
         <div id="tab-upg" class="htp-content">
             <h3 style="color:#9c27b0; margin-top:0;">💎 การอัปเกรดถาวร</h3>
-            <p style="font-size: 14px; line-height: 1.8;">
-                ใช้ <strong>เพชร</strong> ที่ดรอปจากมอนสเตอร์ มาอัปเกรดสถานะตั้งต้นให้เก่งขึ้นตลอดกาล:<br>
-                ❤️ <strong>Max HP:</strong> เพิ่มขีดจำกัดเลือด (อัปได้ 40 ขั้น)<br>
-                ⚔️ <strong>Attack:</strong> เพิ่มความแรงพื้นฐาน (อัปได้ 10 ขั้น)<br>
-                🛡️ <strong>ภูมิคุ้มกัน:</strong> เพิ่มโอกาสหลบหลีก (อัปได้ 50 ขั้น)<br>
-                👟 <strong>Speed:</strong> เพิ่มความเร็วการเดิน (อัปได้ 3 ขั้น)<br>
-                🎯 <strong>Critical:</strong> เพิ่มโอกาสคริติคอล (อัปได้ 5 ขั้น)
-            </p>
+            <p style="font-size: 14px; line-height: 1.6;">ใช้ <strong>เพชร</strong> ที่ได้รับจากเชื้อโรค มาอัปเกรดสถานะตั้งต้นให้เก่งขึ้นตลอดกาล:</p>
+            <div class="htp-card-list">
+                <div class="htp-card upg-card">
+                    <div class="htp-card-icon" style="font-size:22px;">❤️</div>
+                    <div class="htp-card-body"><div class="htp-card-title">พลังชีวิตสูงสุด</div><div class="htp-card-desc">เพิ่มขีดจำกัดเลือด (อัปได้ 40 ขั้น)</div></div>
+                </div>
+                <div class="htp-card upg-card">
+                    <div class="htp-card-icon" style="font-size:22px;">⚔️</div>
+                    <div class="htp-card-body"><div class="htp-card-title">พลังโจมตี</div><div class="htp-card-desc">เพิ่มความแรงพื้นฐาน (อัปได้ 10 ขั้น)</div></div>
+                </div>
+                <div class="htp-card upg-card">
+                    <div class="htp-card-icon" style="font-size:22px;">🛡️</div>
+                    <div class="htp-card-body"><div class="htp-card-title">ภูมิคุ้มกัน</div><div class="htp-card-desc">เพิ่มโอกาสหลบหลีก (อัปได้ 50 ขั้น)</div></div>
+                </div>
+                <div class="htp-card upg-card">
+                    <div class="htp-card-icon" style="font-size:22px;">👟</div>
+                    <div class="htp-card-body"><div class="htp-card-title">ความเร็ว</div><div class="htp-card-desc">เพิ่มความเร็วการเดิน (อัปได้ 3 ขั้น)</div></div>
+                </div>
+                <div class="htp-card upg-card">
+                    <div class="htp-card-icon" style="font-size:22px;">🎯</div>
+                    <div class="htp-card-body"><div class="htp-card-title">โชค</div><div class="htp-card-desc">เพิ่มโอกาสโจมตีพิเศษ (อัปได้ 5 ขั้น)</div></div>
+                </div>
+            </div>
         </div>
         
         <button onclick="switchScreen('menuScreen'); SFX.play('click');" style="background-color: #777; padding: 15px 40px; font-size: 18px;">กลับสู่เมนูหลัก</button>
@@ -659,11 +758,11 @@ function toggleSound() {
         <h2 style="font-size: 36px; margin-bottom: 10px;">อัปเกรดถาวร</h2>
         <p style="font-size: 20px; margin-bottom: 20px;">เพชรที่มี: <span id="upg-diamonds" style="color: cyan; font-weight: bold; font-size: 24px;">0</span> 💎</p>
         <div style="background: rgba(40,40,40,0.9); padding: 30px; border-radius: 12px; width: 500px; border: 2px solid #4CAF50;">
-            <div class="upg-row"><span style="font-size: 18px;">❤️ <strong>Max HP</strong> (+<span id="upg-lvl-hp">0</span>/40)</span><button id="btn-upg-hp" onclick="buyUpgrade('hp'); SFX.play('click');">อัปเกรด</button></div>
-            <div class="upg-row"><span style="font-size: 18px;">⚔️ <strong>Attack</strong> (+<span id="upg-lvl-atk">0</span>/10)</span><button id="btn-upg-atk" onclick="buyUpgrade('atk'); SFX.play('click');">อัปเกรด</button></div>
+            <div class="upg-row"><span style="font-size: 18px;">❤️ <strong>พลังชีวิตสูงสุด</strong> (+<span id="upg-lvl-hp">0</span>/40)</span><button id="btn-upg-hp" onclick="buyUpgrade('hp'); SFX.play('click');">อัปเกรด</button></div>
+            <div class="upg-row"><span style="font-size: 18px;">⚔️ <strong>พลังโจมตี</strong> (+<span id="upg-lvl-atk">0</span>/10)</span><button id="btn-upg-atk" onclick="buyUpgrade('atk'); SFX.play('click');">อัปเกรด</button></div>
             <div class="upg-row"><span style="font-size: 18px;">🛡️ <strong>ภูมิคุ้มกัน</strong> (+<span id="upg-lvl-def">0</span>/50)</span><button id="btn-upg-def" onclick="buyUpgrade('def'); SFX.play('click');">อัปเกรด</button></div>
-            <div class="upg-row"><span style="font-size: 18px;">👟 <strong>Speed</strong> (+<span id="upg-lvl-spd">0</span>/3)</span><button id="btn-upg-spd" onclick="buyUpgrade('spd'); SFX.play('click');">อัปเกรด</button></div>
-            <div class="upg-row"><span style="font-size: 18px;">🎯 <strong>Critical</strong> (+<span id="upg-lvl-crit">0</span>%/5%)</span><button id="btn-upg-crit" onclick="buyUpgrade('crit'); SFX.play('click');">อัปเกรด</button></div>
+            <div class="upg-row"><span style="font-size: 18px;">👟 <strong>ความเร็ว</strong> (+<span id="upg-lvl-spd">0</span>/3)</span><button id="btn-upg-spd" onclick="buyUpgrade('spd'); SFX.play('click');">อัปเกรด</button></div>
+            <div class="upg-row"><span style="font-size: 18px;">🎯 <strong>โชค</strong> (+<span id="upg-lvl-crit">0</span>%/5%)</span><button id="btn-upg-crit" onclick="buyUpgrade('crit'); SFX.play('click');">อัปเกรด</button></div>
         </div>
         <button onclick="switchScreen('menuScreen'); SFX.play('click');" style="margin-top: 30px; background-color: #777; padding: 15px 40px; font-size: 18px;">กลับสู่เมนูหลัก</button>
     </div>
@@ -678,7 +777,7 @@ function toggleSound() {
     <!-- Game Over Screen -->
     <div id="gameOverScreen" class="screen">
         <h1 style="font-size: 80px; color: #ff5555; margin-bottom: 20px;">จบเกม</h1>
-        <h2 id="go-phase" style="color: white; font-size: 30px;">ไปถึงเฟส: 1</h2>
+        <h2 id="go-phase" style="color: white; font-size: 30px;">ไปถึงด่าน: 1</h2>
         <h2 id="go-score" style="color: yellow; font-size: 30px; margin-bottom: 40px;">คะแนน: 0</h2>
         <button onclick="switchScreen('menuScreen'); SFX.play('click');" style="font-size: 24px; padding: 15px 40px; background-color: #2196F3;">กลับสู่เมนูหลัก</button>
     </div>
@@ -690,11 +789,11 @@ function toggleSound() {
             <div class="shop-left">
                 <h3 style="margin: 0; color: #4CAF50; border-bottom: 2px solid #555; padding-bottom: 10px;">📊 สถานะผู้เล่น</h3>
                 
-                <div class="stat-badge"><span style="color:#0f0;">❤️ Max HP</span> <strong id="shop-hp-stat">0/0</strong></div>
+                <div class="stat-badge"><span style="color:#0f0;">❤️ พลังชีวิตสูงสุด</span> <strong id="shop-hp-stat">0/0</strong></div>
                 <div class="stat-badge"><span style="color:#ff5555;">⚔️ พลังโจมตี</span> <strong id="shop-atk-stat">0</strong></div>
                 <div class="stat-badge"><span style="color:#aaa;">🛡️ ภูมิคุ้มกัน</span> <strong id="shop-def-stat">0 (หลบ 0%)</strong></div>
-                <div class="stat-badge"><span style="color:#55ccff;">👟 Speed</span> <strong id="shop-spd-stat">0</strong></div>
-                <div class="stat-badge"><span style="color:#ff9800;">🎯 Critical</span> <strong id="shop-crit-stat">0% | x1.5</strong></div>
+                <div class="stat-badge"><span style="color:#55ccff;">👟 ความเร็ว</span> <strong id="shop-spd-stat">0</strong></div>
+                <div class="stat-badge"><span style="color:#ff9800;">🎯 โชค</span> <strong id="shop-crit-stat">0% | x1.5</strong></div>
                 
                 <div class="status-box">
                     <strong style="color: #ffcc00;">🦠 อาการป่วยปัจจุบัน:</strong> 
@@ -716,7 +815,7 @@ function toggleSound() {
 
             <div class="shop-right">
                 <div class="shop-right-header">
-                    <h1 style="margin:0; font-size: 32px;">เฟส <span id="shop-phase-num" style="color: #4CAF50;"></span> - ร้านขายยา</h1>
+                    <h1 style="margin:0; font-size: 32px;">ด่าน <span id="shop-phase-num" style="color: #4CAF50;"></span> - ร้านขายยา</h1>
                     <div style="text-align: right; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 1px solid #FFD700;">
                         <h2 style="margin:0; color: yellow; display: inline-block;">💰 <span id="shop-coins">0</span></h2>
                         <span style="font-size: 16px; margin-left: 15px; color: cyan;">💎 <span id="shop-diamonds">0</span></span>
@@ -744,10 +843,10 @@ function toggleSound() {
                     <div style="display: flex; gap: 10px; margin-top: 5px;">
                         <button onclick="surrenderGame(); SFX.play('click');" class="btn-surrender" style="flex: 1;">🏳️ ยอมแพ้</button>
                         <button onclick="showNextPhaseInfo(); SFX.play('click');" class="btn-info" style="flex: 1;">ℹ️ ข้อมูลด่านหน้า</button>
-                        <button onclick="nextPhase(); SFX.play('click');" id="btn-next-phase" class="btn-next" style="flex: 1;">➡️ ลุย Phase ถัดไป</button>
+                        <button onclick="nextPhase(); SFX.play('click');" id="btn-next-phase" class="btn-next" style="flex: 1;">➡️ ลุย Stage ถัดไป</button>
                     </div>
                     
-                    <button id="btnAdminSkip" onclick="adminSkipPhase()" class="btn-reroll" style="display:none; background-color: #ff5722; margin-top: 5px;">👑 [Admin] วาร์ปข้าม Phase</button>
+                    <button id="btnAdminSkip" onclick="adminSkipPhase()" class="btn-reroll" style="display:none; background-color: #ff5722; margin-top: 5px;">👑 [Admin] วาร์ปข้าม Stage</button>
                 </div>
                 
                 <!-- Modal แคตตาล็อกยาทั้งหมด (แบบ List นวนอน) -->
@@ -775,10 +874,10 @@ function toggleSound() {
                 <div id="nextPhaseModal">
                     <div class="info-panel">
                         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #555; padding-bottom:10px;">
-                            <h2 style="margin:0; color:#00bcd4;">ℹ️ ข้อมูล Phase ถัดไป (<span id="info-phase-num"></span>)</h2>
+                            <h2 style="margin:0; color:#00bcd4;">ℹ️ ข้อมูล Stage ถัดไป (<span id="info-phase-num"></span>)</h2>
                             <button onclick="document.getElementById('nextPhaseModal').classList.remove('active-modal'); SFX.play('click');" style="background:#f44336; padding:8px 20px; font-size:14px;">ปิด (X)</button>
                         </div>
-                        <h3 style="color:#FFD700; margin-top:20px; margin-bottom:10px;">👹 มอนสเตอร์ที่จะพบ</h3>
+                        <h3 style="color:#FFD700; margin-top:20px; margin-bottom:10px;">👹 เชื้อโรคที่จะพบ</h3>
                         <div id="info-monsters"></div>
                     </div>
                 </div>
@@ -1129,12 +1228,12 @@ function toggleSound() {
         allergy: "ลดภูมิคุ้มกัน (Dodge) 25/50/100", 
         stomach: "ลดความเร็วเดิน 1/2/3 หน่วย", 
         muscle_ache: "ลดความเร็วเดิน 1/2/3 หน่วย",
-        rash: "โอกาสมอนสเตอร์ไม่ดรอปเหรียญ 30/50/70%", 
-        swelling: "สุ่มเกิดมอนสเตอร์ Elite ที่แข็งแกร่ง", 
-        mouth_ulcer: "ลด Max HP 10/20/30", 
+        rash: "โอกาสเชื้อโรคไม่ได้รับเหรียญ 30/50/70%", 
+        swelling: "สุ่มเกิดเชื้อโรค Elite ที่แข็งแกร่ง", 
+        mouth_ulcer: "ลด พลังชีวิตสูงสุด 10/20/30", 
         red_eye: "เกิดหมอกบดบังขอบจอ และโอกาสยิงพลาด 10/20/30%", 
         sore_throat: "ลดความเร็วการยิง 20/35/50%", 
-        fresh_wound: "รับดาเมจแรงขึ้น 20/30/50%", 
+        fresh_wound: "รับความเสียหายแรงขึ้น 20/30/50%", 
         scald: "เสียเลือด 1/3/6 ทุก 6 วินาที" 
     };
 
@@ -1157,9 +1256,9 @@ function toggleSound() {
         allergy: "หลบหลีกลด",
         stomach: "เดินช้า",
         muscle_ache: "เดินช้า",
-        rash: "เงินไม่ดรอป",
-        swelling: "มอนเก่งขึ้น",
-        mouth_ulcer: "Max HP ลด",
+        rash: "เงินไม่ได้รับ",
+        swelling: "เชื้อโรคเก่งขึ้น",
+        mouth_ulcer: "พลังชีวิตสูงสุด ลด",
         red_eye: "จอเบลอ/ยิงวืด",
         sore_throat: "ยิงช้า",
         fresh_wound: "โดนตีแรงขึ้น",
@@ -1199,32 +1298,32 @@ const ITEM_ICONS = {
     }
 
     const ITEMS_DB = [
-        { id: 'tylenol', category: 'attack', name: "Tylenol", cost: 30, cures: 'headache', maxStack: 5, short_desc: "รักษาปวดหัว | +ATK", desc: "+ATK 2, 4, 6, 8, 10 ตามลำดับ" },
-        { id: 'ponstan', category: 'attack', name: "Ponstan", cost: 30, cures: 'headache,muscle_ache', maxStack: 3, short_desc: "รักษาปวดหัว,ปวดกล้ามเนื้อ | +นัดกระสุน, +ATK", desc: "เพิ่มกระสุน 1 นัด และบวก ATK 1 แต้ม (ต่อ 1 สแต็ก)" },
-        { id: 'air_x', category: 'attack', name: "Air-X", cost: 20, cures: 'stomach', maxStack: 1, short_desc: "รักษาปวดท้อง | กระสุน 3 แฉก", desc: "กางกระสุนออกเป็น 3 ทิศทาง<br>มีผลใช้งาน 1 เฟส" },
-        { id: 'flying_rabit', category: 'attack', name: "Flying Rabit", cost: 20, cures: 'stomach', maxStack: 1, short_desc: "รักษาปวดท้อง | กระสุนทะลุ", desc: "กระสุนทะลุศัตรูเพิ่มอีก 2 ตัว<br>มีผลใช้งาน 1 เฟส" },
-        { id: 'gumgig', category: 'attack', name: "Gumgig pean", cost: 30, cures: 'sore_throat', maxStack: 3, short_desc: "รักษาเจ็บคอ | ยิงไว, กระสุนสโลว์มอน, +ATK", desc: "ยิงไวขึ้น 10, 15, 25%<br>กระสุนทำให้มอนสเตอร์เดินช้าลง -1, -1.5, -2 หน่วย<br>บวกโบนัส +ATK 1, 2, 3" },
-        { id: 'eye_lotion', category: 'attack', name: "Eye lotion", cost: 30, cures: 'red_eye', maxStack: 3, short_desc: "รักษาตาแดง | เพิ่มโอกาสคริติคอล", desc: "โอกาสโจมตีติดคริติคอลเพิ่มขึ้น 10%, 20%, 30%" },
-        { id: 'apache', category: 'attack', name: "Apache", cost: 30, cures: 'sore_throat', maxStack: 3, short_desc: "รักษาเจ็บคอ | ยิงไว, สตั้น, +ATK", desc: "ยิงไวขึ้น 10, 15, 25%<br>โอกาสทำให้ศัตรูชะงัก 5, 10, 20%<br>บวกโบนัส +ATK 1, 2, 3" },
-        { id: 'eye_drop', category: 'attack', name: "Eye Drop", cost: 30, cures: 'red_eye', maxStack: 3, short_desc: "รักษาตาแดง | เพิ่มความแรงคริติคอล", desc: "เพิ่มความรุนแรงคริติคอลเป็น x1.75, x2.5, x3.0" },
+        { id: 'tylenol', category: 'attack', name: "Tylenol", cost: 30, cures: 'headache', maxStack: 5, short_desc: "รักษาปวดหัว | +พลังโจมตี", desc: "+พลังโจมตี 2, 4, 6, 8, 10 ตามลำดับ" },
+        { id: 'ponstan', category: 'attack', name: "Ponstan", cost: 30, cures: 'headache,muscle_ache', maxStack: 3, short_desc: "รักษาปวดหัว,ปวดกล้ามเนื้อ | +นัดกระสุน, +พลังโจมตี", desc: "เพิ่มกระสุน 1 นัด และบวก พลังโจมตี 1 แต้ม (ต่อ 1 ระดับ)" },
+        { id: 'air_x', category: 'attack', name: "Air-X", cost: 20, cures: 'stomach', maxStack: 1, short_desc: "รักษาปวดท้อง | กระสุน 3 แฉก", desc: "กางกระสุนออกเป็น 3 ทิศทาง<br>มีผลใช้งาน 1 ด่าน" },
+        { id: 'flying_rabit', category: 'attack', name: "Flying Rabit", cost: 20, cures: 'stomach', maxStack: 1, short_desc: "รักษาปวดท้อง | กระสุนทะลุ", desc: "กระสุนทะลุศัตรูเพิ่มอีก 2 ตัว<br>มีผลใช้งาน 1 ด่าน" },
+        { id: 'gumgig', category: 'attack', name: "Gumgig pean", cost: 30, cures: 'sore_throat', maxStack: 3, short_desc: "รักษาเจ็บคอ | ยิงไว, กระสุนเชื่องช้าเชื้อโรค, +พลังโจมตี", desc: "ยิงไวขึ้น 10, 15, 25%<br>กระสุนทำให้เชื้อโรคเดินช้าลง -1, -1.5, -2 หน่วย<br>บวกโบนัส +พลังโจมตี 1, 2, 3" },
+        { id: 'eye_lotion', category: 'attack', name: "Eye lotion", cost: 30, cures: 'red_eye', maxStack: 3, short_desc: "รักษาตาแดง | เพิ่มโอกาสโจมตีพิเศษ", desc: "โอกาสโจมตีพิเศษเพิ่มขึ้น 10%, 20%, 30%" },
+        { id: 'apache', category: 'attack', name: "Apache", cost: 30, cures: 'sore_throat', maxStack: 3, short_desc: "รักษาเจ็บคอ | ยิงไว, สตั้น, +พลังโจมตี", desc: "ยิงไวขึ้น 10, 15, 25%<br>โอกาสทำให้ศัตรูชะงัก 5, 10, 20%<br>บวกโบนัส +พลังโจมตี 1, 2, 3" },
+        { id: 'eye_drop', category: 'attack', name: "Eye Drop", cost: 30, cures: 'red_eye', maxStack: 3, short_desc: "รักษาตาแดง | เพิ่มโจมตีพิเศษ", desc: "เพิ่มโจมตีพิเศษเป็น x1.75, x2.5, x3.0" },
 
-        { id: 'cpm', category: 'defense', name: "CPM", cost: 20, cures: 'allergy', maxStack: 3, short_desc: "รักษาภูมิแพ้ | +DEF, ผลข้างเคียงง่วงนอน", desc: "เพิ่มพลังป้องกัน 15, 25, 35<br><span style='color:#ff5555'>ผลข้างเคียง: มีอาการง่วงนอน (1 เฟส) ลดความเร็วเดิน 1 หน่วย ต่อสแต็ก</span>" },
-        { id: 'telfast', category: 'defense', name: "Telfast", cost: 15, cures: 'allergy', maxStack: 3, short_desc: "รักษาภูมิแพ้ | +DEF", desc: "เพิ่มพลังป้องกัน 5, 10, 15" },
+        { id: 'cpm', category: 'defense', name: "CPM", cost: 20, cures: 'allergy', maxStack: 3, short_desc: "รักษาภูมิแพ้ | +ภูมิคุ้มกัน, ผลข้างเคียงง่วงนอน", desc: "เพิ่มพลังป้องกัน 15, 25, 35<br><span style='color:#ff5555'>ผลข้างเคียง: มีอาการง่วงนอน (1 ด่าน) ลดความเร็วเดิน 1 หน่วย ต่อระดับ</span>" },
+        { id: 'telfast', category: 'defense', name: "Telfast", cost: 15, cures: 'allergy', maxStack: 3, short_desc: "รักษาภูมิแพ้ | +ภูมิคุ้มกัน", desc: "เพิ่มพลังป้องกัน 5, 10, 15" },
         { id: 'carbon', category: 'defense', name: "Carbon", cost: 15, cures: 'stomach', maxStack: 3, short_desc: "รักษาปวดท้อง | +ความเร็วเดิน", desc: "เพิ่มความเร็วการเดิน 1, 2, 3 หน่วย" },
-        { id: 'counterpain', category: 'defense', name: "Counterpain Cool", cost: 20, cures: 'muscle_ache', maxStack: 3, short_desc: "รักษาปวดกล้ามเนื้อ | ออร่าสโลว์ & ทำดาเมจ", desc: "กางออร่าลดความเร็วศัตรู -1, -1.5, -2 หน่วย<br>และทำดาเมจ 2, 3, 4 ทุกๆ 1 วินาที<br>(กดใช้งานมีผล 1 เฟส สแต็กยังคงอยู่)" },
-        { id: 'silver_cream', category: 'defense', name: "Silver cream", cost: 30, cures: 'scald', maxStack: 3, short_desc: "รักษาน้ำร้อนลวก | ฮีลอัตโนมัติ", desc: "ฟื้นฟู HP 5%, 7%, 10% ของ Max HP<br>ทุกๆ 4 วินาทีอัตโนมัติ" },
-        { id: 'betadine', category: 'defense', name: "Betadine", cost: 30, cures: 'fresh_wound', maxStack: 3, short_desc: "รักษาแผลสด | +Max HP", desc: "เพิ่มขีดจำกัด HP สูงสุด +10, +16, +21 หน่วย" },
-        { id: 'oral_paste', category: 'defense', name: "Oral paste", cost: 30, cures: 'mouth_ulcer', maxStack: 3, short_desc: "รักษาแผลในปาก | กระสุนระเบิดหมู่, +Max HP", desc: "กระสุนระเบิดทำดาเมจหมู่วงกว้าง 15, 25, 35 พิกเซล<br>เพิ่ม Max HP +5, +8, +15 หน่วย" },
+        { id: 'counterpain', category: 'defense', name: "Counterpain Cool", cost: 20, cures: 'muscle_ache', maxStack: 3, short_desc: "รักษาปวดกล้ามเนื้อ | ออร่าเชื่องช้า & ทำความเสียหาย", desc: "กางออร่าลดความเร็วศัตรู -1, -1.5, -2 หน่วย<br>และทำความเสียหาย 2, 3, 4 ทุกๆ 1 วินาที<br>(กดใช้งานมีผล 1 ด่าน ระดับยังคงอยู่)" },
+        { id: 'silver_cream', category: 'defense', name: "Silver cream", cost: 30, cures: 'scald', maxStack: 3, short_desc: "รักษาน้ำร้อนลวก | รักษาอัตโนมัติ", desc: "ฟื้นฟู HP 5%, 7%, 10% ของ พลังชีวิตสูงสุด<br>ทุกๆ 4 วินาทีอัตโนมัติ" },
+        { id: 'betadine', category: 'defense', name: "Betadine", cost: 30, cures: 'fresh_wound', maxStack: 3, short_desc: "รักษาแผลสด | +พลังชีวิตสูงสุด", desc: "เพิ่มขีดจำกัด HP สูงสุด +10, +16, +21 หน่วย" },
+        { id: 'oral_paste', category: 'defense', name: "Oral paste", cost: 30, cures: 'mouth_ulcer', maxStack: 3, short_desc: "รักษาแผลในปาก | กระสุนระเบิดหมู่, +พลังชีวิตสูงสุด", desc: "กระสุนระเบิดทำความเสียหายหมู่วงกว้าง 15, 25, 35 พิกเซล<br>เพิ่ม พลังชีวิตสูงสุด +5, +8, +15 หน่วย" },
 
         { id: 'cardamine', category: 'economy', name: "Cardamine", cost: 30, cures: 'rash', maxStack: 3, short_desc: "รักษาผื่นแพ้ | โบนัสเหรียญจบด่าน", desc: "รับโบนัสเหรียญฟรีก่อนเข้าร้านค้า +20, +30, +45 เหรียญ" },
-        { id: 'golden_cup', category: 'economy', name: "Golden Cup Blam", cost: 30, cures: 'swelling', maxStack: 3, short_desc: "รักษาผื่นบวม | ดูดเหรียญ, +แม่เหล็ก", desc: "ขยายรัศมีการดูดเหรียญให้กว้างขึ้น<br>และเพิ่มโอกาสดรอปแม่เหล็ก +5%, +5%, +10%" },
-        { id: 'systral', category: 'economy', name: "Systral cream", cost: 30, cures: 'rash', maxStack: 3, short_desc: "รักษาผื่นแพ้ | โอกาสดรอปเหรียญเบิ้ล", desc: "เพิ่มโอกาส 5%, 10%, 20% ที่มอนสเตอร์<br>จะดรอปทีเดียว 2-3 เหรียญ" },
+        { id: 'golden_cup', category: 'economy', name: "Golden Cup Blam", cost: 30, cures: 'swelling', maxStack: 3, short_desc: "รักษาผื่นบวม | ดูดเหรียญ, +แม่เหล็ก", desc: "ขยายรัศมีการดูดเหรียญให้กว้างขึ้น<br>และเพิ่มโอกาสได้รับแม่เหล็ก +5%, +5%, +10%" },
+        { id: 'systral', category: 'economy', name: "Systral cream", cost: 30, cures: 'rash', maxStack: 3, short_desc: "รักษาผื่นแพ้ | โอกาสได้รับเหรียญเบิ้ล", desc: "เพิ่มโอกาส 5%, 10%, 20% ที่เชื้อโรค<br>จะได้รับทีเดียว 2-3 เหรียญ" },
 
-        { id: 'saline', category: 'heal', name: "Saline", cost: 15, cures: 'hp', maxStack: 99, short_desc: "ฟื้นฟู | ฮีล 3 หน่วย", desc: "ฟื้นฟู HP ทันที 3 หน่วย<br><span style='color:#FFD700'>(คอมโบ: คู่กับ Plaster รับ +5 Max HP ถาวร)</span>" },
-        { id: 'plaster', category: 'heal', name: "Plaster", cost: 15, cures: 'hp', maxStack: 99, short_desc: "ฟื้นฟู | ฮีล 3 หน่วย", desc: "ฟื้นฟู HP ทันที 3 หน่วย<br><span style='color:#FFD700'>(คอมโบ: คู่กับ Saline รับ +5 Max HP ถาวร)</span>" },
-        { id: 'alcohol', category: 'heal', name: "Alcohol", cost: 15, cures: 'hp', maxStack: 99, short_desc: "ฟื้นฟู | ฮีล 3 หน่วย", desc: "ฟื้นฟู HP ทันที 3 หน่วย<br><span style='color:#FFD700'>(คอมโบ: คู่กับ Gauze รับ +5 Max HP ถาวร)</span>" },
-        { id: 'gauze', category: 'heal', name: "Gauze", cost: 15, cures: 'hp', maxStack: 99, short_desc: "ฟื้นฟู | ฮีล 3 หน่วย", desc: "ฟื้นฟู HP ทันที 3 หน่วย<br><span style='color:#FFD700'>(คอมโบ: คู่กับ Alcohol รับ +5 Max HP ถาวร)</span>" },
-        { id: 'dressing_set', category: 'heal', name: "Dressing set", cost: 30, cures: 'hp', maxStack: 99, short_desc: "ฟื้นฟู | ฮีล 7 หน่วย", desc: "ฟื้นฟู HP ทันที 7 หน่วย<br><span style='color:#FFD700'>(คอมโบ: คู่กับ Betadine รับ +5 Max HP ถาวร)</span>" }
+        { id: 'saline', category: 'heal', name: "Saline", cost: 15, cures: 'hp', maxStack: 99, short_desc: "ฟื้นฟู | รักษา 3 หน่วย", desc: "ฟื้นฟู HP ทันที 3 หน่วย<br><span style='color:#FFD700'>(คอมโบ: คู่กับ Plaster รับ +5 พลังชีวิตสูงสุด ถาวร)</span>" },
+        { id: 'plaster', category: 'heal', name: "Plaster", cost: 15, cures: 'hp', maxStack: 99, short_desc: "ฟื้นฟู | รักษา 3 หน่วย", desc: "ฟื้นฟู HP ทันที 3 หน่วย<br><span style='color:#FFD700'>(คอมโบ: คู่กับ Saline รับ +5 พลังชีวิตสูงสุด ถาวร)</span>" },
+        { id: 'alcohol', category: 'heal', name: "Alcohol", cost: 15, cures: 'hp', maxStack: 99, short_desc: "ฟื้นฟู | รักษา 3 หน่วย", desc: "ฟื้นฟู HP ทันที 3 หน่วย<br><span style='color:#FFD700'>(คอมโบ: คู่กับ Gauze รับ +5 พลังชีวิตสูงสุด ถาวร)</span>" },
+        { id: 'gauze', category: 'heal', name: "Gauze", cost: 15, cures: 'hp', maxStack: 99, short_desc: "ฟื้นฟู | รักษา 3 หน่วย", desc: "ฟื้นฟู HP ทันที 3 หน่วย<br><span style='color:#FFD700'>(คอมโบ: คู่กับ Alcohol รับ +5 พลังชีวิตสูงสุด ถาวร)</span>" },
+        { id: 'dressing_set', category: 'heal', name: "Dressing set", cost: 30, cures: 'hp', maxStack: 99, short_desc: "ฟื้นฟู | รักษา 7 หน่วย", desc: "ฟื้นฟู HP ทันที 7 หน่วย<br><span style='color:#FFD700'>(คอมโบ: คู่กับ Betadine รับ +5 พลังชีวิตสูงสุด ถาวร)</span>" }
     ];
 
     const TAG_MAP = {
@@ -1367,6 +1466,27 @@ const ITEM_ICONS = {
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active-tab'));
         document.getElementById(`tab-${tabId}`).classList.add('active-content');
         document.getElementById(`btn-tab-${tabId}`).classList.add('active-tab');
+        if (tabId === 'shop') renderHtpItemCards();
+    }
+
+    function renderHtpItemCards() {
+        let container = document.getElementById('htp-item-cards');
+        if (!container) return;
+        let html = '';
+        ITEMS_DB.forEach(item => {
+            let tag = TAG_MAP[item.category];
+            html += `
+                <div class="htp-card">
+                    <div class="htp-card-icon">${getItemIconHtml(item.id, 34)}</div>
+                    <div class="htp-card-body">
+                        <div class="htp-card-tag ${tag.class}">${tag.text}</div>
+                        <div class="htp-card-title">${item.name}</div>
+                        <div class="htp-card-desc">${item.short_desc}</div>
+                        <div class="htp-card-sub">${item.desc}</div>
+                    </div>
+                </div>`;
+        });
+        container.innerHTML = html;
     }
 
     function getThaiDate() { let now = new Date(); return new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (3600000 * 7)); }
@@ -1581,7 +1701,7 @@ const ITEM_ICONS = {
         let hpGain = player.maxHp - oldMaxHp;
         if (hpGain > 0) {
             player.hp += hpGain;
-            showToast(`ปลดล็อกคอมโบสำเร็จ (+${hpBonus} Max HP)`, "#0f0", 3000);
+            showToast(`ปลดล็อกคอมโบสำเร็จ (+${hpBonus} พลังชีวิตสูงสุด)`, "#0f0", 3000);
         }
         
         updateShopUI();
@@ -1743,7 +1863,7 @@ const ITEM_ICONS = {
                     let healAmt = this.maxHp * healPercent;
                     if (this.hp < this.maxHp && healAmt > 0) {
                         this.hp = Math.min(this.maxHp, this.hp + healAmt);
-                        showToast(`💚 Silver Cream ฮีลเลือด ${healAmt.toFixed(1)}`, "#0f0");
+                        showToast(`💚 Silver Cream รักษาเลือด ${healAmt.toFixed(1)}`, "#0f0");
                     }
                 }
             } else {
@@ -2326,12 +2446,12 @@ const ITEM_ICONS = {
             statsBox.innerHTML = `
                 <h3 style="color:#4CAF50; margin-top:0;">📊 ค่าสถานะ</h3>
                 <div class="upg-row"><span>❤️ HP</span><strong>${Math.ceil(player.hp)} / ${Math.ceil(player.maxHp)}</strong></div>
-                <div class="upg-row"><span>⚔️ ATK</span><strong>${player.atk}</strong></div>
-                <div class="upg-row"><span>🛡️ DEF</span><strong>${player.def}</strong></div>
+                <div class="upg-row"><span>⚔️ พลังโจมตี</span><strong>${player.atk}</strong></div>
+                <div class="upg-row"><span>🛡️ ภูมิคุ้มกัน</span><strong>${player.def}</strong></div>
                 <div class="upg-row"><span>🏃 SPD</span><strong>${player.spd}</strong></div>
                 <div class="upg-row"><span>🔫 กระสุน/นัด</span><strong>${player.bulletCount}</strong></div>
                 <div class="upg-row"><span>⏱️ อัตรายิง</span><strong>${player.fireRate.toFixed(2)}</strong></div>
-                <div class="upg-row"><span>🎯 คริติคอล</span><strong>${(player.critChance * 100).toFixed(0)}% (x${player.critDamage})</strong></div>
+                <div class="upg-row"><span>🎯 โชค</span><strong>${(player.critChance * 100).toFixed(0)}% (x${player.critDamage})</strong></div>
                 <div class="upg-row"><span>🧲 รัศมีแม่เหล็ก</span><strong>${Math.round(player.magnetRange)}</strong></div>
             `;
         }
@@ -2426,7 +2546,7 @@ const ITEM_ICONS = {
             </div>
             <div style="text-align: center; background: rgba(255, 215, 0, 0.15); padding: 10px; border-radius: 8px; border: 1px solid #FFD700; margin-top: 12px;">
                 <strong style="color: #FFD700; font-size: 16px;">🌟 FULL COMBO ${statusFullSet}</strong><br>
-                <span style="font-size: 12px; color: #ccc;">สำเร็จคอมโบชุดที่ 1, 2, 3 รับโบนัสพิเศษ <span style="color:#0f0; font-weight:bold;">+15 Max HP!</span></span>
+                <span style="font-size: 12px; color: #ccc;">สำเร็จคอมโบชุดที่ 1, 2, 3 รับโบนัสพิเศษ <span style="color:#0f0; font-weight:bold;">+15 พลังชีวิตสูงสุด!</span></span>
             </div>`;
 
         let comboDets = document.getElementById('combo-details');
@@ -2486,7 +2606,7 @@ const ITEM_ICONS = {
                 btnAirX.innerHTML = `<span style="font-weight:bold;">🚀 Air-X <span style="color:#0f0;">[✅]</span></span><span style="font-size:12px; color:#eee; margin-top:2px;">ปืน 3 แฉก (ทำงานแล้ว)</span>`;
                 btnAirX.classList.add('active-buy');
             } else {
-                btnAirX.innerHTML = `<span style="font-weight:bold;">🚀 ซื้อด่วน Air-X ($${priceAx})</span><span style="font-size:12px; color:#eee; margin-top:2px;">ปืน 3 แฉก (1 เฟส)</span>`;
+                btnAirX.innerHTML = `<span style="font-weight:bold;">🚀 ซื้อด่วน Air-X ($${priceAx})</span><span style="font-size:12px; color:#eee; margin-top:2px;">ปืน 3 แฉก (1 ด่าน)</span>`;
                 btnAirX.classList.remove('active-buy');
             }
         }
@@ -2495,27 +2615,27 @@ const ITEM_ICONS = {
                 btnRabit.innerHTML = `<span style="font-weight:bold;">🚀 Flying Rabit <span style="color:#0f0;">[✅]</span></span><span style="font-size:12px; color:#eee; margin-top:2px;">กระสุนทะลุ (ทำงานแล้ว)</span>`;
                 btnRabit.classList.add('active-buy');
             } else {
-                btnRabit.innerHTML = `<span style="font-weight:bold;">🚀 ซื้อด่วน Flying Rabit ($${priceFr})</span><span style="font-size:12px; color:#eee; margin-top:2px;">กระสุนทะลุศัตรู (1 เฟส)</span>`;
+                btnRabit.innerHTML = `<span style="font-weight:bold;">🚀 ซื้อด่วน Flying Rabit ($${priceFr})</span><span style="font-size:12px; color:#eee; margin-top:2px;">กระสุนทะลุศัตรู (1 ด่าน)</span>`;
                 btnRabit.classList.remove('active-buy');
             }
         }
         if (btnCounter) {
             if (player.activeCounterpain) {
-                btnCounter.innerHTML = `<span style="font-weight:bold;">❄️ Counterpain <span style="color:#0f0;">[✅]</span></span><span style="font-size:12px; color:#eee; margin-top:2px;">ออร่าสโลว์ (ทำงานแล้ว)</span>`;
+                btnCounter.innerHTML = `<span style="font-weight:bold;">❄️ Counterpain <span style="color:#0f0;">[✅]</span></span><span style="font-size:12px; color:#eee; margin-top:2px;">ออร่าเชื่องช้า (ทำงานแล้ว)</span>`;
                 btnCounter.classList.add('active-buy');
             } else {
-                btnCounter.innerHTML = `<span style="font-weight:bold;">❄️ ซื้อด่วน Counterpain ($${priceCp})</span><span style="font-size:12px; color:#eee; margin-top:2px;">ออร่าสโลว์ (1 เฟส)</span>`;
+                btnCounter.innerHTML = `<span style="font-weight:bold;">❄️ ซื้อด่วน Counterpain ($${priceCp})</span><span style="font-size:12px; color:#eee; margin-top:2px;">ออร่าเชื่องช้า (1 ด่าน)</span>`;
                 btnCounter.classList.remove('active-buy');
             }
         }
         if (btnDress) {
-            btnDress.innerHTML = `<span style="font-weight:bold;">🩹 ซื้อด่วน Dressing Set ($${priceDs})</span><span style="font-size:12px; color:#eee; margin-top:2px;">ฮีล 7 หน่วย</span>`;
+            btnDress.innerHTML = `<span style="font-weight:bold;">🩹 ซื้อด่วน Dressing Set ($${priceDs})</span><span style="font-size:12px; color:#eee; margin-top:2px;">รักษา 7 หน่วย</span>`;
             btnDress.classList.remove('active-buy');
         }
         if (btnNext) {
             let nextPh = currentPhase + 1;
             let isBoss = (nextPh === 3 || nextPh === 5 || nextPh === 7 || nextPh === 9 || nextPh >= 10);
-            btnNext.innerHTML = `➡️ ลุย Phase ${nextPh} ${isBoss ? '<span style="font-size:14px; color:#FFD700;">(Boss Fight!)</span>' : ''}`;
+            btnNext.innerHTML = `➡️ ลุย Stage ${nextPh} ${isBoss ? '<span style="font-size:14px; color:#FFD700;">(Boss Fight!)</span>' : ''}`;
         }
         
         let btnAs = document.getElementById('btnAdminSkip');
@@ -2587,7 +2707,7 @@ const ITEM_ICONS = {
                 <img src="${iconSrc}" style="width:32px; height:32px; image-rendering:pixelated; flex-shrink:0; margin-top:2px;">
                 <div>
                     <strong style="color:#FFD700; font-size:15px;">${mName}</strong>
-                    <p style="margin:4px 0; font-size:12px;">❤️ HP: ${e.maxHp} | ⚔️ ATK: ${e.atk} ${e.rangedAtk ? `(ไกล: ${e.rangedAtk})` : ''} | 👟 SPD: ${e.spd.toFixed(1)}</p>
+                    <p style="margin:4px 0; font-size:12px;">❤️ HP: ${e.maxHp} | ⚔️ พลังโจมตี: ${e.atk} ${e.rangedAtk ? `(ไกล: ${e.rangedAtk})` : ''} | 👟 SPD: ${e.spd.toFixed(1)}</p>
                     <p style="margin:4px 0; font-size:12px; color:#ff9999;">💥 โรคเมื่อชน: ${meleeDis}</p>
                     ${e.isRanged ? `<p style="margin:4px 0; font-size:12px; color:#ff9999;">🎯 โรคเมื่อยิง: ${rangedDis}</p>` : ''}
                 </div>
@@ -2931,7 +3051,7 @@ const ITEM_ICONS = {
         let hpGain = player.maxHp - oldMaxHp;
         if (hpGain > 0) {
             player.hp += hpGain;
-            showToast(`💚 Max HP เพิ่ม! ฟื้นฟูเลือด ${hpGain} หน่วย`, "#0f0");
+            showToast(`💚 พลังชีวิตสูงสุด เพิ่ม! ฟื้นฟูเลือด ${hpGain} หน่วย`, "#0f0");
         }
 
         if (['saline', 'alcohol', 'plaster', 'gauze'].includes(itemId)) { 
@@ -2965,7 +3085,7 @@ const ITEM_ICONS = {
         currentPhase++; phaseTimer = 30; bossSpawnedThisPhase = false;
         enemies.length = 0; bullets.length = 0; enemyBullets.length = 0; drops.length = 0; explosions = [];
         
-        // 🔹 ดึงตัวละครกลับมาจุดกึ่งกลางจอเสมอเมื่อเริ่มเฟสใหม่
+        // 🔹 ดึงตัวละครกลับมาจุดกึ่งกลางจอเสมอเมื่อเริ่มด่านใหม่
         if (player) {
             player.x = canvas.width / 2;
             player.y = canvas.height / 2;
@@ -2983,7 +3103,7 @@ const ITEM_ICONS = {
     }
     
     function adminSkipPhase() {
-        let target = prompt("ป้อนเลข Phase ที่ต้องการวาร์ปไป (เช่น 10, 20, 50):", currentPhase + 1);
+        let target = prompt("ป้อนเลข Stage ที่ต้องการวาร์ปไป (เช่น 10, 20, 50):", currentPhase + 1);
         if (target !== null && !isNaN(target) && parseInt(target) > 0) {
             currentPhase = parseInt(target) - 1;
             nextPhase();
@@ -3005,7 +3125,7 @@ const ITEM_ICONS = {
         SFX.stopBGM();
         SFX.play('gameover');
         
-        let gp = document.getElementById('go-phase'); if(gp) gp.innerText = `ไปถึงเฟส: ${currentPhase}`;
+        let gp = document.getElementById('go-phase'); if(gp) gp.innerText = `ไปถึงด่าน: ${currentPhase}`;
         let gs = document.getElementById('go-score'); if(gs) gs.innerText = `คะแนน: ${score}`;
         
         switchScreen('gameOverScreen');
@@ -3060,7 +3180,7 @@ const ITEM_ICONS = {
         enemySpawnTimer -= dt;
         if (enemySpawnTimer <= 0) {
             
-            // 👹 ระบบบอส และ มินิบอสเฟสหลังๆ
+            // 👹 ระบบบอส และ มินิบอสด่านหลังๆ
             if (!bossSpawnedThisPhase && (currentPhase === 3 || currentPhase === 5 || currentPhase === 7 || currentPhase === 9 || currentPhase >= 10)) {
                 let boss = new Enemy(5, currentPhase);
                 boss.bossName = "เชื้อโรคร้ายกาจ (Boss)";
@@ -3333,7 +3453,7 @@ const ITEM_ICONS = {
         }
 
         ctx.fillStyle = 'white'; ctx.font = 'bold 20px Arial';
-        ctx.fillText(`Phase: ${currentPhase}`, 10, 70);
+        ctx.fillText(`Stage: ${currentPhase}`, 10, 70);
         ctx.fillText(`Time: ${Math.ceil(phaseTimer)}`, 10, 100);
         ctx.fillText(`Score: ${score}`, 10, 130);
         ctx.fillStyle = 'yellow'; ctx.fillText(`Coins: ${coins}`, 10, 160);
