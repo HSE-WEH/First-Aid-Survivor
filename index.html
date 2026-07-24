@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First Aid Survivor V4.0 (with 8-Bit Audio)</title>
+    <title>First Aid Survivor</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #111; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -1266,6 +1266,7 @@ function toggleSound() {
         }
         
         if (gameState !== 'PLAYING' && gameState !== 'SHOP') return; 
+        if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
         keys[k] = true;
         
         if (currentUser && currentUser.is_admin) {
@@ -1690,13 +1691,18 @@ function toggleSound() {
             }
 
             let moveSpd = this.spd * 60 * dt;
-            if (keys['w'] && this.y > this.size) this.y -= moveSpd;
-            if (keys['s'] && this.y < canvas.height - this.size) this.y += moveSpd;
-            if (keys['a'] && this.x > this.size) this.x -= moveSpd;
-            if (keys['d'] && this.x < canvas.width - this.size) this.x += moveSpd;
+            let upPressed = keys['w'] || keys['arrowup'];
+            let downPressed = keys['s'] || keys['arrowdown'];
+            let leftPressed = keys['a'] || keys['arrowleft'];
+            let rightPressed = keys['d'] || keys['arrowright'];
 
-            let mvX = (keys['d'] ? 1 : 0) - (keys['a'] ? 1 : 0);
-            let mvY = (keys['s'] ? 1 : 0) - (keys['w'] ? 1 : 0);
+            if (upPressed && this.y > this.size) this.y -= moveSpd;
+            if (downPressed && this.y < canvas.height - this.size) this.y += moveSpd;
+            if (leftPressed && this.x > this.size) this.x -= moveSpd;
+            if (rightPressed && this.x < canvas.width - this.size) this.x += moveSpd;
+
+            let mvX = (rightPressed ? 1 : 0) - (leftPressed ? 1 : 0);
+            let mvY = (downPressed ? 1 : 0) - (upPressed ? 1 : 0);
             if (mvX !== 0 || mvY !== 0) {
                 if (Math.abs(mvX) > Math.abs(mvY)) this.facing = mvX > 0 ? 'right' : 'left';
                 else this.facing = mvY > 0 ? 'down' : 'up';
