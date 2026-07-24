@@ -574,10 +574,10 @@ function toggleSound() {
         </div>
         
         <div id="tab-basic" class="htp-content active-content">
-            <h3 style="color:#2196F3; margin-top:0;">🎮 ระบบต่างๆ ในเกม (ภาพรวมแบบเร็ว)</h3>
+            <h3 style="color:#2196F3; margin-top:0;">🎮 ระบบต่างๆภายในเกม </h3>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px;">
                 <div style="background:#222; border-left: 4px solid #2196F3; border-radius: 8px; padding: 12px 14px;">
-                    <div style="font-size:22px; margin-bottom:4px;">🕹️ การเคลื่อนที่</div>
+                    <div style="font-size:22px; margin-bottom:4px;">🕹️ การควบคุม</div>
                     <div style="color:#ccc; line-height:1.5;">ใช้ปุ่ม <code>W A S D</code> หรือ <code>ปุ่มลูกศร</code> เดินหลบศัตรู</div>
                 </div>
                 <div style="background:#222; border-left: 4px solid #ff5555; border-radius: 8px; padding: 12px 14px;">
@@ -585,8 +585,8 @@ function toggleSound() {
                     <div style="color:#ccc; line-height:1.5;">ยิงใส่ศัตรูใกล้สุดให้อัตโนมัติ ไม่ต้องกดยิงเอง</div>
                 </div>
                 <div style="background:#222; border-left: 4px solid #FFD700; border-radius: 8px; padding: 12px 14px;">
-                    <div style="font-size:22px; margin-bottom:4px;">⏱️ เป้าหมายแต่ละด่าน</div>
-                    <div style="color:#ccc; line-height:1.5;">รอดให้ครบ <code>30 วินาที</code> ต่อด่าน แล้วเข้าร้านค้าอัตโนมัติ</div>
+                    <div style="font-size:22px; margin-bottom:4px;">⏱️ เป้าหมาย</div>
+                    <div style="color:#ccc; line-height:1.5;">กำจัดเชื้อโรคเพื่อรับคะแนนและเหรียญ โดยในแต่ละ Stage ต้องรอดชีวิตให้ครบ <code>30 วินาที</code>  </div>
                 </div>
                 <div style="background:#222; border-left: 4px solid #4CAF50; border-radius: 8px; padding: 12px 14px;">
                     <div style="font-size:22px; margin-bottom:4px;">📊 เช็กสถานะตัวเอง</div>
@@ -594,7 +594,7 @@ function toggleSound() {
                 </div>
                 <div style="background:#222; border-left: 4px solid #9c27b0; border-radius: 8px; padding: 12px 14px;">
                     <div style="font-size:22px; margin-bottom:4px;">💰 ของได้รับจากศัตรู</div>
-                    <div style="color:#ccc; line-height:1.5;">🟡 เหรียญซื้อยา &nbsp; 💎 เพชรอัปเกรด &nbsp; 🧲 แม่เหล็กดูดของ</div>
+                    <div style="color:#ccc; line-height:1.5;">🟡 เหรียญทองสำหรับซื้อยา &nbsp; 💎 เพชรสำหรับอัปเกรดตัวละคร &nbsp; 🧲 แม่เหล็กดูดเหรียญและเพชร</div>
                 </div>
                 <div style="background:#222; border-left: 4px solid #ff9800; border-radius: 8px; padding: 12px 14px;">
                     <div style="font-size:22px; margin-bottom:4px;">🦠 อาการป่วย</div>
@@ -602,11 +602,11 @@ function toggleSound() {
                 </div>
                 <div style="background:#222; border-left: 4px solid #4CAF50; border-radius: 8px; padding: 12px 14px;">
                     <div style="font-size:22px; margin-bottom:4px;">🛒 ร้านค้า</div>
-                    <div style="color:#ccc; line-height:1.5;">จบด่านแล้วซื้อยาเพิ่มพลัง แบ่งเป็น 4 สาย: โจมตี ป้องกัน หาเงิน ฟื้นฟู (ดูรายละเอียดในแท็บ "ยาในร้านค้า")</div>
+                    <div style="color:#ccc; line-height:1.5;">เมื่อเล่นจบแต่ละ Stage จะเข้าสู่ช่วงซื้อยารักษาผู้เล่นต้องบริหารเหรียญทองเพื่อรักษาอาการป่วยและซื้อยาเพื่อพัฒนาความสามารถของตัวละคร (ดูรายละเอียดในแท็บ "ยาในร้านค้า")</div>
                 </div>
                 <div style="background:#222; border-left: 4px solid #00bcd4; border-radius: 8px; padding: 12px 14px;">
                     <div style="font-size:22px; margin-bottom:4px;">💎 อัปเกรดถาวร</div>
-                    <div style="color:#ccc; line-height:1.5;">เอาเพชรที่เก็บได้ไปอัปเกรดค่าพลังตั้งต้นให้เก่งขึ้นตลอดกาล (ดูรายละเอียดในแท็บ "อัปเกรด")</div>
+                    <div style="color:#ccc; line-height:1.5;">เพชรสำหรับอัปเกรดความสามารถตัวละครแบบถาวร สามารถอัปเกรดได้ที่หน้า เมนูหลัก (ดูรายละเอียดในแท็บ "อัปเกรด")</div>
                 </div>
             </div>
         </div>
@@ -619,35 +619,35 @@ function toggleSound() {
                     <div class="htp-card-icon"><img id="htp-icon-t1"></div>
                     <div class="htp-card-body">
                         <div class="htp-card-title">เชื้อโรคหนาม</div>
-                        <div class="htp-card-desc">เดินเข้าหาตรงๆ แจกอาการป่วยระยะประชิด</div>
+                        <div class="htp-card-desc">วิ่งชนผู้เล่น ผู้เล่นจะได้รับอาการป่วย</div>
                     </div>
                 </div>
                 <div class="htp-card enemy-card">
                     <div class="htp-card-icon"><img id="htp-icon-t2"></div>
                     <div class="htp-card-body">
                         <div class="htp-card-title">เชื้อโรคพิษ</div>
-                        <div class="htp-card-desc">ยิงกระสุนพิษจากระยะไกล แจกอาการป่วยเมื่อกระสุนโดนตัว</div>
+                        <div class="htp-card-desc">ยิงกระสุนพิษจากระยะไกล ผู้เล่นจะได้รับอาการป่วย</div>
                     </div>
                 </div>
                 <div class="htp-card enemy-card">
                     <div class="htp-card-icon"><img id="htp-icon-t3"></div>
                     <div class="htp-card-body">
                         <div class="htp-card-title">แมลงพิษ</div>
-                        <div class="htp-card-desc">เริ่มโผล่ด่าน 4 เคลื่อนที่เร็วมาก แจกตาแดงและแผลสดประชิด</div>
+                        <div class="htp-card-desc">วิ่งชนผู้เล่นด้วยความเร็ว ผู้เล่นจะได้รับอาการป่วย</div>
                     </div>
                 </div>
                 <div class="htp-card enemy-card">
                     <div class="htp-card-icon"><img id="htp-icon-t4"></div>
                     <div class="htp-card-body">
                         <div class="htp-card-title">ไวรัส</div>
-                        <div class="htp-card-desc">ถึกและโจมตีแรง ยิงกระสุนพิษระยะไกลที่แจกแผลในปาก</div>
+                        <div class="htp-card-desc">ยิงกระสุนพิษระยะไกลและมีความทนทานสูง ผู้เล่นจะได้รับอาการป่วย</div>
                     </div>
                 </div>
                 <div class="htp-card enemy-card" style="border-left-color:#FFD700;">
                     <div class="htp-card-icon"><img id="htp-icon-boss"></div>
                     <div class="htp-card-body">
-                        <div class="htp-card-title">บอสและมินิบอส (เชื้อโรคร้ายกาจ)</div>
-                        <div class="htp-card-desc">ปรากฏตัวในด่านบอส (3,5,7,9,10+) และมินิบอสจะเริ่มสมทบตั้งแต่ด่าน 12 และ 15 เป็นต้นไป โจมตีเป็นวงกว้างและการโจมตีทุกชนิด <strong>"สุ่มติดทุกสถานะ 100%"</strong></div>
+                        <div class="htp-card-title">บอส(เชื้อโรคร้ายกาจ)</div>
+                        <div class="htp-card-desc">ปรากฏตัวในด่านบอส (3,5,7,9,10+) โจมตีด้วยกระสุนพิษเป็นวงกว้างและการโจมตีทุกชนิด <strong>"สุ่มติดทุกสถานะ 100%"</strong></div>
                     </div>
                 </div>
             </div>
@@ -657,8 +657,8 @@ function toggleSound() {
             <h3 style="color:#4CAF50; margin-top:0;">🛒 ร้านขายยาและไอเทม</h3>
             <p style="font-size: 14px; line-height: 1.6;">
                 <strong>หมวดหมู่ไอเทม:</strong><br>
-                🔴 <span style="color:#ff5555">สายโจมตี:</span> เน้นเพิ่ม พลังโจมตี, ยิงไว, โชค, และลูกเล่นปืน (ชิ่ง/ทะลุ)<br>
-                🔵 <span style="color:#448AFF">สายป้องกัน:</span> เน้นเพิ่ม ภูมิคุ้มกัน, พลังชีวิตสูงสุด, สปีด และการเอาตัวรอด<br>
+                🔴 <span style="color:#ff5555">สายโจมตี:</span> เน้นเพิ่ม พลังโจมตี, ยิงไว, โชค, และเพิ่มความสามารถพิเศษให้กระสุน <br>
+                🔵 <span style="color:#448AFF">สายป้องกัน:</span> เน้นเพิ่ม ภูมิคุ้มกัน, พลังชีวิตสูงสุด, ความเร็ว เพื่อการเอาตัวรอด<br>
                 🟡 <span style="color:#FFD700">สายหาเงิน:</span> เน้นค้นหาเหรียญ ดูดไอเทม ได้รับแม่เหล็ก<br>
                 💚 <span style="color:#4CAF50">สายฟื้นฟู:</span> อุปกรณ์ทำแผล ช่วยรักษา HP โดยตรง
             </p>
@@ -681,7 +681,7 @@ function toggleSound() {
                 </div>
                 <div class="htp-card debuff-card">
                     <div class="htp-card-icon" style="font-size:22px;">🤧</div>
-                    <div class="htp-card-body"><div class="htp-card-title">ภูมิแพ้</div><div class="htp-card-desc">ลดการหลบหลีก <em>(แก้ด้วย CPM, Telfast)</em></div></div>
+                    <div class="htp-card-body"><div class="htp-card-title">ภูมิแพ้</div><div class="htp-card-desc">ลดภูมิคุ้มกัน <em>(แก้ด้วย CPM, Telfast)</em></div></div>
                 </div>
                 <div class="htp-card debuff-card">
                     <div class="htp-card-icon" style="font-size:22px;">🤢</div>
@@ -693,15 +693,15 @@ function toggleSound() {
                 </div>
                 <div class="htp-card debuff-card">
                     <div class="htp-card-icon" style="font-size:22px;">🔴</div>
-                    <div class="htp-card-body"><div class="htp-card-title">ผื่นแพ้</div><div class="htp-card-desc">เชื้อโรคไม่ได้รับเหรียญ <em>(แก้ด้วย Cardamine, Systral)</em></div></div>
+                    <div class="htp-card-body"><div class="htp-card-title">ผื่นแพ้</div><div class="htp-card-desc">ไม่ได้รับเหรียญทอง <em>(แก้ด้วย Cardamine, Systral)</em></div></div>
                 </div>
                 <div class="htp-card debuff-card">
                     <div class="htp-card-icon" style="font-size:22px;">🎈</div>
-                    <div class="htp-card-body"><div class="htp-card-title">ผื่นบวม</div><div class="htp-card-desc">สุ่มเกิด Elite <em>(แก้ด้วย Golden Cup)</em></div></div>
+                    <div class="htp-card-body"><div class="htp-card-title">ผื่นบวม</div><div class="htp-card-desc">สุ่มเกิดเชื้อโรคชนิดพิเศษ <em>(แก้ด้วย Golden Cup)</em></div></div>
                 </div>
                 <div class="htp-card debuff-card">
                     <div class="htp-card-icon" style="font-size:22px;">👄</div>
-                    <div class="htp-card-body"><div class="htp-card-title">แผลในปาก</div><div class="htp-card-desc">ลด พลังชีวิตสูงสุด <em>(แก้ด้วย Oral Paste)</em></div></div>
+                    <div class="htp-card-body"><div class="htp-card-title">แผลในปาก</div><div class="htp-card-desc">ลดพลังชีวิตสูงสุด <em>(แก้ด้วย Oral Paste)</em></div></div>
                 </div>
                 <div class="htp-card debuff-card">
                     <div class="htp-card-icon" style="font-size:22px;">👁️</div>
@@ -713,11 +713,11 @@ function toggleSound() {
                 </div>
                 <div class="htp-card debuff-card">
                     <div class="htp-card-icon" style="font-size:22px;">🩸</div>
-                    <div class="htp-card-body"><div class="htp-card-title">แผลสด</div><div class="htp-card-desc">โดนความเสียหายแรงขึ้น <em>(แก้ด้วย Betadine)</em></div></div>
+                    <div class="htp-card-body"><div class="htp-card-title">แผลสด</div><div class="htp-card-desc">โดนเชื้อโรคชนหรือกระสุนพิษแรงขึ้น <em>(แก้ด้วย Betadine)</em></div></div>
                 </div>
                 <div class="htp-card debuff-card">
                     <div class="htp-card-icon" style="font-size:22px;">🔥</div>
-                    <div class="htp-card-body"><div class="htp-card-title">น้ำร้อนลวก</div><div class="htp-card-desc">เลือดลดเรื่อยๆ <em>(แก้ด้วย Silver Cream)</em></div></div>
+                    <div class="htp-card-body"><div class="htp-card-title">น้ำร้อนลวก</div><div class="htp-card-desc">ได้รับบาดเจ็บเรื่อยๆ <em>(แก้ด้วย Silver Cream)</em></div></div>
                 </div>
                 <div style="margin-top: 6px; color:#ff5555; font-size:13px;">⚠️ <strong>หมายเหตุ:</strong> หากมีอาการป่วย การซื้อยาที่ตรงกับโรคจะรักษาอาการนั้นทันที (1 ระดับต่อ 1 ชิ้น) และจะไม่ได้ผลบัฟระดับต่อไปจนกว่าโรคจะหายขาด</div>
             </div>
@@ -831,7 +831,7 @@ function toggleSound() {
                 </div>
 
                 <div class="btn-action-group">
-                    <button onclick="toggleFullShop(true); SFX.play('click');" class="btn-catalog">🛒 เปิดแคตตาล็อกยาทั้งหมด (Full Shop)</button>
+                    <button onclick="toggleFullShop(true); SFX.play('click');" class="btn-catalog">🛒 เปิดรายการยาทั้งหมด (Full Shop)</button>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <button id="btn-quick-airx" onclick="buyQuickItem('air_x'); SFX.play('click');" class="btn-quick-buy"></button>
@@ -849,11 +849,11 @@ function toggleSound() {
                     <button id="btnAdminSkip" onclick="adminSkipPhase()" class="btn-reroll" style="display:none; background-color: #ff5722; margin-top: 5px;">👑 [Admin] วาร์ปข้าม Stage</button>
                 </div>
                 
-                <!-- Modal แคตตาล็อกยาทั้งหมด (แบบ List นวนอน) -->
+                <!-- Modal รายการยาทั้งหมด (แบบ List นวนอน) -->
                 <div id="fullShopModal">
                     <div style="width: 100%; display: flex; flex-direction: column; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; margin-bottom: 15px; gap: 15px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h2 style="margin: 0; color: #4CAF50; font-size: 24px;">🛒 แคตตาล็อกยาทั้งหมด</h2>
+                            <h2 style="margin: 0; color: #4CAF50; font-size: 24px;">🛒 รายการยาทั้งหมด</h2>
                             <div style="display: flex; align-items: center; gap: 20px;">
                                 <h3 style="margin:0; color: yellow;">เงิน: 💰 <span id="full-shop-coins">0</span></h3>
                                 <button onclick="toggleFullShop(false); SFX.play('click');" style="background-color: #f44336; padding: 8px 20px; font-size: 14px;">ปิด (X)</button>
@@ -2445,10 +2445,10 @@ const ITEM_ICONS = {
         if (statsBox) {
             statsBox.innerHTML = `
                 <h3 style="color:#4CAF50; margin-top:0;">📊 ค่าสถานะ</h3>
-                <div class="upg-row"><span>❤️ HP</span><strong>${Math.ceil(player.hp)} / ${Math.ceil(player.maxHp)}</strong></div>
+                <div class="upg-row"><span>❤️ พลังชีวิต</span><strong>${Math.ceil(player.hp)} / ${Math.ceil(player.maxHp)}</strong></div>
                 <div class="upg-row"><span>⚔️ พลังโจมตี</span><strong>${player.atk}</strong></div>
                 <div class="upg-row"><span>🛡️ ภูมิคุ้มกัน</span><strong>${player.def}</strong></div>
-                <div class="upg-row"><span>🏃 SPD</span><strong>${player.spd}</strong></div>
+                <div class="upg-row"><span>🏃 ความเร็ว</span><strong>${player.spd}</strong></div>
                 <div class="upg-row"><span>🔫 กระสุน/นัด</span><strong>${player.bulletCount}</strong></div>
                 <div class="upg-row"><span>⏱️ อัตรายิง</span><strong>${player.fireRate.toFixed(2)}</strong></div>
                 <div class="upg-row"><span>🎯 โชค</span><strong>${(player.critChance * 100).toFixed(0)}% (x${player.critDamage})</strong></div>
@@ -2466,7 +2466,7 @@ const ITEM_ICONS = {
                     rows += `<div class="upg-row"><span style="display:flex; align-items:center; gap:6px;">${getItemIconHtml(key, 22)}${item.name}</span><strong style="color:#4CAF50;">x${player.inv[key]}</strong></div>`;
                 }
             }
-            buffBox.innerHTML = `<h3 style="color:#2196F3; margin-top:0;">💊 ไอเทม/บัฟที่ถือ</h3>${rows || '<p style="color:#777;">ยังไม่มีไอเทม</p>'}`;
+            buffBox.innerHTML = `<h3 style="color:#2196F3; margin-top:0;">💊 ยาในกระเป๋า</h3>${rows || '<p style="color:#777;">ยังไม่มีไอเทม</p>'}`;
         }
 
         let debuffBox = document.getElementById('hudTabDebuff');
