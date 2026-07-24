@@ -582,7 +582,7 @@ function toggleSound() {
                 </div>
                 <div style="background:#222; border-left: 4px solid #ff5555; border-radius: 8px; padding: 12px 14px;">
                     <div style="font-size:22px; margin-bottom:4px;">🎯 การโจมตี</div>
-                    <div style="color:#ccc; line-height:1.5;">ยิงใส่ศัตรูใกล้สุดให้อัตโนมัติ ไม่ต้องกดยิงเอง</div>
+                    <div style="color:#ccc; line-height:1.5;">ยิงใส่ศัตรูใกล้สุดให้อัตโนมัติ ทุกๆ 1 วินาที </div>
                 </div>
                 <div style="background:#222; border-left: 4px solid #FFD700; border-radius: 8px; padding: 12px 14px;">
                     <div style="font-size:22px; margin-bottom:4px;">⏱️ เป้าหมาย</div>
@@ -602,7 +602,7 @@ function toggleSound() {
                 </div>
                 <div style="background:#222; border-left: 4px solid #4CAF50; border-radius: 8px; padding: 12px 14px;">
                     <div style="font-size:22px; margin-bottom:4px;">🛒 ร้านค้า</div>
-                    <div style="color:#ccc; line-height:1.5;">เมื่อเล่นจบแต่ละ Stage จะเข้าสู่ช่วงซื้อยารักษาผู้เล่นต้องบริหารเหรียญทองเพื่อรักษาอาการป่วยและซื้อยาเพื่อพัฒนาความสามารถของตัวละคร (ดูรายละเอียดในแท็บ "ยาในร้านค้า")</div>
+                    <div style="color:#ccc; line-height:1.5;">เมื่อเล่นจบแต่ละ Stage จะเข้าสู่ช่วงซื้อยารักษา โดยผู้เล่นต้องบริหารเหรียญทองเพื่อรักษาอาการป่วยและซื้อยาเพื่อพัฒนาความสามารถของตัวละคร (ดูรายละเอียดในแท็บ "ยาในร้านค้า")</div>
                 </div>
                 <div style="background:#222; border-left: 4px solid #00bcd4; border-radius: 8px; padding: 12px 14px;">
                     <div style="font-size:22px; margin-bottom:4px;">💎 อัปเกรดถาวร</div>
@@ -667,7 +667,7 @@ function toggleSound() {
                 ชุด 1: Saline + Plaster (+6 HP) | ชุด 2: Alcohol + Gauze (+6 HP) | ชุด 3: Dressing + Betadine (+7 HP)<br>
                 <em>สะสมครบ 3 ชุด รับเพิ่มอีก +15 HP!</em>
             </p>
-            <p style="font-size: 14px;"><strong>รายการโปรด:</strong> กดปุ่ม ❤️ หน้าไอเทมในแคตตาล็อก เพื่อปักหมุดไว้บนสุด</p>
+            <p style="font-size: 14px;"><strong>รายการโปรด:</strong> กดปุ่ม ❤️ หน้าไอเทมในรายการยา เพื่อปักหมุดไว้บนสุด</p>
             <h3 style="color:#4CAF50; margin-top:20px;">💊 รายการยาทั้งหมด</h3>
             <div id="htp-item-cards" class="htp-card-list"></div>
         </div>
@@ -2510,7 +2510,7 @@ const ITEM_ICONS = {
                 bagHtml += `<div style="background: rgba(0,0,0,0.4); padding: 5px; border-radius: 4px; text-align: center; border: 1px solid #555; display:flex; align-items:center; justify-content:center; gap:5px;">${getItemIconHtml(item.id, 20)}${item.name} ${maxBadge}</div>`;
             }
         }
-        if (!hasAnyItem) bagHtml += `<div style="grid-column: 1 / -1; color:#777; text-align:center; padding: 6px;">ยังไม่มีไอเทมสะสม</div>`;
+        if (!hasAnyItem) bagHtml += `<div style="grid-column: 1 / -1; color:#777; text-align:center; padding: 6px;">ยังไม่มียาสะสม</div>`;
         bagHtml += `</div>`;
         let bagDets = document.getElementById('bag-details');
         if (bagDets) bagDets.innerHTML = bagHtml;
@@ -2975,7 +2975,7 @@ const ITEM_ICONS = {
 
         let finalHtml = '';
         finalHtml += buildSection('⭐ รายการโปรด (Favorites)', favs);
-        finalHtml += buildSection('📦 แคตตาล็อกไอเทมทั้งหมด', others);
+        finalHtml += buildSection('📦 รายการยาทั้งหมด', others);
         container.innerHTML = finalHtml;
     }
 
